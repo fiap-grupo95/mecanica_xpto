@@ -30,3 +30,8 @@ go.work.sum
 # Editor/IDE
  .idea/
  .vscode/
+/.idea/.gitignore
+/.idea/discord.xml
+/.idea/mecanica_xpto.iml
+/.idea/modules.xml
+/.idea/vcs.xml
