@@ -35,11 +35,10 @@ func Run() {
 func getRoutes() {
 	v1 := router.Group("/v1")
 	addPingRoutes(v1)
-
-	// other routes can be added here
-	//addUserRoutes(v1, db)
+	addUserRoutes(v1)
 }
 
+// setMiddlewares will configure our middleware
 func setMiddlewares() {
 	// Set trusted proxies
 	middleware.SetTrustedProxies(router)
