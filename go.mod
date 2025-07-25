@@ -2,8 +2,6 @@ module mecanica_xpto
 
 go 1.24.4
 
-toolchain go1.24.2
-
 require github.com/gin-gonic/gin v1.10.1
 
 require filippo.io/edwards25519 v1.1.0 // indirect
