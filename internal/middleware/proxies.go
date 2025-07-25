@@ -4,7 +4,6 @@ import "github.com/gin-gonic/gin"
 
 var proxies = []string{
 	"0.0.0.0/0",
-	"172.18.0.1",
 }
 
 func SetTrustedProxies(eng *gin.Engine) {
