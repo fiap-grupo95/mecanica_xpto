@@ -38,3 +38,8 @@ go.work.sum
 
 # MongoDB data directory
 mongo_data/
+
+# Swagger generated files
+/docs/swagger.json
+/docs/swagger.yaml
+/docs/docs.go
