@@ -13,5 +13,46 @@ services:
     volumes:
       - db_data:/var/lib/mysql
 
+  app:
+    container_name: mecanica_xpto
+    build:
+      context: ../
+    ports:
+      - "8080:8080"
+    env_file:
+      - ../.env
+    volumes:
+      - mongo_data:/data
+    network_mode: "host"
+
+  mongo_db:
+    image: mongo:latest
+    container_name: mongo_db
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+
 volumes:
   db_data:
+  mongo_data:
+  app_data:
+
+networks:
+    default:
+        driver: bridge
+
+    app_network:
+        driver: bridge
+        external: true
+
+    db_network:
+        driver: bridge
+        external: true
+
+    mongo_network:
+        driver: bridge
+        external: true

@@ -9,7 +9,7 @@ import (
 
 var router = gin.Default()
 
-const port = 8080
+const PORT = 8080
 
 // Run will start the server
 func Run() {
@@ -17,7 +17,7 @@ func Run() {
 
 	getRoutes()
 
-	err := router.Run(":" + strconv.Itoa(port))
+	err := router.Run(":" + strconv.Itoa(PORT))
 	if err != nil {
 		log.Fatalf("Failed to startup the application: %v", err.Error())
 	}
