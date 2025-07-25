@@ -38,3 +38,24 @@ Para executar os testes, utilize o seguinte comando:
 ```bash
 go test ./... -v
 ```
+## Documentação da API
+
+### Swagger
+First install the Swagger CLI:
+
+```bash
+go install github.com/swaggo/swag/cmd/swag@latest
+```
+
+Then download the dependencies:
+```bash
+go mod tidy
+```
+
+Finally, generate the Swagger documentation:
+
+```bash
+swag init -g cmd/api/main.go
+```
+
+After running these commands, you'll be able to access your API documentation at `http://localhost:8080/swagger/index.html` when you run your application.

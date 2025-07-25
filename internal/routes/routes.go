@@ -2,7 +2,10 @@ package routes
 
 import (
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 	"log"
+	_ "mecanica_xpto/docs" // This will be auto-generated
 	"mecanica_xpto/internal/middleware"
 	"strconv"
 )
@@ -14,6 +17,9 @@ const PORT = 8080
 // Run will start the server
 func Run() {
 	setMiddlewares()
+
+	// Swagger documentation endpoint
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	getRoutes()
 
@@ -37,7 +43,7 @@ func getRoutes() {
 func setMiddlewares() {
 	// Set trusted proxies
 	middleware.SetTrustedProxies(router)
-	middleware.ConnectDatabase()
+	//middleware.ConnectDatabase()
 
 	// Set CORS middleware
 	router.Use(gin.Logger())

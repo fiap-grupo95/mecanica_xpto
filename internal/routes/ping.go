@@ -5,6 +5,12 @@ import (
 	"net/http"
 )
 
+// @Summary Health check endpoint
+// @Description Returns a pong message to verify the API is running
+// @Tags Health Check
+// @Produce json
+// @Success 200 {object} map[string]interface{} "Returns pong message"
+// @Router /ping [get]
 func addPingRoutes(rg *gin.RouterGroup) {
 	ping := rg.Group(PathHealthCheck)
 
