@@ -28,10 +28,13 @@ go.work.sum
 .env
 
 # Editor/IDE
- .idea/
- .vscode/
+.idea/
+.vscode/
 /.idea/.gitignore
 /.idea/discord.xml
 /.idea/mecanica_xpto.iml
 /.idea/modules.xml
 /.idea/vcs.xml
+
+# MongoDB data directory
+mongo_data/

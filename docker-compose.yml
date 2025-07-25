@@ -1,0 +1,25 @@
+version: "3.8"
+
+services:
+  app:
+    container_name: mecanica_xpto
+    build:
+      context: .
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    volumes:
+      - ./app_data:/data
+    network_mode: "host"
+
+  mongo_db:
+    image: mongo:latest
+    container_name: mongo_db
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./mongo_data:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
