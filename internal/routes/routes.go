@@ -28,7 +28,7 @@ func Run() {
 // so this one won't be so messy
 func getRoutes() {
 	v1 := router.Group("/v1")
-	addPingRoutes(v1, nil)
+	addPingRoutes(v1)
 
 	// other routes can be added here
 	//addUserRoutes(v1, db)
