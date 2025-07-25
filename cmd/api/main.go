@@ -1,13 +1,9 @@
 package main
 
-import "github.com/gin-gonic/gin"
+import (
+	"mecanica_xpto/internal/routes"
+)
 
 func main() {
-	router := gin.Default()
-	router.GET("/health", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"status": "OK",
-		})
-	})
-	router.Run()
+	routes.Run()
 }
