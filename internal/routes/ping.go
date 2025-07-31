@@ -13,8 +13,9 @@ import (
 // @Router /ping [get]
 func addPingRoutes(rg *gin.RouterGroup) {
 	ping := rg.Group(PathHealthCheck)
-
-	ping.GET("/", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{"message": "pong"})
-	})
+	{
+		ping.GET("", func(c *gin.Context) {
+			c.JSON(http.StatusOK, gin.H{"message": "pong"})
+		})
+	}
 }
