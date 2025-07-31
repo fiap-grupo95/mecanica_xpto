@@ -2,7 +2,7 @@
 # It is similar to .gitignore but specific to Docker.
 # Ignore the Docker build context
 Dockerfile
-build/docker-compose.yml
+docker-compose.yml
 
 # Ignore Readme files
 *.md

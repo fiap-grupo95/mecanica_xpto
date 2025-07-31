@@ -1,4 +1,4 @@
-FROM golang:1.24-alpine as builder
+FROM golang:1.24.4-alpine AS builder
 
 WORKDIR /app
 
@@ -11,7 +11,7 @@ WORKDIR /app/cmd/api
 RUN CGO_ENABLED=0 go build -o /mecanica-xpto-api
 
 
-FROM alpine:latest
+FROM alpine:3.22
 
 WORKDIR /app
 
