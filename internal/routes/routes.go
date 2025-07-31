@@ -42,7 +42,7 @@ func getRoutes() {
 func setMiddlewares() {
 	// Set trusted proxies
 	middleware.SetTrustedProxies(router)
-	//middleware.ConnectDatabase()
+	middleware.ConnectDatabase()
 
 	// Set CORS middleware
 	router.Use(gin.Logger())

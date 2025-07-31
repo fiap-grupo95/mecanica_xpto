@@ -1,23 +1,23 @@
 services:
-  app:
-    container_name: mecanica_xpto
-    build:
-      context: .
-    ports:
-      - "8080:8080"
-    env_file:
-      - .env
-    volumes:
-      - app_data:/app
-      - postgresql_data:/var/lib/postgresql/data
-    networks:
-      - app_network
-    depends_on:
-      - db
+#  app:
+#    container_name: mecanica_xpto
+#    build:
+#      context: .
+#    ports:
+#      - "8080:8080"
+#    env_file:
+#      - .env
+#    volumes:
+#      - app_data:/app
+#      - postgresql_data:/var/lib/postgresql/data
+#    networks:
+#      - app_network
+#    depends_on:
+#      - db
 
   db:
-    image: postgres:latest
-    container_name: db_postgres
+    image: postgres:17.5
+    container_name: db
     restart: always
     env_file:
       - .env
@@ -26,71 +26,54 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
     ports:
-      - ${POSTGRES_SONAR_PORT}:${POSTGRES_SONAR_PORT}
+      - "5432:5432"
     volumes:
       - postgresql_data:/var/lib/postgresql/data
     networks:
       - db_network
 
-  sonarqube:
-    image: sonarqube:latest
-    container_name: sonarqube
-    restart: always
-    ports:
-      - "9000:9000"
-    environment:
-      SONAR_JDBC_URL: jdbc:postgresql://db_postgres_sonar:5433/${POSTGRES_SONAR_DB}
-      SONAR_JDBC_USERNAME: ${POSTGRES_SONAR_USER}
-      SONAR_JDBC_PASSWORD: ${POSTGRES_SONAR_PASSWORD}
-    depends_on:
-      - db_postgres_sonar
-    networks:
-      - sonar-net
-    volumes:
-      - sonar_data:/opt/sonarqube/data
-      - sonar_extensions:/opt/sonarqube/extensions
-
-  db_postgres_sonar:
-    image: postgres:latest
-    container_name: db_postgres_sonar
-    restart: always
-    environment:
-      POSTGRES_USER: ${POSTGRES_SONAR_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_SONAR_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_SONAR_DB}
-      POSTGRES_PORT: 5433
-    command: -p 5433
-    networks:
-      - sonar-net
-    ports:
-      - "5433:5433"
-    volumes:
-      - postgresql_sonar_data:/var/lib/postgresql/data
-
-  pgAdmin:
-    image: dpage/pgadmin4:latest
-    build: dpage/pgadmin4:latest
-    ports:
-      - "15432:80"
-    networks:
-      - app_network
-    container_name: pgadmin
-    volumes:
-      - pgadmin_data/var/lib/pgadmin/data
-    environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
+#  sonarqube:
+#    image: sonarqube:25.7.0.110598-community
+#    container_name: sonarqube
+#    restart: always
+#    ports:
+#      - "9000:9000"
+#    environment:
+#      SONAR_JDBC_URL: jdbc:postgresql://db_postgres_sonar:5433/${POSTGRES_SONAR_DB}
+#      SONAR_JDBC_USERNAME: ${POSTGRES_SONAR_USER}
+#      SONAR_JDBC_PASSWORD: ${POSTGRES_SONAR_PASSWORD}
+#    depends_on:
+#      - db_postgres_sonar
+#    networks:
+#      - sonar-net
+#    volumes:
+#      - sonar_data:/opt/sonarqube/data
+#      - sonar_extensions:/opt/sonarqube/extensions
+#
+#  db_postgres_sonar:
+#    image: postgres:17.5
+#    container_name: db_postgres_sonar
+#    restart: always
+#    environment:
+#      POSTGRES_USER: ${POSTGRES_SONAR_USER}
+#      POSTGRES_PASSWORD: ${POSTGRES_SONAR_PASSWORD}
+#      POSTGRES_DB: ${POSTGRES_SONAR_DB}
+#      POSTGRES_PORT: 5433
+#    command: -p 5433
+#    networks:
+#      - sonar-net
+#    ports:
+#      - "5433:5433"
+#    volumes:
+#      - postgresql_sonar_data:/var/lib/postgresql/data
 
 volumes:
   db_data:
   app_data:
   sonar_data:
   sonar_extensions:
-  sonar_logs:
-  sonar_temp:
   postgresql_sonar_data:
   postgresql_data:
-  pgadmin_data:
 
 networks:
     default:
