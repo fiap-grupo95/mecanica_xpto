@@ -24,13 +24,13 @@ Event Storming: https://miro.com/app/board/uXjVIgU2y2I=/
    ```
 4. Inicie os serviços com Docker Compose:
    ```bash
-    docker-compose up -d
+    docker-compose --env-file .env up -d
     ```
 5. Acesse a aplicação em `http://localhost:8080`
 
 6. Para parar os serviços, use:
    ```bash
-   docker-compose down
+   docker-compose --env-file .env down -d
    ```
 ## Testes
 Para executar os testes, utilize o seguinte comando:
