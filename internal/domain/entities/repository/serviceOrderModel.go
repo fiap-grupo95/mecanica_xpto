@@ -1,0 +1,60 @@
+package repository
+
+import (
+	"mecanica_xpto/internal/domain/entities"
+	"time"
+)
+
+type ServiceOrderStatusModel struct {
+	ID            uint   `gorm:"primaryKey"`
+	Description   string `gorm:"size:50;not null"`
+	ServiceOrders []ServiceOrderModel
+}
+
+type ServiceOrderModel struct {
+	ID                   uint                    `gorm:"primaryKey"`
+	CustomerID           uint                    `gorm:"not null"`
+	Customer             CustomerModel           `gorm:"foreignKey:CustomerID"`
+	VehicleID            uint                    `gorm:"not null"`
+	Vehicle              VehicleModel            `gorm:"foreignKey:VehicleID"`
+	OSStatusID           uint                    `gorm:"not null"`
+	ServiceOrderStatus   ServiceOrderStatusModel `gorm:"foreignKey:OSStatusID"`
+	Estimate             float64                 `gorm:"type:decimal(10,2)"`
+	StartedExecutionDate time.Time
+	FinalExecutionDate   time.Time
+	CreatedAt            time.Time `gorm:"autoCreateTime"`
+	UpdatedAt            time.Time `gorm:"autoUpdateTime"`
+	AdditionalRepairs    []AdditionalRepairModel
+	Payment              *PaymentModel      `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	PartsSupplies        []PartsSupplyModel `gorm:"many2many:partssupply_serviceorders;"`
+	Services             []ServiceModel     `gorm:"many2many:service_serviceorders;"`
+}
+
+func (m *ServiceOrderStatusModel) ToDomain() entities.ServiceOrderStatus {
+	return entities.ServiceOrderStatus{
+		ID:          m.ID,
+		Description: m.Description,
+	}
+}
+
+func (m *ServiceOrderModel) ToDomain() entities.ServiceOrder {
+	return entities.ServiceOrder{
+		ID:                   m.ID,
+		CustomerID:           m.CustomerID,
+		VehicleID:            m.VehicleID,
+		OSStatusID:           m.OSStatusID,
+		Estimate:             m.Estimate,
+		StartedExecutionDate: m.StartedExecutionDate,
+		FinalExecutionDate:   m.FinalExecutionDate,
+		CreatedAt:            m.CreatedAt,
+		UpdatedAt:            m.UpdatedAt,
+	}
+}
+
+func ServiceOrdersToDomain(models []ServiceOrderModel) []entities.ServiceOrder {
+	serviceOrders := make([]entities.ServiceOrder, len(models))
+	for i, so := range models {
+		serviceOrders[i] = so.ToDomain()
+	}
+	return serviceOrders
+}

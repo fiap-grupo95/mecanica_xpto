@@ -1,15 +1,16 @@
 package config
 
 import (
-	"database/sql"
 	"fmt"
 	"os"
 
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq" // PostgreSQL driver
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
-func NewDBFromEnv() (*sql.DB, error) {
+func NewDBFromEnv() (*gorm.DB, error) {
 	// Carrega variáveis do .env
 	godotenv.Load()
 
@@ -21,11 +22,17 @@ func NewDBFromEnv() (*sql.DB, error) {
 
 	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
 		host, port, user, password, database)
-	db, err := sql.Open("postgres", dsn)
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		return nil, err
 	}
-	if err := db.Ping(); err != nil {
+
+	sqlDB, err := db.DB()
+	if err != nil {
+		return nil, err
+	}
+
+	if err := sqlDB.Ping(); err != nil {
 		return nil, err
 	}
 	return db, nil

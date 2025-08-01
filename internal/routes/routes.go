@@ -1,13 +1,14 @@
 package routes
 
 import (
-	"github.com/gin-gonic/gin"
-	swaggerFiles "github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger"
 	"log"
 	_ "mecanica_xpto/docs" // This will be auto-generated
 	"mecanica_xpto/internal/middleware"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 var router = gin.Default()
@@ -35,7 +36,6 @@ func Run() {
 func getRoutes() {
 	v1 := router.Group("/v1")
 	addPingRoutes(v1)
-	addUserRoutes(v1)
 }
 
 // setMiddlewares will configure our middleware
