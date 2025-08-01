@@ -50,11 +50,3 @@ func (m *ServiceOrderModel) ToDomain() entities.ServiceOrder {
 		UpdatedAt:            m.UpdatedAt,
 	}
 }
-
-func ServiceOrdersToDomain(models []ServiceOrderModel) []entities.ServiceOrder {
-	serviceOrders := make([]entities.ServiceOrder, len(models))
-	for i, so := range models {
-		serviceOrders[i] = so.ToDomain()
-	}
-	return serviceOrders
-}

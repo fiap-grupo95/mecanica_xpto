@@ -12,7 +12,7 @@ type PaymentModel struct {
 	PaymentDate    time.Time         `gorm:"not null"`
 }
 
-func (pm PaymentModel) ToDomain() entities.Payment {
+func (pm *PaymentModel) ToDomain() entities.Payment {
 	return entities.Payment{
 		ID:             pm.ID,
 		ServiceOrderID: pm.ServiceOrderID,

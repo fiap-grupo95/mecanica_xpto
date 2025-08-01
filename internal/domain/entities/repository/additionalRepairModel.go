@@ -31,7 +31,7 @@ type AdditionalRepairModel struct {
 }
 
 // crie um toDomain para a entidade AdditionalRepairModel
-func (arm AdditionalRepairModel) ToDomain() entities.AdditionalRepair {
+func (arm *AdditionalRepairModel) ToDomain() entities.AdditionalRepair {
 	return entities.AdditionalRepair{
 		ID:             arm.ID,
 		ServiceOrderID: arm.ServiceOrderID,
@@ -43,12 +43,4 @@ func (arm AdditionalRepairModel) ToDomain() entities.AdditionalRepair {
 		ARStatusID:     arm.ARStatusID,
 		ARStatus:       arm.ARStatus.ToDomain(),
 	}
-}
-
-func AdditionalRepairsToDomain(models []AdditionalRepairModel) []entities.AdditionalRepair {
-	additionalRepairs := make([]entities.AdditionalRepair, len(models))
-	for i, ar := range models {
-		additionalRepairs[i] = ar.ToDomain()
-	}
-	return additionalRepairs
 }

@@ -9,7 +9,7 @@ type PartsSupplyServiceOrderModel struct {
 	Quantity       int  `gorm:"not null;default:1"`
 }
 
-func (pssom PartsSupplyServiceOrderModel) ToDomain() entities.PartsSupplyServiceOrder {
+func (pssom *PartsSupplyServiceOrderModel) ToDomain() entities.PartsSupplyServiceOrder {
 	return entities.PartsSupplyServiceOrder{
 		PartsSupplyID:  pssom.PartsSupplyID,
 		ServiceOrderID: pssom.ServiceOrderID,

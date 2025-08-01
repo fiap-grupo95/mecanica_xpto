@@ -2,14 +2,15 @@ package handler_test
 
 import (
 	"encoding/json"
-	"github.com/gin-gonic/gin"
-	"github.com/stretchr/testify/assert"
 	"mecanica_xpto/internal/domain/user"
 	"mecanica_xpto/internal/domain/user/repository"
 	"mecanica_xpto/internal/handler"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/gin-gonic/gin"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestUserHandler_GetUser(t *testing.T) {

@@ -17,7 +17,7 @@ type CustomerModel struct {
 }
 
 //crie um toDomain para a entidade CustomerModel
-func (cm CustomerModel) ToDomain() entities.Customer {
+func (cm *CustomerModel) ToDomain() entities.Customer {
 	var user *entities.User
 	if cm.User != nil {
 		u := cm.User.ToDomain()
@@ -30,7 +30,7 @@ func (cm CustomerModel) ToDomain() entities.Customer {
 		Document:      cm.Document,
 		PhoneNumber:   cm.PhoneNumber,
 		FullName:      cm.FullName,
-		Vehicles:      VehiclesToDomain(cm.Vehicles),           // This will be populated later if needed
-		ServiceOrders: ServiceOrdersToDomain(cm.ServiceOrders), // This will be populated later if needed
+		Vehicles:      nil, // This will be populated later if needed
+		ServiceOrders: nil, // This will be populated later if needed
 	}
 }

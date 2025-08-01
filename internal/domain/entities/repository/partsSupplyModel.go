@@ -33,7 +33,7 @@ func (m *PartsSupplyModel) ToDomain() entities.PartsSupply {
 		QuantityReserve:   m.QuantityReserve,
 		CreatedAt:         m.CreatedAt,
 		UpdatedAt:         m.UpdatedAt,
-		AdditionalRepairs: AdditionalRepairsToDomain(m.AdditionalRepairs), // This will be populated by the repository layer
-		ServiceOrders:     ServiceOrdersToDomain(m.ServiceOrders),         // This will be populated by the repository layer
+		AdditionalRepairs: nil, // This will be populated by the repository layer
+		ServiceOrders:     nil, // This will be populated by the repository layer
 	}
 }

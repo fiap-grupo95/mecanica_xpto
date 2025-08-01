@@ -32,14 +32,11 @@ func (v *VehicleModel) ToDomain() entities.Vehicle {
 		Brand:      v.Brand,
 		CreatedAt:  v.CreatedAt,
 		UpdatedAt:  v.UpdatedAt,
-		DeletedAt:  &v.DeletedAt.Time,
+		DeletedAt: func() *time.Time {
+			if v.DeletedAt.Valid {
+				return &v.DeletedAt.Time
+			}
+			return nil
+		}(),
 	}
-}
-
-func VehiclesToDomain(models []VehicleModel) []entities.Vehicle {
-	vehicles := make([]entities.Vehicle, len(models))
-	for i, v := range models {
-		vehicles[i] = v.ToDomain()
-	}
-	return vehicles
 }

@@ -8,7 +8,7 @@ type UserTypeModel struct {
 	Users []UserModel
 }
 
-func (utm UserTypeModel) ToDomain() entities.UserType {
+func (utm *UserTypeModel) ToDomain() entities.UserType {
 	return entities.UserType{
 		ID:   utm.ID,
 		Type: utm.Type,
