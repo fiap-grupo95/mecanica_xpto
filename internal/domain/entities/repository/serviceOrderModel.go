@@ -2,6 +2,7 @@ package repository
 
 import (
 	"mecanica_xpto/internal/domain/entities"
+	"mecanica_xpto/internal/domain/entities/valueobject"
 	"time"
 )
 
@@ -33,21 +34,19 @@ type ServiceOrderModel struct {
 func (m *ServiceOrderStatusModel) ToDomain() entities.ServiceOrderStatus {
 	return entities.ServiceOrderStatus{
 		ID:          m.ID,
-		Description: m.Description,
+		Description: valueobject.ParseServiceOrderStatus(m.Description),
 	}
 }
 
 func (m *ServiceOrderModel) ToDomain() entities.ServiceOrder {
 	return entities.ServiceOrder{
 		ID:                   m.ID,
-		CustomerID:           m.CustomerID,
-		VehicleID:            m.VehicleID,
-		OSStatusID:           m.OSStatusID,
 		Estimate:             m.Estimate,
 		StartedExecutionDate: m.StartedExecutionDate,
 		FinalExecutionDate:   m.FinalExecutionDate,
 		CreatedAt:            m.CreatedAt,
 		UpdatedAt:            m.UpdatedAt,
+		ServiceOrderStatus:   valueobject.ParseServiceOrderStatus(m.ServiceOrderStatus.Description),
 		AdditionalRepairs:    nil, // This will be populated by the repository layer
 		Payment:              nil, // This will be populated by the repository layer
 		PartsSupplies:        nil, // This will be populated by the repository layer

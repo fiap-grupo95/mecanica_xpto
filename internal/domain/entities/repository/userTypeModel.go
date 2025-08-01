@@ -1,6 +1,9 @@
 package repository
 
-import "mecanica_xpto/internal/domain/entities"
+import (
+	"mecanica_xpto/internal/domain/entities"
+	"mecanica_xpto/internal/domain/entities/valueobject"
+)
 
 type UserTypeModel struct {
 	ID    uint   `gorm:"primaryKey"`
@@ -11,6 +14,6 @@ type UserTypeModel struct {
 func (utm *UserTypeModel) ToDomain() entities.UserType {
 	return entities.UserType{
 		ID:   utm.ID,
-		Type: utm.Type,
+		Type: valueobject.ParseUserType(utm.Type),
 	}
 }

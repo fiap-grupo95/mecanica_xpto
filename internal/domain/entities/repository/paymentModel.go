@@ -14,9 +14,8 @@ type PaymentModel struct {
 
 func (pm *PaymentModel) ToDomain() entities.Payment {
 	return entities.Payment{
-		ID:             pm.ID,
-		ServiceOrderID: pm.ServiceOrderID,
-		ServiceOrder:   pm.ServiceOrder.ToDomain(),
-		PaymentDate:    pm.PaymentDate,
+		ID:           pm.ID,
+		ServiceOrder: pm.ServiceOrder.ToDomain(),
+		PaymentDate:  pm.PaymentDate,
 	}
 }

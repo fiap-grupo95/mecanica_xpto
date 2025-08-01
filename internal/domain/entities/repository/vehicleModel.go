@@ -2,6 +2,7 @@ package repository
 
 import (
 	"mecanica_xpto/internal/domain/entities"
+	"mecanica_xpto/internal/domain/entities/valueobject"
 	"time"
 
 	"gorm.io/gorm"
@@ -23,15 +24,14 @@ type VehicleModel struct {
 
 func (v *VehicleModel) ToDomain() entities.Vehicle {
 	return entities.Vehicle{
-		ID:         v.ID,
-		Plate:      v.Plate,
-		CustomerID: v.CustomerID,
-		Customer:   v.Customer.ToDomain(),
-		Model:      v.Model,
-		Year:       v.Year,
-		Brand:      v.Brand,
-		CreatedAt:  v.CreatedAt,
-		UpdatedAt:  v.UpdatedAt,
+		ID:        v.ID,
+		Plate:     valueobject.ParsePlate(v.Plate),
+		Customer:  v.Customer.ToDomain(),
+		Model:     v.Model,
+		Year:      v.Year,
+		Brand:     v.Brand,
+		CreatedAt: v.CreatedAt,
+		UpdatedAt: v.UpdatedAt,
 		DeletedAt: func() *time.Time {
 			if v.DeletedAt.Valid {
 				return &v.DeletedAt.Time

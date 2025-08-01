@@ -30,14 +30,13 @@ func (m *UserModel) ToDomain() entities.User {
 		customer = &c
 	}
 	return entities.User{
-		ID:         m.ID,
-		Email:      m.Email,
-		Password:   m.Password,
-		UserTypeID: m.UserTypeID,
-		UserType:   m.UserType.ToDomain(),
-		CreatedAt:  m.CreatedAt,
-		UpdatedAt:  m.UpdatedAt,
-		DeletedAt:  deletedAt,
-		Customer:   customer,
+		ID:        m.ID,
+		Email:     m.Email,
+		Password:  m.Password,
+		UserType:  m.UserType.ToDomain().Type,
+		CreatedAt: m.CreatedAt,
+		UpdatedAt: m.UpdatedAt,
+		DeletedAt: deletedAt,
+		Customer:  customer,
 	}
 }

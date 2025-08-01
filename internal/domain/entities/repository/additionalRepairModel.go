@@ -1,6 +1,9 @@
 package repository
 
-import "mecanica_xpto/internal/domain/entities"
+import (
+	"mecanica_xpto/internal/domain/entities"
+	"mecanica_xpto/internal/domain/entities/valueobject"
+)
 
 // 1:N relationship between AdditionalRepair and AdditionalRepairStatus
 type AdditionalRepairStatusModel struct {
@@ -31,14 +34,10 @@ type AdditionalRepairModel struct {
 
 func (arm *AdditionalRepairModel) ToDomain() entities.AdditionalRepair {
 	return entities.AdditionalRepair{
-		ID:             arm.ID,
-		ServiceOrderID: arm.ServiceOrderID,
-		ServiceOrder:   arm.ServiceOrder.ToDomain(),
-		ServiceID:      arm.ServiceID,
-		Service:        arm.Service.ToDomain(),
-		PartsSupplyID:  arm.PartsSupplyID,
-		PartsSupply:    arm.PartsSupply.ToDomain(),
-		ARStatusID:     arm.ARStatusID,
-		ARStatus:       arm.ARStatus.ToDomain(),
+		ID:           arm.ID,
+		ServiceOrder: arm.ServiceOrder.ToDomain(),
+		Service:      arm.Service.ToDomain(),
+		PartsSupply:  arm.PartsSupply.ToDomain(),
+		ARStatus:     valueobject.ParseAdditionalRepairStatus(arm.ARStatus.Description),
 	}
 }
