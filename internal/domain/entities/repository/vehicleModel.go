@@ -38,5 +38,6 @@ func (v *VehicleModel) ToDomain() entities.Vehicle {
 			}
 			return nil
 		}(),
+		ServiceOrders: nil, // This will be populated by the repository layer
 	}
 }

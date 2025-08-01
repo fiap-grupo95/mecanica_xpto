@@ -48,5 +48,9 @@ func (m *ServiceOrderModel) ToDomain() entities.ServiceOrder {
 		FinalExecutionDate:   m.FinalExecutionDate,
 		CreatedAt:            m.CreatedAt,
 		UpdatedAt:            m.UpdatedAt,
+		AdditionalRepairs:    nil, // This will be populated by the repository layer
+		Payment:              nil, // This will be populated by the repository layer
+		PartsSupplies:        nil, // This will be populated by the repository layer
+		Services:             nil, // This will be populated by the repository layer
 	}
 }

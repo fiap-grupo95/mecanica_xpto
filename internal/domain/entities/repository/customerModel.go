@@ -16,7 +16,6 @@ type CustomerModel struct {
 	ServiceOrders []ServiceOrderModel
 }
 
-//crie um toDomain para a entidade CustomerModel
 func (cm *CustomerModel) ToDomain() entities.Customer {
 	var user *entities.User
 	if cm.User != nil {

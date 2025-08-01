@@ -9,7 +9,6 @@ type AdditionalRepairStatusModel struct {
 	AdditionalRepairs []AdditionalRepairModel
 }
 
-// crie um toDomain para a entidade AdditionalRepairStatusModel
 func (arsm AdditionalRepairStatusModel) ToDomain() entities.AdditionalRepairStatus {
 	return entities.AdditionalRepairStatus{
 		ID:                arsm.ID,
@@ -30,7 +29,6 @@ type AdditionalRepairModel struct {
 	ARStatus       AdditionalRepairStatusModel `gorm:"foreignKey:ARStatusID"`
 }
 
-// crie um toDomain para a entidade AdditionalRepairModel
 func (arm *AdditionalRepairModel) ToDomain() entities.AdditionalRepair {
 	return entities.AdditionalRepair{
 		ID:             arm.ID,

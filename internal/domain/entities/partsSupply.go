@@ -13,6 +13,7 @@ type PartsSupply struct {
 	QuantityReserve   int                `json:"quantity_reserve"`
 	CreatedAt         time.Time          `json:"created_at"`
 	UpdatedAt         time.Time          `json:"updated_at"`
+	DeletedAt         *time.Time         `json:"deleted_at,omitempty"`
 	AdditionalRepairs []AdditionalRepair `json:"additional_repairs,omitempty"`
 	ServiceOrders     []ServiceOrder     `json:"service_orders,omitempty"`
 }
