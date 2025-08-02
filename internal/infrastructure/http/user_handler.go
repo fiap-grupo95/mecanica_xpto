@@ -24,7 +24,7 @@ func NewUserHandler(repo user_example.Repository) *UserHandler {
 // @Accept json
 // @Produce json
 // @Param id path string true "User ID"
-// @Success 200 {object} user-example.User
+// @Success 200 {object} user_example.User
 // @Failure 404 {object} map[string]string "error":"user-example not found"
 // @Failure 500 {object} map[string]string "error":"internal server error"
 // @Router /users/{id} [get]
