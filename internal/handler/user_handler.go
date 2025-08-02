@@ -1,9 +1,10 @@
 package handler
 
 import (
-	"github.com/gin-gonic/gin"
 	"mecanica_xpto/internal/domain/user"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
 // UserHandler handles HTTP requests for users

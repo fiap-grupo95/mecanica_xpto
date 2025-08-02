@@ -1,9 +1,10 @@
 package routes
 
 import (
-	"github.com/gin-gonic/gin"
 	"mecanica_xpto/internal/domain/user/repository"
 	"mecanica_xpto/internal/handler"
+
+	"github.com/gin-gonic/gin"
 )
 
 func addUserRoutes(rg *gin.RouterGroup) {
