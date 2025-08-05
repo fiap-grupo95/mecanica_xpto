@@ -6,6 +6,7 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"log"
 	_ "mecanica_xpto/docs" // This will be auto-generated
+	"mecanica_xpto/internal/config"
 	"mecanica_xpto/internal/middleware"
 	"strconv"
 )
@@ -40,6 +41,11 @@ func getRoutes() {
 
 // setMiddlewares will configure our middleware
 func setMiddlewares() {
+
+	secretKey := config.GetSecretKey()
+
+	router.Use(middleware.JWTAuthMiddleware(secretKey))
+
 	// Set trusted proxies
 	middleware.SetTrustedProxies(router)
 	middleware.ConnectDatabase()
