@@ -1,7 +1,7 @@
 package main
 
 import (
-	"mecanica_xpto/internal/routes"
+	"mecanica_xpto/internal/infrastructure/http/routes"
 )
 
 // @title           Mecanica XPTO API

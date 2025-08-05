@@ -1,15 +1,16 @@
-package handler_test
+package http_test
 
 import (
 	"encoding/json"
-	"github.com/gin-gonic/gin"
-	"github.com/stretchr/testify/assert"
-	"mecanica_xpto/internal/domain/user"
-	"mecanica_xpto/internal/domain/user/repository"
-	"mecanica_xpto/internal/handler"
+	"mecanica_xpto/internal/domain/user-example"
+	"mecanica_xpto/internal/domain/user-example/repository"
+	http2 "mecanica_xpto/internal/infrastructure/http"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/gin-gonic/gin"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestUserHandler_GetUser(t *testing.T) {
@@ -17,15 +18,15 @@ func TestUserHandler_GetUser(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	repo := repository.NewMemoryRepository()
 
-	// Add a test user to the repository
-	testUser := &user.User{
+	// Add a test user-example to the repository
+	testUser := &user_example.User{
 		ID:    "1",
 		Name:  "Test User",
 		Email: "test@example.com",
 	}
 	repo.AddUser(testUser)
 
-	h := handler.NewUserHandler(repo)
+	h := http2.NewUserHandler(repo)
 
 	// Create a new Gin engine for testing
 	r := gin.New()
@@ -38,7 +39,7 @@ func TestUserHandler_GetUser(t *testing.T) {
 		expectedBody   map[string]interface{}
 	}{
 		{
-			name:           "Existing user",
+			name:           "Existing user-example",
 			userID:         "1",
 			expectedStatus: http.StatusOK,
 			expectedBody: map[string]interface{}{
@@ -48,11 +49,11 @@ func TestUserHandler_GetUser(t *testing.T) {
 			},
 		},
 		{
-			name:           "Non-existing user",
+			name:           "Non-existing user-example",
 			userID:         "999",
 			expectedStatus: http.StatusNotFound,
 			expectedBody: map[string]interface{}{
-				"error": "user not found",
+				"error": "user-example not found",
 			},
 		},
 	}
