@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"mecanica_xpto/internal/domain/repository"
 	"os"
 
 	"github.com/joho/godotenv"
@@ -34,6 +35,11 @@ func NewDBFromEnv() (*gorm.DB, error) {
 
 	if err := sqlDB.Ping(); err != nil {
 		return nil, err
+	}
+
+	err = db.AutoMigrate(&repository.VehicleDTO{})
+	if err != nil {
+		return nil, fmt.Errorf("failed to auto migrate: %w", err)
 	}
 	return db, nil
 }
