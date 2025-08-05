@@ -1,14 +1,15 @@
 package routes
 
 import (
+	"log"
+	_ "mecanica_xpto/docs" // This will be auto-generated
+	"mecanica_xpto/internal/infrastructure/config"
+	middleware2 "mecanica_xpto/internal/infrastructure/middleware"
+	"strconv"
+
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
-	"log"
-	_ "mecanica_xpto/docs" // This will be auto-generated
-	"mecanica_xpto/internal/config"
-	"mecanica_xpto/internal/middleware"
-	"strconv"
 )
 
 var router = gin.Default()
@@ -44,11 +45,10 @@ func setMiddlewares() {
 
 	secretKey := config.GetSecretKey()
 
-	router.Use(middleware.JWTAuthMiddleware(secretKey))
-
+	router.Use(middleware2.JWTAuthMiddleware(secretKey))
 	// Set trusted proxies
-	middleware.SetTrustedProxies(router)
-	middleware.ConnectDatabase()
+	middleware2.SetTrustedProxies(router)
+	middleware2.ConnectDatabase()
 
 	// Set CORS middleware
 	router.Use(gin.Logger())

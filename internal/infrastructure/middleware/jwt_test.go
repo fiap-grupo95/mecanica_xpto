@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"mecanica_xpto/internal/infrastructure/config"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -8,7 +9,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/stretchr/testify/assert"
-	"mecanica_xpto/internal/config" // Importando a função GetSecretKey
 )
 
 func TestJWTAuthMiddleware(t *testing.T) {
