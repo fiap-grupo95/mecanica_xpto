@@ -1,4 +1,48 @@
+# Base URL and Health Check
 GET localhost:8080/v1/ping
 
 ###
 GET mecanica_xpto:8080/v1/ping
+
+###
+# Vehicle Endpoints
+
+# Get all vehicles
+GET http://localhost:8080/v1/vehicles
+Accept: application/json
+
+###
+# Get vehicles by customer ID
+GET http://localhost:8080/v1/vehicles/customer/1
+Accept: application/json
+
+###
+# Create new vehicle
+POST http://localhost:8080/v1/vehicles
+Content-Type: application/json
+
+{
+    "plate": "ABC1234",
+    "customerID": 1,
+    "model": "Civic",
+    "year": "2020",
+    "brand": "Honda"
+}
+
+###
+# Update vehicle
+PUT http://localhost:8080/v1/vehicles/1
+Content-Type: application/json
+
+{
+    "plate": "XYZ5678",
+    "customerID": 1,
+    "model": "Civic",
+    "year": "2020",
+    "brand": "Honda"
+}
+
+###
+# Delete vehicle
+DELETE http://localhost:8080/v1/vehicles/1
+Accept: application/json

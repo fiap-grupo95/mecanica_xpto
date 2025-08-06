@@ -15,12 +15,12 @@ type CustomerDTO struct {
 	CpfCnpj       string            `gorm:"size:20;not null"`
 	PhoneNumber   string            `gorm:"size:20;not null"`
 	FullName      string            `gorm:"size:100;not null"`
-	Vehicles      []VehicleDTO      `gorm:"foreignKey:CustomerID"`
-	ServiceOrders []ServiceOrderDTO `gorm:"foreignKey:CustomerID"`
+	Vehicles      []VehicleDTO      `gorm:"foreignKey:CustomerID;references:ID"`
+	ServiceOrders []ServiceOrderDTO `gorm:"foreignKey:CustomerID;references:ID"`
 }
 
 func (cm *CustomerDTO) TableName() string {
-	return "customers"
+	return "db_mecanica_xpto.tb_customer"
 }
 
 func (cm *CustomerDTO) ToDomain() entities.Customer {

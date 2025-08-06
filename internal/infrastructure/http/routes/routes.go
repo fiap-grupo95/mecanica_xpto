@@ -6,8 +6,7 @@ import (
 	"mecanica_xpto/internal/domain/repository"
 	memory "mecanica_xpto/internal/domain/repository/user-example/repository"
 	"mecanica_xpto/internal/domain/service"
-	"mecanica_xpto/internal/infrastructure/config"
-	database "mecanica_xpto/internal/infrastructure/databse"
+	"mecanica_xpto/internal/infrastructure/database"
 	"mecanica_xpto/internal/infrastructure/http"
 	"mecanica_xpto/internal/infrastructure/http/middleware"
 	"strconv"
@@ -23,9 +22,9 @@ const PORT = 8080
 
 // Run will start the server
 func Run() {
-	secretKey := config.GetSecretKey()
-
-	router.Use(middleware.JWTAuthMiddleware(secretKey))
+	//secretKey := config.GetSecretKey()
+	//
+	//router.Use(middleware.JWTAuthMiddleware(secretKey))
 
 	// Set trusted proxies
 	middleware.SetTrustedProxies(router)

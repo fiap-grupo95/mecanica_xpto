@@ -2,7 +2,6 @@ package config
 
 import (
 	"fmt"
-	"mecanica_xpto/internal/domain/repository"
 	"os"
 
 	"github.com/joho/godotenv"
@@ -37,18 +36,6 @@ func NewDBFromEnv() (*gorm.DB, error) {
 		return nil, err
 	}
 
-	// Auto-migrate tables in the correct order to handle relationships
-	err = db.AutoMigrate(
-		//&repository.UserTypeDTO{},
-		//&repository.UserDTO{},
-		&repository.CustomerDTO{},
-		&repository.VehicleDTO{},
-		//&repository.ServiceOrderDTO{},
-		//&repository.ServiceDTO{},
-		//&repository.PartsSupplyDTO{},
-		//&repository.AdditionalRepairDTO{},
-		//&repository.PaymentDTO{},
-	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to auto migrate: %w", err)
 	}
