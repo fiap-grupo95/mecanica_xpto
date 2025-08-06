@@ -1,4 +1,4 @@
-package repository
+package dto
 
 import (
 	"mecanica_xpto/internal/domain/model/entities"
@@ -9,14 +9,18 @@ import (
 // 1:N relationship between Customer and Vehicle
 // 1:N relationship between Customer and ServiceOrder
 type CustomerDTO struct {
-	ID            uint     `gorm:"primaryKey"`
-	UserID        uint     `gorm:"unique;not null"`
-	User          *UserDTO `gorm:"foreignKey:UserID;references:ID"`
-	CpfCnpj       string   `gorm:"size:20;not null"`
-	PhoneNumber   string   `gorm:"size:20;not null"`
-	FullName      string   `gorm:"size:100;not null"`
-	Vehicles      []VehicleDTO
-	ServiceOrders []ServiceOrderDTO
+	ID            uint              `gorm:"primaryKey"`
+	UserID        uint              `gorm:"unique;not null"`
+	User          *UserDTO          `gorm:"foreignKey:UserID;references:ID"`
+	CpfCnpj       string            `gorm:"size:20;not null"`
+	PhoneNumber   string            `gorm:"size:20;not null"`
+	FullName      string            `gorm:"size:100;not null"`
+	Vehicles      []VehicleDTO      `gorm:"foreignKey:CustomerID"`
+	ServiceOrders []ServiceOrderDTO `gorm:"foreignKey:CustomerID"`
+}
+
+func (cm *CustomerDTO) TableName() string {
+	return "customers"
 }
 
 func (cm *CustomerDTO) ToDomain() entities.Customer {

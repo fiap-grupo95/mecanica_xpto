@@ -5,7 +5,7 @@ import (
 )
 
 type AdditionalRepairStatus struct {
-	ID                uint               `json:"id"`
+	ID                uint               `json:"id" validate:"required"`
 	Description       string             `json:"description"`
 	AdditionalRepairs []AdditionalRepair `json:"additional_repairs,omitempty"`
 }
