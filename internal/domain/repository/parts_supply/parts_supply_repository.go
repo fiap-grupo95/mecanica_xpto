@@ -5,7 +5,6 @@ package parts_supply
 import (
 	"context"
 	"errors"
-	"fmt"
 	"mecanica_xpto/internal/domain/model/dto"
 	"mecanica_xpto/internal/domain/model/entities"
 
@@ -39,10 +38,7 @@ func (s *PartsSupplyRepository) Create(ctx context.Context, ps *entities.PartsSu
 		QuantityTotal:   ps.QuantityTotal,
 		QuantityReserve: ps.QuantityReserve,
 	}
-	// Use fmt.Printf to print struct details
-	fmt.Printf("Creating parts supply: %+v\n", dto)
 	if err := s.db.WithContext(ctx).Create(&dto).Error; err != nil {
-		fmt.Printf("Error creating parts supply: %v\n", err)
 		return entities.PartsSupply{}, err
 	}
 	return dto.ToDomain(), nil
@@ -94,7 +90,7 @@ func (s *PartsSupplyRepository) Update(ctx context.Context, ps *entities.PartsSu
 	}
 
 	if len(updates) == 0 {
-		return nil // nada para atualizar
+		return nil
 	}
 
 	return s.db.WithContext(ctx).
