@@ -2,6 +2,8 @@ package routes
 
 import (
 	"log"
+	_ "mecanica_xpto/docs" // This will be auto-generated
+	"mecanica_xpto/internal/infrastructure/config"
 	database "mecanica_xpto/internal/infrastructure/databse"
 	"mecanica_xpto/internal/infrastructure/http/middleware"
 	"strconv"
@@ -42,7 +44,11 @@ func getRoutes(db *gorm.DB) {
 }
 
 // setMiddlewares will configure our middleware
-func setMiddlewares() *gorm.DB {
+func setMiddlewares() {
+
+	secretKey := config.GetSecretKey()
+
+	router.Use(middleware.JWTAuthMiddleware(secretKey))
 	// Set trusted proxies
 	middleware.SetTrustedProxies(router)
 	db := database.ConnectDatabase()
