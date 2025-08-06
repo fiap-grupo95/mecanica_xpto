@@ -17,5 +17,9 @@ func addVehicleRoutes(rg *gin.RouterGroup, db *gorm.DB) {
 	vehicleHandler := http.NewVehicleHandler(vehiclesService)
 	{
 		vehicles.GET("/", vehicleHandler.GetVehicles)
+		vehicles.GET("/customer/:customerID", vehicleHandler.GetVehiclesByCustomerID)
+		vehicles.POST("/", vehicleHandler.CreateVehicle)
+		vehicles.PUT("/:id", vehicleHandler.UpdateVehicle)
+		vehicles.DELETE("/:id", vehicleHandler.DeleteVehicle)
 	}
 }

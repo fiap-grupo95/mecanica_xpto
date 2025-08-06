@@ -21,7 +21,7 @@ func NewDBFromEnv() (*gorm.DB, error) {
 	port := os.Getenv("POSTGRES_PORT")
 	database := os.Getenv("POSTGRES_DB")
 
-	dsn := fmt.Sprintf("host=%s port=%s user-example=%s password=%s dbname=%s sslmode=disable",
+	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
 		host, port, user, password, database)
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
@@ -37,7 +37,18 @@ func NewDBFromEnv() (*gorm.DB, error) {
 		return nil, err
 	}
 
-	err = db.AutoMigrate(&repository.VehicleDTO{})
+	// Auto-migrate tables in the correct order to handle relationships
+	err = db.AutoMigrate(
+		//&repository.UserTypeDTO{},
+		//&repository.UserDTO{},
+		&repository.CustomerDTO{},
+		&repository.VehicleDTO{},
+		//&repository.ServiceOrderDTO{},
+		//&repository.ServiceDTO{},
+		//&repository.PartsSupplyDTO{},
+		//&repository.AdditionalRepairDTO{},
+		//&repository.PaymentDTO{},
+	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to auto migrate: %w", err)
 	}
