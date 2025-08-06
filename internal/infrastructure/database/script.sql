@@ -1,4 +1,4 @@
-CREATE SCHEMA db_mecanica_xpto
+CREATE SCHEMA db_mecanica_xpto;
 
 CREATE TABLE IF NOT EXISTS db_mecanica_xpto.tb_customer (
     id BIGSERIAL PRIMARY KEY,

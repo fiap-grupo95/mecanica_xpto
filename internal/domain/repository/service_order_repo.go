@@ -29,9 +29,9 @@ type ServiceServiceOrderDTO struct {
 type ServiceOrderDTO struct {
 	ID                   uint                  `gorm:"primaryKey"`
 	CustomerID           uint                  `gorm:"not null"`
-	Customer             CustomerDTO           `gorm:"foreignKey:CustomerID"`
+	Customer             dto.CustomerDTO       `gorm:"foreignKey:CustomerID"`
 	VehicleID            uint                  `gorm:"not null"`
-	Vehicle              VehicleDTO            `gorm:"foreignKey:VehicleID"`
+	Vehicle              dto.VehicleDTO        `gorm:"foreignKey:VehicleID"`
 	OSStatusID           uint                  `gorm:"not null"`
 	ServiceOrderStatus   ServiceOrderStatusDTO `gorm:"foreignKey:OSStatusID"`
 	Estimate             float64               `gorm:"type:decimal(10,2)"`
