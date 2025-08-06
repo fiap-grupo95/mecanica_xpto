@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"mecanica_xpto/internal/infrastructure/config"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -18,7 +17,7 @@ func TestJWTAuthMiddleware(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	r := gin.New()
 
-	// Simulando um handler para testar o middleware
+	// Simulando um handler para testar o middleware n
 	r.GET("/test", JWTAuthMiddleware(secretKey), func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"message": "Access Granted"})
 	})
@@ -68,7 +67,7 @@ func TestJWTAuthMiddleware(t *testing.T) {
 
 func TestGenerateToken(t *testing.T) {
 	// Testando se a geração de token está funcionando corretamente
-	secretKey := config.GetSecretKey() // Pega a chave secreta do .env
+	secretKey := "fb21b3a964e6ae5d413bc6a403864f693eaae4b273f91b71fd84ca014aff622f"
 	userID := "testuser"
 
 	tokenString, err := GenerateToken(userID, secretKey)
