@@ -3,8 +3,12 @@ package routes
 import (
 	"log"
 	_ "mecanica_xpto/docs" // This will be auto-generated
+	"mecanica_xpto/internal/domain/repository"
+	memory "mecanica_xpto/internal/domain/repository/user-example/repository"
+	"mecanica_xpto/internal/domain/service"
 	"mecanica_xpto/internal/infrastructure/config"
 	database "mecanica_xpto/internal/infrastructure/databse"
+	"mecanica_xpto/internal/infrastructure/http"
 	"mecanica_xpto/internal/infrastructure/http/middleware"
 	"strconv"
 
