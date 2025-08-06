@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"mecanica_xpto/internal/domain/model/dto"
 	"mecanica_xpto/internal/domain/model/entities"
 	"mecanica_xpto/internal/domain/model/valueobject"
 )
@@ -9,12 +10,12 @@ import (
 // 1:N relationship between Customer and Vehicle
 // 1:N relationship between Customer and ServiceOrder
 type CustomerDTO struct {
-	ID            uint     `gorm:"primaryKey"`
-	UserID        uint     `gorm:"unique;not null"`
-	User          *UserDTO `gorm:"foreignKey:UserID;references:ID"`
-	CpfCnpj       string   `gorm:"size:20;not null"`
-	PhoneNumber   string   `gorm:"size:20;not null"`
-	FullName      string   `gorm:"size:100;not null"`
+	ID            uint         `gorm:"primaryKey"`
+	UserID        uint         `gorm:"unique;not null"`
+	User          *dto.UserDTO `gorm:"foreignKey:UserID;references:ID"`
+	CpfCnpj       string       `gorm:"size:20;not null"`
+	PhoneNumber   string       `gorm:"size:20;not null"`
+	FullName      string       `gorm:"size:100;not null"`
 	Vehicles      []VehicleDTO
 	ServiceOrders []ServiceOrderDTO
 }

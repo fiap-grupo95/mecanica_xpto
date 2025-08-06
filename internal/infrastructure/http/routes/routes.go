@@ -2,7 +2,11 @@ package routes
 
 import (
 	"log"
+	"mecanica_xpto/internal/domain/repository"
+	memory "mecanica_xpto/internal/domain/repository/user-example/repository"
+	"mecanica_xpto/internal/domain/service"
 	database "mecanica_xpto/internal/infrastructure/databse"
+	"mecanica_xpto/internal/infrastructure/http"
 	"mecanica_xpto/internal/infrastructure/http/middleware"
 	"strconv"
 
@@ -17,33 +21,9 @@ const PORT = 8080
 
 // Run will start the server
 func Run() {
-	setMiddlewares()
-
-	// Swagger documentation endpoint
-	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-
-	getRoutes()
-
-	err := router.Run(":" + strconv.Itoa(PORT))
-	if err != nil {
-		log.Fatalf("Failed to startup the application: %v", err.Error())
-	}
-}
-
-// getRoutes will create our routes of our entire application
-// this way every group of routes can be defined in their own file,
-// so this one won't be so messy
-func getRoutes() {
-	v1 := router.Group("/v1")
-	addPingRoutes(v1)
-	addUserRoutes(v1)
-}
-
-// setMiddlewares will configure our middleware
-func setMiddlewares() {
 	// Set trusted proxies
 	middleware.SetTrustedProxies(router)
-	database.ConnectDatabase()
+	db := database.ConnectDatabase()
 
 	// Set CORS middleware
 	router.Use(gin.Logger())
@@ -52,4 +32,24 @@ func setMiddlewares() {
 		log.Printf("Recovered from panic: %v", recovered)
 		c.AbortWithStatus(500)
 	}))
+
+	// Swagger documentation endpoint
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
+	userRepo := memory.NewMemoryRepository()
+	userHandler := http.NewUserHandler(userRepo)
+
+	vehiclesRepository := repository.NewVehicleRepository(db)
+	vehiclesService := service.NewVehicleService(vehiclesRepository)
+	vehicleHandler := http.NewVehicleHandler(vehiclesService)
+
+	v1 := router.Group("/v1")
+	addPingRoutes(v1)
+	addUserRoutes(v1, userHandler)
+	addVehicleRoutes(v1, vehicleHandler)
+
+	err := router.Run(":" + strconv.Itoa(PORT))
+	if err != nil {
+		log.Fatalf("Failed to startup the application: %v", err.Error())
+	}
 }
