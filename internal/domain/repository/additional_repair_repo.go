@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"mecanica_xpto/internal/domain/model/dto"
 	"mecanica_xpto/internal/domain/model/entities"
 	"mecanica_xpto/internal/domain/model/valueobject"
 )
@@ -25,9 +26,9 @@ type AdditionalRepairDTO struct {
 	ServiceOrderID uint                      `gorm:"not null"`
 	ServiceOrder   ServiceOrderDTO           `gorm:"foreignKey:ServiceOrderID"`
 	ServiceID      uint                      `gorm:"not null"`
-	Service        ServiceDTO                `gorm:"foreignKey:ServiceID"`
+	Service        dto.ServiceDTO            `gorm:"foreignKey:ServiceID"`
 	PartsSupplyID  uint                      `gorm:"not null"`
-	PartsSupply    PartsSupplyDTO            `gorm:"foreignKey:PartsSupplyID"`
+	PartsSupply    dto.PartsSupplyDTO        `gorm:"foreignKey:PartsSupplyID"`
 	ARStatusID     uint                      `gorm:"not null"`
 	ARStatus       AdditionalRepairStatusDTO `gorm:"foreignKey:ARStatusID"`
 }

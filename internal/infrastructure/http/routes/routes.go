@@ -42,10 +42,16 @@ func Run() {
 	partsSupplyUseCase := use_case.NewPartsSupplyUseCase(repository.NewPartsSupplyRepository(db))
 	partsSupplyHandler := http.NewPartsSupplyHandler(partsSupplyUseCase)
 
+	vehiclesRepository := repository.NewVehicleRepository(db)
+	vehiclesUseCase := use_case.NewVehicleUseCase(vehiclesRepository)
+	vehicleHandler := http.NewVehicleHandler(vehiclesService)
+
+
 	v1 := router.Group("/v1")
 	addPingRoutes(v1)
 	addUserRoutes(v1)
 	addPartsSupplyRoutes(v1, partsSupplyHandler)
+	addVehicleRoutes(v1, vehicleHandler)
 
 	err := router.Run(":" + strconv.Itoa(PORT))
 	if err != nil {

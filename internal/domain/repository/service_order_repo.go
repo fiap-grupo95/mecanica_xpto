@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"mecanica_xpto/internal/domain/model/dto"
 	"mecanica_xpto/internal/domain/model/entities"
 	"mecanica_xpto/internal/domain/model/valueobject"
 	"time"
@@ -39,9 +40,9 @@ type ServiceOrderDTO struct {
 	CreatedAt            time.Time `gorm:"autoCreateTime"`
 	UpdatedAt            time.Time `gorm:"autoUpdateTime"`
 	AdditionalRepairs    []AdditionalRepairDTO
-	Payment              *PaymentDTO      `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
-	PartsSupplies        []PartsSupplyDTO `gorm:"many2many:partssupply_serviceorders;"`
-	Services             []ServiceDTO     `gorm:"many2many:service_serviceorders;"`
+	Payment              *PaymentDTO          `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	PartsSupplies        []dto.PartsSupplyDTO `gorm:"many2many:partssupply_serviceorders;"`
+	Services             []dto.ServiceDTO     `gorm:"many2many:service_serviceorders;"`
 }
 
 func (m *ServiceOrderStatusDTO) ToDomain() entities.ServiceOrderStatus {
