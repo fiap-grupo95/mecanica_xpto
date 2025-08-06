@@ -2,8 +2,8 @@ package routes
 
 import (
 	"log"
-	_ "mecanica_xpto/docs" // This will be auto-generated
-	middleware2 "mecanica_xpto/internal/infrastructure/middleware"
+	database "mecanica_xpto/internal/infrastructure/databse"
+	"mecanica_xpto/internal/infrastructure/http/middleware"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -36,14 +36,14 @@ func Run() {
 func getRoutes() {
 	v1 := router.Group("/v1")
 	addPingRoutes(v1)
-	addUserRoutes(v1)
+	addCustomerRoutes(v1)
 }
 
 // setMiddlewares will configure our middleware
 func setMiddlewares() {
 	// Set trusted proxies
-	middleware2.SetTrustedProxies(router)
-	middleware2.ConnectDatabase()
+	middleware.SetTrustedProxies(router)
+	database.ConnectDatabase()
 
 	// Set CORS middleware
 	router.Use(gin.Logger())

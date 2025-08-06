@@ -1,4 +1,4 @@
-package repository
+package dto
 
 import (
 	"mecanica_xpto/internal/domain/model/entities"
@@ -7,9 +7,9 @@ import (
 )
 
 type ServiceOrderStatusDTO struct {
-	ID            uint   `gorm:"primaryKey"`
-	Description   string `gorm:"size:50;not null"`
-	ServiceOrders []ServiceOrderDTO
+	ID            uint              `gorm:"primaryKey"`
+	Description   string            `gorm:"size:50;not null"`
+	ServiceOrders []ServiceOrderDTO `gorm:"foreignKey:OSStatusID"`
 }
 
 // N:N relationship between PartsSupply and ServiceOrder
@@ -36,12 +36,12 @@ type ServiceOrderDTO struct {
 	Estimate             float64               `gorm:"type:decimal(10,2)"`
 	StartedExecutionDate time.Time
 	FinalExecutionDate   time.Time
-	CreatedAt            time.Time `gorm:"autoCreateTime"`
-	UpdatedAt            time.Time `gorm:"autoUpdateTime"`
-	AdditionalRepairs    []AdditionalRepairDTO
-	Payment              *PaymentDTO      `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
-	PartsSupplies        []PartsSupplyDTO `gorm:"many2many:partssupply_serviceorders;"`
-	Services             []ServiceDTO     `gorm:"many2many:service_serviceorders;"`
+	CreatedAt            time.Time             `gorm:"autoCreateTime"`
+	UpdatedAt            time.Time             `gorm:"autoUpdateTime"`
+	AdditionalRepairs    []AdditionalRepairDTO `gorm:"foreignKey:ServiceOrderID"`
+	Payment              *PaymentDTO           `gorm:"foreignKey:ServiceOrderID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	PartsSupplies        []PartsSupplyDTO      `gorm:"many2many:partssupply_serviceorders;"`
+	Services             []ServiceDTO          `gorm:"many2many:service_serviceorders;"`
 }
 
 func (m *ServiceOrderStatusDTO) ToDomain() entities.ServiceOrderStatus {

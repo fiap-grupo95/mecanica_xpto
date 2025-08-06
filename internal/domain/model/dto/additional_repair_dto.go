@@ -1,4 +1,4 @@
-package repository
+package dto
 
 import (
 	"mecanica_xpto/internal/domain/model/entities"
@@ -7,9 +7,9 @@ import (
 
 // 1:N relationship between AdditionalRepair and AdditionalRepairStatus
 type AdditionalRepairStatusDTO struct {
-	ID                uint   `gorm:"primaryKey"`
-	Description       string `gorm:"size:50;not null"`
-	AdditionalRepairs []AdditionalRepairDTO
+	ID                uint                  `gorm:"primaryKey"`
+	Description       string                `gorm:"size:50;not null"`
+	AdditionalRepairs []AdditionalRepairDTO `gorm:"foreignKey:ARStatusID"`
 }
 
 func (arsm AdditionalRepairStatusDTO) ToDomain() entities.AdditionalRepairStatus {

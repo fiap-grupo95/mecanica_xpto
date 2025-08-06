@@ -1,4 +1,4 @@
-package repository
+package dto
 
 import (
 	"mecanica_xpto/internal/domain/model/entities"
