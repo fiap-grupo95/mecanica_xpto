@@ -46,7 +46,7 @@ func setMiddlewares() {
 
 	secretKey := config.GetSecretKey()
 
-	router.Use(middleware2.JWTAuthMiddleware(secretKey))
+	router.Use(middleware.JWTAuthMiddleware(secretKey))
 	// Set trusted proxies
 	middleware.SetTrustedProxies(router)
 	database.ConnectDatabase()
