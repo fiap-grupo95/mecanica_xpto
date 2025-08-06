@@ -1,7 +1,7 @@
 package routes
 
 import (
-	"mecanica_xpto/internal/domain/user-example/repository"
+	"mecanica_xpto/internal/domain/repository/user-example/repository"
 	"mecanica_xpto/internal/infrastructure/http"
 
 	"github.com/gin-gonic/gin"

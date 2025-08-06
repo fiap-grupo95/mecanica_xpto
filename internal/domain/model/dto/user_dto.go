@@ -1,4 +1,4 @@
-package repository
+package dto
 
 import (
 	"mecanica_xpto/internal/domain/model/entities"
@@ -16,7 +16,7 @@ type UserDTO struct {
 	CreatedAt  time.Time      `gorm:"autoCreateTime"`
 	UpdatedAt  time.Time      `gorm:"autoUpdateTime"`
 	DeletedAt  gorm.DeletedAt `gorm:"index"`
-	Customer   *CustomerDTO   `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	Customer   *CustomerDTO   `gorm:"foreignKey:UserID;references:ID"`
 }
 
 func (m *UserDTO) ToDomain() entities.User {

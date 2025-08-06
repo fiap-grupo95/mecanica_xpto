@@ -1,7 +1,7 @@
 package http
 
 import (
-	"mecanica_xpto/internal/domain/user-example"
+	"mecanica_xpto/internal/domain/repository/user-example"
 	"net/http"
 
 	"github.com/gin-gonic/gin"

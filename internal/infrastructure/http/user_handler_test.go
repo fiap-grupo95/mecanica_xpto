@@ -2,8 +2,8 @@ package http_test
 
 import (
 	"encoding/json"
-	"mecanica_xpto/internal/domain/user-example"
-	"mecanica_xpto/internal/domain/user-example/repository"
+	"mecanica_xpto/internal/domain/repository/user-example"
+	"mecanica_xpto/internal/domain/repository/user-example/repository"
 	http2 "mecanica_xpto/internal/infrastructure/http"
 	"net/http"
 	"net/http/httptest"

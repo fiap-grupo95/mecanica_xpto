@@ -4,7 +4,8 @@ import (
 	"log"
 	_ "mecanica_xpto/docs" // This will be auto-generated
 	"mecanica_xpto/internal/infrastructure/config"
-	middleware2 "mecanica_xpto/internal/infrastructure/middleware"
+	database "mecanica_xpto/internal/infrastructure/databse"
+	"mecanica_xpto/internal/infrastructure/http/middleware"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -47,8 +48,8 @@ func setMiddlewares() {
 
 	router.Use(middleware2.JWTAuthMiddleware(secretKey))
 	// Set trusted proxies
-	middleware2.SetTrustedProxies(router)
-	middleware2.ConnectDatabase()
+	middleware.SetTrustedProxies(router)
+	database.ConnectDatabase()
 
 	// Set CORS middleware
 	router.Use(gin.Logger())
