@@ -44,7 +44,7 @@ func getRoutes(db *gorm.DB) {
 }
 
 // setMiddlewares will configure our middleware
-func setMiddlewares() {
+func setMiddlewares() *gorm.DB {
 
 	secretKey := config.GetSecretKey()
 
