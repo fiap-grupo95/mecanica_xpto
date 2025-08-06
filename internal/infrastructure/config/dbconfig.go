@@ -13,7 +13,7 @@ import (
 
 func NewDBFromEnv() (*gorm.DB, error) {
 	// Carrega variáveis do .env
-	err := godotenv.Load("c:/Users/Daniel/docker/pos/mecanica_xpto/.env")
+	err := godotenv.Load()
 	if err != nil {
 		return nil, err
 	}
