@@ -13,7 +13,7 @@ import (
 
 func TestJWTAuthMiddleware(t *testing.T) {
 	// Carregar a chave secreta do .env
-	secretKey := config.GetSecretKey()
+	secretKey := "fb21b3a964e6ae5d413bc6a403864f693eaae4b273f91b71fd84ca014aff622f"
 
 	gin.SetMode(gin.TestMode)
 	r := gin.New()
