@@ -35,7 +35,7 @@ func NewCpfCnpj(v string) (CpfCnpj, error) {
 
 func (c CpfCnpj) IsValid() error {
 	if len(c) <= 11 {
-		return validators.CnpjIsValid(c.String())
+		return validators.CpfIsValid(c.String())
 	}
 	return validators.CnpjIsValid(c.String())
 }
