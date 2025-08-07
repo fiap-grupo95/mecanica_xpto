@@ -12,7 +12,7 @@ func addVehicleRoutes(rg *gin.RouterGroup, vehicleHandler *http.VehicleHandler) 
 		vehicles.GET("/", vehicleHandler.GetVehicles)
 		vehicles.GET("/customer/:customerID", vehicleHandler.GetVehiclesByCustomerID)
 		vehicles.POST("/", vehicleHandler.CreateVehicle)
-		vehicles.PUT("/:id", vehicleHandler.UpdateVehicle)
+		vehicles.PATCH("/:id", vehicleHandler.UpdateVehicle)
 		vehicles.DELETE("/:id", vehicleHandler.DeleteVehicle)
 	}
 }

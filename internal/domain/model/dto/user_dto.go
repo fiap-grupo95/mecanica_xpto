@@ -24,11 +24,11 @@ func (m *UserDTO) ToDomain() entities.User {
 	if m.DeletedAt.Valid {
 		deletedAt = &m.DeletedAt.Time
 	}
-	var customer *entities.Customer
-	if m.Customer != nil {
-		c := m.Customer.ToDomain()
-		customer = &c
-	}
+	//var customer *entities.Customer
+	//if m.Customer != nil {
+	//	c := m.Customer.ToDomain()
+	//	customer = &c
+	//}
 	return entities.User{
 		ID:        m.ID,
 		Email:     m.Email,
@@ -37,6 +37,6 @@ func (m *UserDTO) ToDomain() entities.User {
 		CreatedAt: m.CreatedAt,
 		UpdatedAt: m.UpdatedAt,
 		DeletedAt: deletedAt,
-		Customer:  customer,
+		//Customer:  customer,
 	}
 }

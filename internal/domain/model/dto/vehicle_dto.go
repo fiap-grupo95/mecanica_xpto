@@ -17,7 +17,7 @@ type VehicleDTO struct {
 	Year       string         `gorm:"size:4"`
 	Brand      string         `gorm:"size:50;not null"`
 	CreatedAt  time.Time      `gorm:"autoCreateTime"`
-	UpdatedAt  time.Time      `gorm:"autoUpdateTime"`
+	UpdatedAt  *time.Time     `gorm:"autoUpdateTime"`
 	DeletedAt  gorm.DeletedAt `gorm:"index"`
 	//ServiceOrders []ServiceOrderDTO `gorm:"foreignKey:VehicleID"`
 }
@@ -38,11 +38,11 @@ func (v *VehicleDTO) ToDomain() *entities.Vehicle {
 			}
 			return nil
 		}(),
-		ServiceOrders: nil, // This will be populated by the repository layer
+		//ServiceOrders: nil, // This will be populated by the repository layer
 	}
 }
 
 // TableName specifies the table name for VehicleDTO
 func (v *VehicleDTO) TableName() string {
-	return "db_mecanica_xpto.tb_vehicle"
+	return "tb_vehicle"
 }
