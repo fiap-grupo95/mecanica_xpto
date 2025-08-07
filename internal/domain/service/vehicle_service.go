@@ -77,9 +77,9 @@ func (s *VehicleService) GetVehiclesByCustomerID(customerID uint) ([]entities.Ve
 func (s *VehicleService) CreateVehicle(vehicle entities.Vehicle) (string, error) {
 	err := s.repo.Create(vehicle)
 	if err != nil {
-		return "Vehicle created successfully", err
+		return "error creating a new vehicle", err
 	}
-	return "success creating", nil
+	return "Vehicle created successfully", nil
 }
 
 func (s *VehicleService) UpdateVehicle(vehicle entities.Vehicle) (string, error) {

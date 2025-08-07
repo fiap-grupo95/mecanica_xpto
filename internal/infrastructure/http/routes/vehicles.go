@@ -11,6 +11,8 @@ func addVehicleRoutes(rg *gin.RouterGroup, vehicleHandler *http.VehicleHandler) 
 	{
 		vehicles.GET("/", vehicleHandler.GetVehicles)
 		vehicles.GET("/customer/:customerID", vehicleHandler.GetVehiclesByCustomerID)
+		vehicles.GET("/:id", vehicleHandler.GetVehicleByID)
+		vehicles.GET("/:plate", vehicleHandler.GetVehicleByPlate)
 		vehicles.POST("/", vehicleHandler.CreateVehicle)
 		vehicles.PATCH("/:id", vehicleHandler.UpdateVehicle)
 		vehicles.DELETE("/:id", vehicleHandler.DeleteVehicle)
