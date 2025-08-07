@@ -103,7 +103,7 @@ func (r *VehicleRepository) Update(vehicle entities.Vehicle) error {
 
 func (r *VehicleRepository) Delete(id uint) error {
 	// Using GORM's soft delete functionality which will automatically set the deleted_at timestamp
-	if err := r.db.Model(&dto.VehicleDTO{}).Where("id = ?", id).Delete("").Error; err != nil {
+	if err := r.db.Model(&dto.VehicleDTO{}).Where("id = ?", id).Delete(nil).Error; err != nil {
 		return err
 	}
 	return nil
