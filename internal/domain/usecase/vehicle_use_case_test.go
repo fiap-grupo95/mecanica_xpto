@@ -12,6 +12,17 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+const (
+	MessageVehicleCreated = "Vehicle created successfully"
+	MessageVehicleUpdated = "Vehicle updated successfully"
+)
+
+var (
+	ErrorUpdatingVehicle = "error updating the vehicle"
+	ErrorCreatingVehicle = "error creating a new vehicle"
+	ErrorDatabase        = errors.New("database error")
+)
+
 func TestGetVehicles(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		mockRepo := new(mocks.MockVehicleRepository)
@@ -52,7 +63,7 @@ func TestGetVehicles(t *testing.T) {
 		mockRepo := new(mocks.MockVehicleRepository)
 		service := NewVehicleService(mockRepo)
 
-		mockRepo.On("FindAll").Return(nil, errors.New("database error"))
+		mockRepo.On("FindAll").Return(nil, ErrorDatabase)
 
 		vehicles, err := service.GetAllVehicles()
 
@@ -204,7 +215,7 @@ func TestCreateVehicle(t *testing.T) {
 		result, err := service.CreateVehicle(vehicle)
 
 		assert.NoError(t, err)
-		assert.Equal(t, "Vehicle created successfully", result)
+		assert.Equal(t, MessageVehicleCreated, result)
 		mockRepo.AssertExpectations(t)
 	})
 
@@ -222,12 +233,12 @@ func TestCreateVehicle(t *testing.T) {
 			},
 		}
 
-		mockRepo.On("Create", vehicle).Return(errors.New("database error"))
+		mockRepo.On("Create", vehicle).Return(ErrorDatabase)
 
 		result, err := service.CreateVehicle(vehicle)
 
 		assert.Error(t, err)
-		assert.Equal(t, "error creating a new vehicle", result)
+		assert.Equal(t, ErrorCreatingVehicle, result)
 		mockRepo.AssertExpectations(t)
 	})
 }
@@ -250,7 +261,7 @@ func TestUpdateVehicle(t *testing.T) {
 		result, err := service.UpdateVehicle(vehicle)
 
 		assert.NoError(t, err)
-		assert.Equal(t, "Vehicle updated successfully", result)
+		assert.Equal(t, MessageVehicleUpdated, result)
 		mockRepo.AssertExpectations(t)
 	})
 
@@ -266,12 +277,12 @@ func TestUpdateVehicle(t *testing.T) {
 			Year:  "2020",
 		}
 
-		mockRepo.On("Update", vehicle).Return(errors.New("database error"))
+		mockRepo.On("Update", vehicle).Return(ErrorDatabase)
 
 		result, err := service.UpdateVehicle(vehicle)
 
 		assert.Error(t, err)
-		assert.Equal(t, "error updating a new vehicle", result)
+		assert.Equal(t, ErrorUpdatingVehicle, result)
 		mockRepo.AssertExpectations(t)
 	})
 }
