@@ -1,6 +1,7 @@
 package dto
 
 import (
+	"log"
 	"mecanica_xpto/internal/domain/model/entities"
 	"mecanica_xpto/internal/domain/model/valueobject"
 )
@@ -29,11 +30,17 @@ func (cm *CustomerDTO) ToDomain() entities.Customer {
 		u := cm.User.ToDomain()
 		user = &u
 	}
+
+	cpfCnpj, err := valueobject.NewCpfCnpj(cm.CpfCnpj)
+	if err != nil {
+		log.Fatalf("Invalid CPF/CNPJ format: %v", err)
+	}
+
 	return entities.Customer{
 		ID:            cm.ID,
 		UserID:        cm.UserID,
 		User:          user,
-		CpfCnpj:       valueobject.ParseCPF_CNPJ(cm.CpfCnpj),
+		CpfCnpj:       cpfCnpj,
 		PhoneNumber:   cm.PhoneNumber,
 		FullName:      cm.FullName,
 		Vehicles:      nil, // This will be populated later if needed
