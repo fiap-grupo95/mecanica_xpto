@@ -6,7 +6,7 @@ import (
 
 // @title           Mecanica XPTO API
 // @version         1.0
-// @description     API for Mecanica XPTO usecase
+// @description     API for Mecanica XPTO service
 // @termsOfService  http://swagger.io/terms/
 
 // @contact.name   API Support
