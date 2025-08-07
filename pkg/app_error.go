@@ -100,5 +100,5 @@ func ToHTTPError(err error) ErrorResponse {
 	if errors.As(err, &appErr) {
 		return appErr.ToHTTPError()
 	}
-	return ErrorResponse{Code: "INTERNAL_ERROR", Message: "Erro interno"}
+	return ErrorResponse{Code: "INTERNAL_ERROR", Message: "internal error"}
 }
