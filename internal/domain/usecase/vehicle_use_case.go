@@ -1,10 +1,10 @@
-package service
+package usecase
 
 import (
 	"errors"
 	"mecanica_xpto/internal/domain/model/entities"
 	"mecanica_xpto/internal/domain/model/valueobject"
-	"mecanica_xpto/internal/domain/repository"
+	"mecanica_xpto/internal/domain/repository/vehicles"
 )
 
 type VehicleServiceInterface interface {
@@ -19,10 +19,10 @@ type VehicleServiceInterface interface {
 }
 
 type VehicleService struct {
-	repo repository.VehicleRepositoryInterface
+	repo vehicles.VehicleRepositoryInterface
 }
 
-func NewVehicleService(repo repository.VehicleRepositoryInterface) VehicleServiceInterface {
+func NewVehicleService(repo vehicles.VehicleRepositoryInterface) VehicleServiceInterface {
 	return &VehicleService{repo: repo}
 }
 

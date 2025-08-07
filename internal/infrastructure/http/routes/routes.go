@@ -3,9 +3,9 @@ package routes
 import (
 	"log"
 	_ "mecanica_xpto/docs" // This will be auto-generated
-	"mecanica_xpto/internal/domain/repository"
-	memory "mecanica_xpto/internal/domain/repository/user-example/repository"
-	"mecanica_xpto/internal/domain/service"
+	memory "mecanica_xpto/internal/domain/repository/user-example"
+	"mecanica_xpto/internal/domain/repository/vehicles"
+	"mecanica_xpto/internal/domain/usecase"
 	"mecanica_xpto/internal/infrastructure/database"
 	"mecanica_xpto/internal/infrastructure/http"
 	"mecanica_xpto/internal/infrastructure/http/middleware"
@@ -43,8 +43,8 @@ func Run() {
 	userRepo := memory.NewMemoryRepository()
 	userHandler := http.NewUserHandler(userRepo)
 
-	vehiclesRepository := repository.NewVehicleRepository(db)
-	vehiclesService := service.NewVehicleService(vehiclesRepository)
+	vehiclesRepository := vehicles.NewVehicleRepository(db)
+	vehiclesService := usecase.NewVehicleService(vehiclesRepository)
 	vehicleHandler := http.NewVehicleHandler(vehiclesService)
 
 	v1 := router.Group("/v1")

@@ -1,11 +1,11 @@
-package service
+package usecase
 
 import (
 	"errors"
 	"mecanica_xpto/internal/domain/model/dto"
 	"mecanica_xpto/internal/domain/model/entities"
 	"mecanica_xpto/internal/domain/model/valueobject"
-	"mecanica_xpto/internal/domain/service/mocks"
+	"mecanica_xpto/internal/domain/usecase/mocks"
 	"testing"
 	"time"
 

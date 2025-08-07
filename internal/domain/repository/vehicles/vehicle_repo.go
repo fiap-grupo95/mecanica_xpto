@@ -1,4 +1,4 @@
-package repository
+package vehicles
 
 import (
 	"mecanica_xpto/internal/domain/model/dto"
