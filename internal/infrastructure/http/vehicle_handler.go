@@ -2,7 +2,7 @@ package http
 
 import (
 	"mecanica_xpto/internal/domain/model/entities"
-	"mecanica_xpto/internal/domain/service"
+	"mecanica_xpto/internal/domain/usecase"
 	"net/http"
 	"strconv"
 
@@ -12,11 +12,11 @@ import (
 // VehicleHandler handles HTTP requests for vehicle operations
 // @title Vehicle API
 type VehicleHandler struct {
-	service service.VehicleServiceInterface
+	service usecase.VehicleServiceInterface
 }
 
 // NewVehicleHandler creates a new vehicle handler instance
-func NewVehicleHandler(service service.VehicleServiceInterface) *VehicleHandler {
+func NewVehicleHandler(service usecase.VehicleServiceInterface) *VehicleHandler {
 	return &VehicleHandler{
 		service: service,
 	}
