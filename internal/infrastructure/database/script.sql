@@ -11,7 +11,10 @@ CREATE INDEX IF NOT EXISTS idx_customer_document ON tb_customer (cpf_cnpj);
 
 -- Exemplo de inserção de dados na tabela
 INSERT INTO tb_customer (cpf_cnpj, fullname, phone_number, user_id)
-    VALUES ('123.456.789-00', 'João da Silva', '(11) 98765-4321', 1);
+    VALUES ('19134950869', 'João da Silva', '(11) 98765-4321', 1);
+
+INSERT INTO tb_customer (cpf_cnpj, fullname, phone_number, user_id)
+VALUES ('93684508000137', 'Joana da Silva', '(11) 99775-4829', 2);
 
 CREATE TABLE IF NOT EXISTS tb_vehicle (
     id BIGSERIAL PRIMARY KEY,
@@ -32,6 +35,7 @@ CREATE INDEX IF NOT EXISTS idx_vehicle_customer_id ON tb_vehicle (customer_id);
 
 -- Exemplo de inserção de dados na tabela
 INSERT INTO tb_vehicle (plate, customer_id, model, brand, year)
-    VALUES ('ABC-1234', 1, 'Corsa', 'Chevrolet', 2005);
+    VALUES ('BJL5938', 1, 'Corsa', 'Chevrolet', 2005);
+
 INSERT INTO tb_vehicle (plate, customer_id, model, brand, year)
-VALUES ('ABC-1345', 1, 'Onix', 'Chevrolet', 2014);
+VALUES ('BRE1683', 2, 'Onix', 'Chevrolet', 2014);
