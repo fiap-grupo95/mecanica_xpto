@@ -17,7 +17,7 @@ services:
     volumes:
       - app_data:/app
     networks:
-      - backend_network
+      - app_network
     depends_on:
       db:
         condition: service_healthy
@@ -34,7 +34,7 @@ services:
       - postgresql_data:/var/lib/postgresql/data
       - ./internal/infrastructure/database/script.sql:/docker-entrypoint-initdb.d/script.sql
     networks:
-      - backend_network
+      - app_network
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
       interval: 5s
@@ -89,9 +89,6 @@ networks:
 
   sonar-net: # Define the network explicitly
     name: sonar-net   # Give it a specific name
-
-  backend_network:
-    driver: bridge
 
 volumes:
   db_data:
