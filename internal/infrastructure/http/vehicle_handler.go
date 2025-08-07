@@ -73,7 +73,13 @@ func (v VehicleHandler) GetVehicleByCustomerID(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param ID path int true "ID"
-// @Success 200 {array} entities.Vehicle
+// @Summary Get vehicle by ID
+// @Description Retrieves a vehicle by its ID
+// @Tags vehicles
+// @Accept json
+// @Produce json
+// @Param ID path int true "ID"
+// @Success 200 {object} entities.Vehicle
 // @Failure 400 {object} map[string]string "Invalid vehicle ID"
 // @Failure 500 {object} map[string]string "error message"
 // @Router /vehicles/{id} [get]
