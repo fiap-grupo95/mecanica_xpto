@@ -22,8 +22,8 @@ type VehicleDTO struct {
 	ServiceOrders []ServiceOrderDTO
 }
 
-func (v *VehicleDTO) ToDomain() entities.Vehicle {
-	return entities.Vehicle{
+func (v *VehicleDTO) ToDomain() *entities.Vehicle {
+	return &entities.Vehicle{
 		ID:        v.ID,
 		Plate:     valueobject.ParsePlate(v.Plate),
 		Customer:  v.Customer.ToDomain(),
@@ -42,13 +42,18 @@ func (v *VehicleDTO) ToDomain() entities.Vehicle {
 	}
 }
 
+// TableName specifies the table name for VehicleDTO
+func (v *VehicleDTO) TableName() string {
+	return "db_mecanica_xpto.tb_vehicle"
+}
+
 type VehicleRepositoryInterface interface {
 	FindAll() ([]VehicleDTO, error)
 	FindByID(id uint) (*VehicleDTO, error)
 	FindByPlate(plate valueobject.Plate) (*VehicleDTO, error)
 	FindByCustomerID(customerID uint) ([]VehicleDTO, error)
-	Create(vehicle VehicleDTO) (*VehicleDTO, error)
-	Update(vehicle VehicleDTO) (*VehicleDTO, error)
+	Create(vehicle entities.Vehicle) (*VehicleDTO, error)
+	Update(vehicle entities.Vehicle) (*VehicleDTO, error)
 	Delete(id uint) error
 }
 
@@ -102,9 +107,9 @@ func (r *VehicleRepository) FindByCustomerID(customerID uint) ([]VehicleDTO, err
 	return vehicles, nil
 }
 
-func (r *VehicleRepository) Create(vehicle VehicleDTO) (*VehicleDTO, error) {
+func (r *VehicleRepository) Create(vehicle entities.Vehicle) (*VehicleDTO, error) {
 	vehicleDTO := VehicleDTO{
-		Plate:      vehicle.Plate,
+		Plate:      string(vehicle.Plate),
 		CustomerID: vehicle.Customer.ID,
 		Model:      vehicle.Model,
 		Year:       vehicle.Year,
@@ -118,10 +123,10 @@ func (r *VehicleRepository) Create(vehicle VehicleDTO) (*VehicleDTO, error) {
 	return &vehicleDTO, nil
 }
 
-func (r *VehicleRepository) Update(vehicle VehicleDTO) (*VehicleDTO, error) {
+func (r *VehicleRepository) Update(vehicle entities.Vehicle) (*VehicleDTO, error) {
 	vehicleDTO := VehicleDTO{
 		ID:         vehicle.ID,
-		Plate:      vehicle.Plate,
+		Plate:      string(vehicle.Plate),
 		CustomerID: vehicle.Customer.ID,
 		Model:      vehicle.Model,
 		Year:       vehicle.Year,

@@ -2,7 +2,6 @@ package routes
 
 import (
 	"log"
-	//_ "mecanica_xpto/docs" // This will be auto-generated
 	repository "mecanica_xpto/internal/domain/repository/parts_supply"
 	use_case "mecanica_xpto/internal/domain/usecase"
 	"mecanica_xpto/internal/infrastructure/config"
