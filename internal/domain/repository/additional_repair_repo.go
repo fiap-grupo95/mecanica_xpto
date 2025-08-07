@@ -24,7 +24,7 @@ func (arsm AdditionalRepairStatusDTO) ToDomain() entities.AdditionalRepairStatus
 type AdditionalRepairDTO struct {
 	ID             uint                      `gorm:"primaryKey"`
 	ServiceOrderID uint                      `gorm:"not null"`
-	ServiceOrder   ServiceOrderDTO           `gorm:"foreignKey:ServiceOrderID"`
+	ServiceOrder   dto.ServiceOrderDTO       `gorm:"foreignKey:ServiceOrderID"`
 	ServiceID      uint                      `gorm:"not null"`
 	Service        dto.ServiceDTO            `gorm:"foreignKey:ServiceID"`
 	PartsSupplyID  uint                      `gorm:"not null"`
