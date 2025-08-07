@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"fmt"
 	"mecanica_xpto/internal/domain/model/dto"
 	"mecanica_xpto/internal/domain/model/entities"
 
@@ -35,9 +34,7 @@ func (s *ServiceRepository) Create(ctx context.Context, service *entities.Servic
 		Price:       service.Price,
 	}
 
-	fmt.Printf("Creating service: %+v\n", dto)
 	if err := s.db.Create(&dto).Error; err != nil {
-		fmt.Printf("Error creating service: %v\n", err)
 		return entities.Service{}, err
 	}
 	return dto.ToDomain(), nil
