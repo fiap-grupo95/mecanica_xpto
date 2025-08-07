@@ -95,7 +95,7 @@ func (s *VehicleService) UpdateVehicle(vehicle entities.Vehicle) (string, error)
 	}
 	err := s.repo.Update(vehicle)
 	if err != nil {
-		return "error updating a new vehicle", err
+		return "error updating the vehicle", err
 	}
 	return "Vehicle updated successfully", nil
 }
