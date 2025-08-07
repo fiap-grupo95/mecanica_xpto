@@ -1,30 +1,56 @@
 package valueobject
 
-import "regexp"
+import (
+	"mecanica_xpto/pkg/utils"
+	"mecanica_xpto/pkg/validators"
+	"regexp"
+)
 
 type CpfCnpj string
 
-var (
-	cpfRegex  = regexp.MustCompile(`^\d{3}\.?\d{3}\.?\d{3}-?\d{2}$`)
-	cnpjRegex = regexp.MustCompile(`^\d{2}\.?\d{3}\.?\d{3}/?\d{4}-?\d{2}$`)
+const (
+	sizeCNPJWithoutDV       = 12
+	baseValue               = int('0')
+	cnpjZerosOnly           = "00000000000000"
+	operationAndErrorFormat = "%s: %w"
 )
 
-// ParseCPF_CNPJ crie um parse CpfCnpj que retorne um CpfCnpj
-func ParseCPF_CNPJ(value string) CpfCnpj {
-	return CpfCnpj(value)
+var (
+	regexCPFPattern      = regexp.MustCompile("^[0-9]{11}$")
+	regexCNPJWithoutDV   = regexp.MustCompile("^[0-9]{12}$")
+	regexCNPJ            = regexp.MustCompile("^[0-9]{14}$")
+	regexCharsNotAllowed = regexp.MustCompile("[^0-9./-]")
+	regexNonNumericChars = regexp.MustCompile("[^0-9]")
+	weightDV             = []int{6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2}
+)
+
+func NewCpfCnpj(v string) (CpfCnpj, error) {
+	v = clean(v)
+	c := CpfCnpj(v)
+	if err := c.IsValid(); err != nil {
+		return "", err
+	}
+	return c, nil
 }
 
-func (v CpfCnpj) IsValidFormat() bool {
-	return cpfRegex.MatchString(string(v)) || cnpjRegex.MatchString(string(v))
-}
-func (v CpfCnpj) IsCPF() bool {
-	return cpfRegex.MatchString(string(v))
-}
-
-func (v CpfCnpj) IsCNPJ() bool {
-	return cnpjRegex.MatchString(string(v))
+func (c CpfCnpj) IsValid() error {
+	if len(c) <= 11 {
+		return validators.CnpjIsValid(c.String())
+	}
+	return validators.CnpjIsValid(c.String())
 }
 
-func (v CpfCnpj) String() string {
-	return string(v)
+func (c CpfCnpj) Mask() string {
+	if len(c) == 11 {
+		return utils.MaskCPF(c.String())
+	}
+	return utils.MaskCNPJ(c.String())
+}
+
+func (c CpfCnpj) String() string {
+	return string(c)
+}
+
+func clean(c string) string {
+	return regexNonNumericChars.ReplaceAllString(c, "")
 }
