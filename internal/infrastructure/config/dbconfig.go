@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"mecanica_xpto/internal/domain/model/dto"
 	"os"
 
 	"github.com/joho/godotenv"
@@ -12,7 +13,10 @@ import (
 
 func NewDBFromEnv() (*gorm.DB, error) {
 	// Carrega variáveis do .env
-	godotenv.Load()
+	err := godotenv.Load()
+	if err != nil {
+		return nil, err
+	}
 
 	user := os.Getenv("POSTGRES_USER")
 	password := os.Getenv("POSTGRES_PASSWORD")
@@ -35,5 +39,10 @@ func NewDBFromEnv() (*gorm.DB, error) {
 	if err := sqlDB.Ping(); err != nil {
 		return nil, err
 	}
+
+	db.AutoMigrate(
+		&dto.PartsSupplyDTO{},
+		&dto.ServiceDTO{},
+	)
 	return db, nil
 }
