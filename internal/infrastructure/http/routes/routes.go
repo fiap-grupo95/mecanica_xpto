@@ -23,7 +23,6 @@ const PORT = 8080
 // Run will start the server
 func Run() {
 	//secretKey := config.GetSecretKey()
-	//
 	//router.Use(middleware.JWTAuthMiddleware(secretKey))
 
 	// Set trusted proxies

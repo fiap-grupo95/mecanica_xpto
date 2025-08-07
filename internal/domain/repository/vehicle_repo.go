@@ -13,8 +13,8 @@ type VehicleRepositoryInterface interface {
 	FindByID(id uint) (*dto.VehicleDTO, error)
 	FindByPlate(plate valueobject.Plate) (*dto.VehicleDTO, error)
 	FindByCustomerID(customerID uint) ([]dto.VehicleDTO, error)
-	Create(vehicle entities.Vehicle) (*dto.VehicleDTO, error)
-	Update(vehicle entities.Vehicle) (*dto.VehicleDTO, error)
+	Create(vehicle entities.Vehicle) error
+	Update(vehicle entities.Vehicle) error
 	Delete(id uint) error
 }
 
@@ -68,7 +68,7 @@ func (r *VehicleRepository) FindByCustomerID(customerID uint) ([]dto.VehicleDTO,
 	return vehicles, nil
 }
 
-func (r *VehicleRepository) Create(vehicle entities.Vehicle) (*dto.VehicleDTO, error) {
+func (r *VehicleRepository) Create(vehicle entities.Vehicle) error {
 	vehicleDTO := dto.VehicleDTO{
 		Plate:      string(vehicle.Plate),
 		CustomerID: vehicle.Customer.ID,
@@ -78,13 +78,13 @@ func (r *VehicleRepository) Create(vehicle entities.Vehicle) (*dto.VehicleDTO, e
 	}
 
 	if err := r.db.Create(&vehicleDTO).Error; err != nil {
-		return nil, err
+		return err
 	}
 
-	return &vehicleDTO, nil
+	return nil
 }
 
-func (r *VehicleRepository) Update(vehicle entities.Vehicle) (*dto.VehicleDTO, error) {
+func (r *VehicleRepository) Update(vehicle entities.Vehicle) error {
 	vehicleDTO := dto.VehicleDTO{
 		ID:         vehicle.ID,
 		Plate:      string(vehicle.Plate),
@@ -95,14 +95,15 @@ func (r *VehicleRepository) Update(vehicle entities.Vehicle) (*dto.VehicleDTO, e
 	}
 
 	if err := r.db.Save(&vehicleDTO).Error; err != nil {
-		return nil, err
+		return err
 	}
 
-	return &vehicleDTO, nil
+	return nil
 }
 
 func (r *VehicleRepository) Delete(id uint) error {
-	if err := r.db.Delete(&dto.VehicleDTO{}, id).Error; err != nil {
+	// Using GORM's soft delete functionality which will automatically set the deleted_at timestamp
+	if err := r.db.Model(&dto.VehicleDTO{}).Where("id = ?", id).Delete("").Error; err != nil {
 		return err
 	}
 	return nil

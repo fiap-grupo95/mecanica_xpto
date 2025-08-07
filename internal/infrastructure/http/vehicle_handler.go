@@ -72,10 +72,10 @@ func (v VehicleHandler) GetVehiclesByCustomerID(c *gin.Context) {
 // @Tags vehicles
 // @Accept json
 // @Produce json
-// @Param vehicle body entities.Vehicle true "Vehicle information"
-// @Success 201 {object} entities.Vehicle
-// @Failure 400 {object} map[string]string "Invalid input"
-// @Failure 500 {object} map[string]string "error message"
+// @Param vehicle body map[string]string true "Vehicle information"
+// @Success 201 {object} string "Vehicle created successfully"
+// @Failure 400 {object} string "Invalid input"
+// @Failure 500 {object} string "error message"
 // @Router /vehicles [post]
 func (v VehicleHandler) CreateVehicle(c *gin.Context) {
 	var vehicle entities.Vehicle
@@ -93,37 +93,36 @@ func (v VehicleHandler) CreateVehicle(c *gin.Context) {
 }
 
 // UpdateVehicle godoc
-// @Summary Update a vehicle
-// @Description Updates an existing vehicle's information
+// @Summary Update a vehicle partially
+// @Description Updates specific fields of an existing vehicle
 // @Tags vehicles
 // @Accept json
 // @Produce json
 // @Param id path int true "Vehicle ID"
-// @Param vehicle body entities.Vehicle true "Vehicle information"
-// @Success 200 {object} entities.Vehicle
-// @Failure 400 {object} map[string]string "Invalid input"
-// @Failure 500 {object} map[string]string "error message"
-// @Router /vehicles/{id} [put]
+// @Param vehicle body entities.Vehicle true "Vehicle fields to update"
+// @Success 200 {object} string "Vehicle updated successfully"
+// @Failure 400 {object} string "Invalid input"
+// @Failure 500 {object} string "error message"
+// @Router /vehicles/{id} [patch]
 func (v VehicleHandler) UpdateVehicle(c *gin.Context) {
-	var vehicle entities.Vehicle
-	if err := c.ShouldBindJSON(&vehicle); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid vehicle ID"})
 		return
 	}
-	vehicle.ID = uint(id)
 
-	result, err := v.service.UpdateVehicle(vehicle)
+	var updates map[string]interface{}
+	if err := c.ShouldBindJSON(&updates); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	result, err := v.service.UpdateVehiclePartial(uint(id), updates)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, result)
+	c.JSON(http.StatusOK, gin.H{"message": result})
 }
 
 // DeleteVehicle godoc

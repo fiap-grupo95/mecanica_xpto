@@ -2,7 +2,7 @@ package valueobject
 
 import "regexp"
 
-type CpfCnpj string
+type Document string
 
 var (
 	cpfRegex  = regexp.MustCompile(`^\d{3}\.?\d{3}\.?\d{3}-?\d{2}$`)
@@ -10,21 +10,21 @@ var (
 )
 
 // ParseCPF_CNPJ crie um parse CpfCnpj que retorne um CpfCnpj
-func ParseCPF_CNPJ(value string) CpfCnpj {
-	return CpfCnpj(value)
+func ParseDocument(value string) Document {
+	return Document(value)
 }
 
-func (v CpfCnpj) IsValidFormat() bool {
+func (v Document) IsValidFormat() bool {
 	return cpfRegex.MatchString(string(v)) || cnpjRegex.MatchString(string(v))
 }
-func (v CpfCnpj) IsCPF() bool {
+func (v Document) IsCPF() bool {
 	return cpfRegex.MatchString(string(v))
 }
 
-func (v CpfCnpj) IsCNPJ() bool {
+func (v Document) IsCNPJ() bool {
 	return cnpjRegex.MatchString(string(v))
 }
 
-func (v CpfCnpj) String() string {
+func (v Document) String() string {
 	return string(v)
 }

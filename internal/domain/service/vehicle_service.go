@@ -11,8 +11,9 @@ type VehicleServiceInterface interface {
 	GetVehicleByID(id uint) (*entities.Vehicle, error)
 	GetVehicleByPlate(plate string) (*entities.Vehicle, error)
 	GetVehiclesByCustomerID(customerID uint) ([]entities.Vehicle, error)
-	CreateVehicle(vehicle entities.Vehicle) (*entities.Vehicle, error)
-	UpdateVehicle(vehicle entities.Vehicle) (*entities.Vehicle, error)
+	CreateVehicle(vehicle entities.Vehicle) (string, error)
+	UpdateVehicle(vehicle entities.Vehicle) (string, error)
+	UpdateVehiclePartial(id uint, updates map[string]interface{}) (string, error)
 	DeleteVehicle(id uint) error
 }
 
@@ -73,20 +74,52 @@ func (s *VehicleService) GetVehiclesByCustomerID(customerID uint) ([]entities.Ve
 	}
 	return vehiclesList, nil
 }
-func (s *VehicleService) CreateVehicle(vehicle entities.Vehicle) (*entities.Vehicle, error) {
-	result, err := s.repo.Create(vehicle)
+func (s *VehicleService) CreateVehicle(vehicle entities.Vehicle) (string, error) {
+	err := s.repo.Create(vehicle)
 	if err != nil {
-		return nil, err
+		return "Vehicle created successfully", err
 	}
-	return result.ToDomain(), nil
+	return "success creating", nil
 }
 
-func (s *VehicleService) UpdateVehicle(vehicle entities.Vehicle) (*entities.Vehicle, error) {
-	result, err := s.repo.Update(vehicle)
+func (s *VehicleService) UpdateVehicle(vehicle entities.Vehicle) (string, error) {
+	err := s.repo.Update(vehicle)
 	if err != nil {
-		return nil, err
+		return "error updating a new vehicle", err
 	}
-	return result.ToDomain(), nil
+	return "Vehicle updated successfully", nil
+}
+
+func (s *VehicleService) UpdateVehiclePartial(id uint, updates map[string]interface{}) (string, error) {
+	// First get the existing vehicle
+	existingVehicle, err := s.repo.FindByID(id)
+	if err != nil {
+		return "", err
+	}
+
+	// Update only the fields that were provided
+	if plate, ok := updates["plate"].(string); ok {
+		existingVehicle.Plate = plate
+	}
+	if model, ok := updates["model"].(string); ok {
+		existingVehicle.Model = model
+	}
+	if year, ok := updates["year"].(string); ok {
+		existingVehicle.Year = year
+	}
+	if brand, ok := updates["brand"].(string); ok {
+		existingVehicle.Brand = brand
+	}
+	if customerId, ok := updates["customer_id"].(float64); ok {
+		existingVehicle.CustomerID = uint(customerId)
+	}
+
+	// Convert DTO to domain entity and update
+	if err := s.repo.Update(*existingVehicle.ToDomain()); err != nil {
+		return "", err
+	}
+
+	return "Vehicle updated successfully", nil
 }
 
 func (s *VehicleService) DeleteVehicle(id uint) error {

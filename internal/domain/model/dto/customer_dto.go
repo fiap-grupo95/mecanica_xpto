@@ -14,13 +14,13 @@ type CustomerDTO struct {
 	User          *UserDTO          `gorm:"foreignKey:UserID;references:ID"`
 	CpfCnpj       string            `gorm:"size:20;not null"`
 	PhoneNumber   string            `gorm:"size:20;not null"`
-	FullName      string            `gorm:"size:100;not null"`
+	FullName      string            `gorm:"column:fullname;size:100;not null"`
 	Vehicles      []VehicleDTO      `gorm:"foreignKey:CustomerID;references:ID"`
 	ServiceOrders []ServiceOrderDTO `gorm:"foreignKey:CustomerID;references:ID"`
 }
 
 func (cm *CustomerDTO) TableName() string {
-	return "db_mecanica_xpto.tb_customer"
+	return "tb_customer"
 }
 
 func (cm *CustomerDTO) ToDomain() entities.Customer {
@@ -30,13 +30,10 @@ func (cm *CustomerDTO) ToDomain() entities.Customer {
 		user = &u
 	}
 	return entities.Customer{
-		ID:            cm.ID,
-		UserID:        cm.UserID,
-		User:          user,
-		CpfCnpj:       valueobject.ParseCPF_CNPJ(cm.CpfCnpj),
-		PhoneNumber:   cm.PhoneNumber,
-		FullName:      cm.FullName,
-		Vehicles:      nil, // This will be populated later if needed
-		ServiceOrders: nil, // This will be populated later if needed
+		ID:          cm.ID,
+		User:        user,
+		Document:    valueobject.Document(cm.CpfCnpj),
+		PhoneNumber: cm.PhoneNumber,
+		FullName:    cm.FullName,
 	}
 }
