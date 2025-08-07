@@ -2,9 +2,9 @@
 package mocks
 
 import (
+	"mecanica_xpto/internal/domain/model/dto"
 	"mecanica_xpto/internal/domain/model/entities"
 	"mecanica_xpto/internal/domain/model/valueobject"
-	"mecanica_xpto/internal/domain/repository"
 
 	"github.com/stretchr/testify/mock"
 )
@@ -17,52 +17,46 @@ func NewMockVehicleRepository() *MockVehicleRepository {
 	return &MockVehicleRepository{}
 }
 
-func (m *MockVehicleRepository) FindAll() ([]repository.VehicleDTO, error) {
+func (m *MockVehicleRepository) FindAll() ([]dto.VehicleDTO, error) {
 	args := m.Called()
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	return args.Get(0).([]repository.VehicleDTO), args.Error(1)
+	return args.Get(0).([]dto.VehicleDTO), args.Error(1)
 }
 
-func (m *MockVehicleRepository) FindByID(id uint) (*repository.VehicleDTO, error) {
+func (m *MockVehicleRepository) FindByID(id uint) (*dto.VehicleDTO, error) {
 	args := m.Called(id)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	return args.Get(0).(*repository.VehicleDTO), args.Error(1)
+	return args.Get(0).(*dto.VehicleDTO), args.Error(1)
 }
 
-func (m *MockVehicleRepository) FindByPlate(plate valueobject.Plate) (*repository.VehicleDTO, error) {
+func (m *MockVehicleRepository) FindByPlate(plate valueobject.Plate) (*dto.VehicleDTO, error) {
 	args := m.Called(plate)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	return args.Get(0).(*repository.VehicleDTO), args.Error(1)
+	return args.Get(0).(*dto.VehicleDTO), args.Error(1)
 }
 
-func (m *MockVehicleRepository) FindByCustomerID(customerID uint) ([]repository.VehicleDTO, error) {
+func (m *MockVehicleRepository) FindByCustomerID(customerID uint) ([]dto.VehicleDTO, error) {
 	args := m.Called(customerID)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	return args.Get(0).([]repository.VehicleDTO), args.Error(1)
+	return args.Get(0).([]dto.VehicleDTO), args.Error(1)
 }
 
-func (m *MockVehicleRepository) Create(vehicle entities.Vehicle) (*repository.VehicleDTO, error) {
+func (m *MockVehicleRepository) Create(vehicle entities.Vehicle) error {
 	args := m.Called(vehicle)
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).(*repository.VehicleDTO), args.Error(1)
+	return args.Error(0)
 }
 
-func (m *MockVehicleRepository) Update(vehicle entities.Vehicle) (*repository.VehicleDTO, error) {
+func (m *MockVehicleRepository) Update(vehicle entities.Vehicle) error {
 	args := m.Called(vehicle)
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).(*repository.VehicleDTO), args.Error(1)
+	return args.Error(0)
 }
 
 func (m *MockVehicleRepository) Delete(id uint) error {

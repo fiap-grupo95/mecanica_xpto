@@ -66,6 +66,57 @@ func (v VehicleHandler) GetVehiclesByCustomerID(c *gin.Context) {
 	c.JSON(http.StatusOK, vehicles)
 }
 
+// GetVehicleByID godoc
+// @Summary Get vehicles by ID
+// @Description Retrieves a vehicle belonging to a specific ID
+// @Tags vehicles
+// @Accept json
+// @Produce json
+// @Param ID path int true "ID"
+// @Success 200 {array} entities.Vehicle
+// @Failure 400 {object} map[string]string "Invalid ID"
+// @Failure 500 {object} map[string]string "error message"
+// @Router /vehicles/{id} [get]
+func (v VehicleHandler) GetVehicleByID(c *gin.Context) {
+	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+		return
+	}
+
+	vehicles, err := v.service.GetVehicleByID(uint(id))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, vehicles)
+}
+
+// GetVehicleByPlate godoc
+// @Summary Get vehicles by plate
+// @Description Retrieves a vehicle belonging to a specific plate
+// @Tags vehicles
+// @Accept json
+// @Produce json
+// @Param string path string true "plate"
+// @Success 200 {array} entities.Vehicle
+// @Failure 400 {object} map[string]string "Invalid ID"
+// @Failure 500 {object} map[string]string "error message"
+// @Router /vehicles/{plate} [get]
+func (v VehicleHandler) GetVehicleByPlate(c *gin.Context) {
+	plate := c.Param("plate")
+	if plate == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Plate cannot be empty"})
+		return
+	}
+	vehicles, err := v.service.GetVehicleByPlate(plate)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, vehicles)
+}
+
 // CreateVehicle godoc
 // @Summary Create a new vehicle
 // @Description Creates a new vehicle record

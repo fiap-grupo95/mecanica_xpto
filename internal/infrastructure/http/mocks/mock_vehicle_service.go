@@ -34,20 +34,20 @@ func (m *MockVehicleService) GetVehiclesByCustomerID(customerID uint) ([]entitie
 	return args.Get(0).([]entities.Vehicle), args.Error(1)
 }
 
-func (m *MockVehicleService) CreateVehicle(vehicle entities.Vehicle) (*entities.Vehicle, error) {
+func (m *MockVehicleService) CreateVehicle(vehicle entities.Vehicle) (string, error) {
 	args := m.Called(vehicle)
 	if args.Get(0) == nil {
-		return nil, args.Error(1)
+		return "", args.Error(1)
 	}
-	return args.Get(0).(*entities.Vehicle), args.Error(1)
+	return args.Get(0).(string), args.Error(1)
 }
 
-func (m *MockVehicleService) UpdateVehicle(vehicle entities.Vehicle) (*entities.Vehicle, error) {
+func (m *MockVehicleService) UpdateVehicle(vehicle entities.Vehicle) (string, error) {
 	args := m.Called(vehicle)
 	if args.Get(0) == nil {
-		return nil, args.Error(1)
+		return "", args.Error(1)
 	}
-	return args.Get(0).(*entities.Vehicle), args.Error(1)
+	return args.Get(0).(string), args.Error(1)
 }
 
 func (m *MockVehicleService) DeleteVehicle(id uint) error {
@@ -61,4 +61,8 @@ func (m *MockVehicleService) GetVehicleByPlate(plate string) (*entities.Vehicle,
 		return nil, args.Error(1)
 	}
 	return args.Get(0).(*entities.Vehicle), args.Error(1)
+}
+func (m *MockVehicleService) UpdateVehiclePartial(id uint, updates map[string]interface{}) (string, error) {
+	args := m.Called(id, updates)
+	return args.String(0), args.Error(1)
 }
