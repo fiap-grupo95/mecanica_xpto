@@ -3,6 +3,7 @@
 ## Descrição
 O projeto "mecanica_xpto" é um sistema integrado de atendimento e execução de serviços, desenvolvido em Go (Golang) e utilizando o framework Gin para a construção de APIs RESTful. O sistema é projetado para gerenciar atendimentos, serviços e clientes de forma eficiente, com uma arquitetura modular que facilita a manutenção e escalabilidade.
 
+
 Event Storming: https://miro.com/app/board/uXjVIgU2y2I=/
 
 ## Pre-requisitos
