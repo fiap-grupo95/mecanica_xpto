@@ -40,7 +40,7 @@ func Run() {
 	// Swagger documentation endpoint
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	partsSupplyUseCase := usecase.NewPartsSupplyUseCase(repository.NewPartsSupplyRepository(db))
+	partsSupplyUseCase := usecase.NewPartsSupplyUseCase(parts_supply.NewPartsSupplyRepository(db))
 	partsSupplyHandler := http.NewPartsSupplyHandler(partsSupplyUseCase)
 
 	vehiclesRepository := vehicles.NewVehicleRepository(db)
