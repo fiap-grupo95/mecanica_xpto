@@ -12,7 +12,7 @@ type ICustomerUseCase interface {
 	GetById(id uint) (*entities.Customer, error)
 	GetByDocument(CpfCnpj string) (*entities.Customer, error)
 	CreateCustomer(customer *entities.Customer) error
-	UpdateCustomer(customer *entities.Customer) error
+	UpdateCustomer(id uint, customer *entities.Customer) error
 	DeleteCustomer(id uint) error
 	ListCustomer() ([]entities.Customer, error)
 }
@@ -60,15 +60,34 @@ func (uc *CustomerUseCase) CreateCustomer(customer *entities.Customer) error {
 	return uc.customerRepo.Create(&customerDTO)
 }
 
-func (uc *CustomerUseCase) UpdateCustomer(customer *entities.Customer) error {
-	return nil
+func (uc *CustomerUseCase) UpdateCustomer(id uint, customer *entities.Customer) error {
+	existingDTO, err := uc.customerRepo.GetByID(id)
+	if err != nil {
+		return err
+	}
+	if customer.FullName != "" {
+		existingDTO.FullName = customer.FullName
+	}
+
+	if customer.PhoneNumber != "" {
+		existingDTO.PhoneNumber = customer.PhoneNumber
+	}
+
+	return uc.customerRepo.Update(existingDTO)
 }
 
 func (uc *CustomerUseCase) DeleteCustomer(id uint) error {
-	return nil
+	return uc.customerRepo.Delete(id)
 }
 
 func (uc *CustomerUseCase) ListCustomer() ([]entities.Customer, error) {
-	var customerList []entities.Customer
-	return customerList, nil
+	dtos, err := uc.customerRepo.List()
+	if err != nil {
+		return nil, err
+	}
+	customers := make([]entities.Customer, 0, len(dtos))
+	for _, dto := range dtos {
+		customers = append(customers, *dto.ToDomain())
+	}
+	return customers, nil
 }

@@ -85,3 +85,53 @@ func (h *CustomerHandler) CreateCustomer(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, nil)
 }
+
+func (h *CustomerHandler) UpdateCustomer(c *gin.Context) {
+	id := c.Param("id")
+	idUint, err := strconv.ParseUint(id, 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid customer id"})
+		return
+	}
+
+	var body entities.Customer
+	if err := c.BindJSON(&body); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid input"})
+		return
+	}
+
+	err = h.ucCustomer.UpdateCustomer(uint(idUint), &body)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
+		return
+	}
+
+	c.JSON(http.StatusOK, nil)
+}
+
+func (h *CustomerHandler) DeleteCustomer(c *gin.Context) {
+	id := c.Param("id")
+	idUint, err := strconv.ParseUint(id, 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid customer id"})
+		return
+	}
+
+	err = h.ucCustomer.DeleteCustomer(uint(idUint))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
+		return
+	}
+
+	c.JSON(http.StatusNoContent, nil)
+}
+
+func (h *CustomerHandler) ListCustomer(c *gin.Context) {
+	customers, err := h.ucCustomer.ListCustomer()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
+		return
+	}
+
+	c.JSON(http.StatusOK, customers)
+}

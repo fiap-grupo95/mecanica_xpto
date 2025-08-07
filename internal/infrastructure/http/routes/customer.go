@@ -29,5 +29,8 @@ func addCustomerRoutes(rg *gin.RouterGroup) {
 		customersRoutes.GET("/full/:id", customerHandler.GetFullCustomer)
 		customersRoutes.GET("/:document", customerHandler.GetCustomer)
 		customersRoutes.POST("", customerHandler.CreateCustomer)
+		customersRoutes.PATCH("/:id", customerHandler.UpdateCustomer)
+		customersRoutes.DELETE("/:id", customerHandler.DeleteCustomer)
+		customersRoutes.GET("/all", customerHandler.ListCustomer)
 	}
 }

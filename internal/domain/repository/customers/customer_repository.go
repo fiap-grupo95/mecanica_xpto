@@ -51,7 +51,16 @@ func (r *CustomerRepository) Update(customer *dto.CustomerDTO) error {
 }
 
 func (r *CustomerRepository) Delete(id uint) error {
-	return r.db.Delete(&dto.CustomerDTO{}, id).Error
+	var customer dto.CustomerDTO
+	err := r.db.Preload("User").First(&customer, id).Error
+	if err != nil {
+		return err
+	}
+	if err := r.db.Delete(&customer.User).Error; err != nil {
+		return err
+	}
+
+	return r.db.Delete(&customer).Error
 }
 
 func (r *CustomerRepository) List() ([]dto.CustomerDTO, error) {
