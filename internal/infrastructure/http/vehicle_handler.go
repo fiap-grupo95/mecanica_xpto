@@ -100,7 +100,7 @@ func (v VehicleHandler) GetVehicleByID(c *gin.Context) {
 }
 
 // GetVehicleByPlate godoc
-// @Summary Get vehicles by plate
+// @Summary Get vehicle by plate
 // @Description Retrieves a vehicle belonging to a specific plate
 // @Tags vehicles
 // @Accept json
