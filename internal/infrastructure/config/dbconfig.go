@@ -42,6 +42,6 @@ func NewDBFromEnv() (*gorm.DB, error) {
 
 	db.AutoMigrate(
 		&dto.PartsSupplyDTO{},
-		&dto.ServiceDTO{})
+	)
 	return db, nil
 }
