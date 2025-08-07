@@ -5,7 +5,7 @@ import (
 	repository "mecanica_xpto/internal/domain/repository/parts_supply"
 	usecase "mecanica_xpto/internal/domain/usecase"
 	"mecanica_xpto/internal/infrastructure/config"
-	database "mecanica_xpto/internal/infrastructure/databse"
+	"mecanica_xpto/internal/infrastructure/database"
 	"mecanica_xpto/internal/infrastructure/http"
 	"mecanica_xpto/internal/infrastructure/http/middleware"
 	"strconv"
