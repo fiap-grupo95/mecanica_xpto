@@ -106,7 +106,7 @@ func (v VehicleHandler) GetVehicleByID(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param string path string true "plate"
-// @Success 200 {array} entities.Vehicle
+// @Success 200 {object} entities.Vehicle
 // @Failure 400 {object} map[string]string "Invalid ID"
 // @Failure 500 {object} map[string]string "error message"
 // @Router /vehicles/plate/{plate} [get]
