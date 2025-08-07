@@ -5,7 +5,7 @@ import "regexp"
 type Plate string
 
 var (
-	plateRegex = regexp.MustCompile(`^[A-Z]{3}(?:\d[A-Z0-9]\d{2}|\d{4})$`)
+	plateRegex = regexp.MustCompile(`^[A-Z]{3}(?:[0-9]{4}|[0-9][A-Z][0-9]{2})$`)
 )
 
 func ParsePlate(value string) Plate {
