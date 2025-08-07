@@ -19,7 +19,6 @@ import (
 // @host localhost:8080
 
 // @BasePath  /v1
-
 // @securityDefinitions.basic  BasicAuth
 
 func main() {
