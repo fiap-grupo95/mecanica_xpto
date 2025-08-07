@@ -107,11 +107,11 @@ func (s *VehicleService) UpdateVehiclePartial(id uint, updates map[string]interf
 		return "", err
 	}
 
-	if !valueobject.ParsePlate(existingVehicle.Plate).IsValidFormat() {
-		return "invalid plate format", errors.New("invalid plate format")
-	}
 	// Update only the fields that were provided
 	if plate, ok := updates["plate"].(string); ok {
+		if !valueobject.ParsePlate(plate).IsValidFormat() {
+			return "invalid plate format", errors.New("invalid plate format")
+		}
 		existingVehicle.Plate = plate
 	}
 	if model, ok := updates["model"].(string); ok {
