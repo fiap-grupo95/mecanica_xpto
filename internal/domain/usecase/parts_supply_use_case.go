@@ -43,7 +43,10 @@ func (h *PartsSupplyUseCase) GetPartsSupplyByID(ctx context.Context, id uint) (e
 func (h *PartsSupplyUseCase) CreatePartsSupply(ctx context.Context, partsSupply *entities.PartsSupply) (entities.PartsSupply, error) {
 	//valide se já existe uma peça com o mesmo nome
 	existingPartsSupply, err := h.repo.GetByName(ctx, partsSupply.Name)
-	if err == nil && existingPartsSupply.ID != 0 {
+	if err != nil {
+		return entities.PartsSupply{}, err
+	}
+	if existingPartsSupply.ID != 0 {
 		return entities.PartsSupply{}, ErrPartsSupplyAlreadyExists
 	}
 

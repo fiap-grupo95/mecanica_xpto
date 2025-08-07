@@ -57,7 +57,7 @@ func TestCreatePartsSupply(t *testing.T) {
 		t.Errorf("expected ErrPartsSupplyAlreadyExists, got %v", err)
 	}
 
-	mockRepo.EXPECT().GetByName(ctx, "Novo").Return(entities.PartsSupply{}, errors.New("not found"))
+	mockRepo.EXPECT().GetByName(ctx, "Novo").Return(entities.PartsSupply{}, nil)
 	mockRepo.EXPECT().Create(ctx, ps).Return(*ps, nil)
 	ps.Name = "Novo"
 	_, err = uc.CreatePartsSupply(ctx, ps)
@@ -65,7 +65,7 @@ func TestCreatePartsSupply(t *testing.T) {
 		t.Errorf("expected no error, got %v", err)
 	}
 
-	mockRepo.EXPECT().GetByName(ctx, "Falha").Return(entities.PartsSupply{}, errors.New("not found"))
+	mockRepo.EXPECT().GetByName(ctx, "Falha").Return(entities.PartsSupply{}, nil)
 	mockRepo.EXPECT().Create(ctx, ps).Return(entities.PartsSupply{}, errors.New("fail"))
 	ps.Name = "Falha"
 	_, err = uc.CreatePartsSupply(ctx, ps)
