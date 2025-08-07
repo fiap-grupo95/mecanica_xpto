@@ -2,9 +2,8 @@ package routes
 
 import (
 	"log"
-	//_ "mecanica_xpto/docs" // This will be auto-generated
 	repository "mecanica_xpto/internal/domain/repository/parts_supply"
-	use_case "mecanica_xpto/internal/domain/usecase"
+	usecase "mecanica_xpto/internal/domain/usecase"
 	"mecanica_xpto/internal/infrastructure/config"
 	database "mecanica_xpto/internal/infrastructure/databse"
 	"mecanica_xpto/internal/infrastructure/http"
@@ -40,7 +39,7 @@ func Run() {
 	// Swagger documentation endpoint
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	partsSupplyUseCase := use_case.NewPartsSupplyUseCase(repository.NewPartsSupplyRepository(db))
+	partsSupplyUseCase := usecase.NewPartsSupplyUseCase(repository.NewPartsSupplyRepository(db))
 	partsSupplyHandler := http.NewPartsSupplyHandler(partsSupplyUseCase)
 
 	v1 := router.Group("/v1")
