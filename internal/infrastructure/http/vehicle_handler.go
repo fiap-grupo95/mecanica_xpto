@@ -40,7 +40,7 @@ func (v VehicleHandler) GetVehicles(c *gin.Context) {
 	c.JSON(http.StatusOK, vehicles)
 }
 
-// GetVehiclesByCustomerID godoc
+// GetVehicleByCustomerID godoc
 // @Summary Get vehicles by customer ID
 // @Description Retrieves all vehicles belonging to a specific customer
 // @Tags vehicles
@@ -51,7 +51,7 @@ func (v VehicleHandler) GetVehicles(c *gin.Context) {
 // @Failure 400 {object} map[string]string "Invalid customer ID"
 // @Failure 500 {object} map[string]string "error message"
 // @Router /vehicles/customer/{customerID} [get]
-func (v VehicleHandler) GetVehiclesByCustomerID(c *gin.Context) {
+func (v VehicleHandler) GetVehicleByCustomerID(c *gin.Context) {
 	customerID, err := strconv.ParseUint(c.Param("customerID"), 10, 32)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid customer ID"})
@@ -74,13 +74,13 @@ func (v VehicleHandler) GetVehiclesByCustomerID(c *gin.Context) {
 // @Produce json
 // @Param ID path int true "ID"
 // @Success 200 {array} entities.Vehicle
-// @Failure 400 {object} map[string]string "Invalid ID"
+// @Failure 400 {object} map[string]string "Invalid vehicle ID"
 // @Failure 500 {object} map[string]string "error message"
 // @Router /vehicles/{id} [get]
 func (v VehicleHandler) GetVehicleByID(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid vehicle ID"})
 		return
 	}
 
@@ -89,6 +89,7 @@ func (v VehicleHandler) GetVehicleByID(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+
 	c.JSON(http.StatusOK, vehicles)
 }
 
@@ -102,7 +103,7 @@ func (v VehicleHandler) GetVehicleByID(c *gin.Context) {
 // @Success 200 {array} entities.Vehicle
 // @Failure 400 {object} map[string]string "Invalid ID"
 // @Failure 500 {object} map[string]string "error message"
-// @Router /vehicles/{plate} [get]
+// @Router /vehicles/plate/{plate} [get]
 func (v VehicleHandler) GetVehicleByPlate(c *gin.Context) {
 	plate := c.Param("plate")
 	if plate == "" {

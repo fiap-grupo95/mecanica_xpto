@@ -1,6 +1,7 @@
 package service
 
 import (
+	"errors"
 	"mecanica_xpto/internal/domain/model/entities"
 	"mecanica_xpto/internal/domain/model/valueobject"
 	"mecanica_xpto/internal/domain/repository"
@@ -47,6 +48,9 @@ func (s *VehicleService) GetVehicleByID(id uint) (*entities.Vehicle, error) {
 }
 func (s *VehicleService) GetVehicleByPlate(plate string) (*entities.Vehicle, error) {
 	voPlate := valueobject.ParsePlate(plate)
+	if !voPlate.IsValidFormat() {
+		return nil, errors.New("invalid plate")
+	}
 	vehicle, err := s.repo.FindByPlate(voPlate)
 	if err != nil {
 		return nil, err
@@ -75,6 +79,9 @@ func (s *VehicleService) GetVehiclesByCustomerID(customerID uint) ([]entities.Ve
 	return vehiclesList, nil
 }
 func (s *VehicleService) CreateVehicle(vehicle entities.Vehicle) (string, error) {
+	if !vehicle.Plate.IsValidFormat() {
+		return "invalid plate format", errors.New("invalid plate format")
+	}
 	err := s.repo.Create(vehicle)
 	if err != nil {
 		return "error creating a new vehicle", err
@@ -83,6 +90,9 @@ func (s *VehicleService) CreateVehicle(vehicle entities.Vehicle) (string, error)
 }
 
 func (s *VehicleService) UpdateVehicle(vehicle entities.Vehicle) (string, error) {
+	if !vehicle.Plate.IsValidFormat() {
+		return "invalid plate format", errors.New("invalid plate format")
+	}
 	err := s.repo.Update(vehicle)
 	if err != nil {
 		return "error updating a new vehicle", err
@@ -97,6 +107,9 @@ func (s *VehicleService) UpdateVehiclePartial(id uint, updates map[string]interf
 		return "", err
 	}
 
+	if !valueobject.ParsePlate(existingVehicle.Plate).IsValidFormat() {
+		return "invalid plate format", errors.New("invalid plate format")
+	}
 	// Update only the fields that were provided
 	if plate, ok := updates["plate"].(string); ok {
 		existingVehicle.Plate = plate
