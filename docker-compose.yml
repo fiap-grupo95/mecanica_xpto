@@ -12,7 +12,7 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_HOST: db
+      POSTGRES_HOST: ${POSTGRES_HOST}
       POSTGRES_PORT: ${POSTGRES_PORT}
     volumes:
       - app_data:/app
@@ -32,6 +32,7 @@ services:
       - "5432:5432"
     volumes:
       - postgresql_data:/var/lib/postgresql/data
+      - ./internal/infrastructure/database/script.sql:/docker-entrypoint-initdb.d/script.sql
     networks:
       - app_network
     healthcheck:
@@ -76,6 +77,19 @@ services:
     volumes:
       - postgresql_sonar_data:/var/lib/postgresql/data
 
+networks:
+  default:
+    driver: bridge
+
+  app_network:
+    driver: bridge
+
+  db_network:
+    driver: bridge
+
+  sonar-net: # Define the network explicitly
+    name: sonar-net   # Give it a specific name
+
 volumes:
   db_data:
   app_data:
@@ -83,16 +97,3 @@ volumes:
   sonar_extensions:
   postgresql_sonar_data:
   postgresql_data:
-
-networks:
-    default:
-        driver: bridge
-
-    app_network:
-        driver: bridge
-
-    db_network:
-        driver: bridge
-
-    sonar-net:     # Define the network explicitly
-      name: sonar-net   # Give it a specific name

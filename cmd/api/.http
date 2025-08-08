@@ -1,4 +1,0 @@
-GET localhost:8080/v1/ping
-
-###
-GET mecanica_xpto:8080/v1/ping

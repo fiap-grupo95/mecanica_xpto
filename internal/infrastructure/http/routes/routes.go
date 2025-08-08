@@ -2,9 +2,9 @@ package routes
 
 import (
 	"log"
-	repository "mecanica_xpto/internal/domain/repository/parts_supply"
-	usecase "mecanica_xpto/internal/domain/usecase"
-	"mecanica_xpto/internal/infrastructure/config"
+	"mecanica_xpto/internal/domain/repository/parts_supply"
+	"mecanica_xpto/internal/domain/repository/vehicles"
+	"mecanica_xpto/internal/domain/usecase"
 	"mecanica_xpto/internal/infrastructure/database"
 	"mecanica_xpto/internal/infrastructure/http"
 	"mecanica_xpto/internal/infrastructure/http/middleware"
@@ -21,9 +21,9 @@ const PORT = 8080
 
 // Run will start the server
 func Run() {
-	secretKey := config.GetSecretKey()
-
-	router.Use(middleware.JWTAuthMiddleware(secretKey))
+	//secretKey := config.GetSecretKey()
+	//
+	//router.Use(middleware.JWTAuthMiddleware(secretKey))
 	// Set trusted proxies
 	middleware.SetTrustedProxies(router)
 	db := database.ConnectDatabase()
@@ -39,13 +39,17 @@ func Run() {
 	// Swagger documentation endpoint
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	partsSupplyUseCase := usecase.NewPartsSupplyUseCase(repository.NewPartsSupplyRepository(db))
+	partsSupplyUseCase := usecase.NewPartsSupplyUseCase(parts_supply.NewPartsSupplyRepository(db))
 	partsSupplyHandler := http.NewPartsSupplyHandler(partsSupplyUseCase)
+
+	vehiclesRepository := vehicles.NewVehicleRepository(db)
+	vehiclesUseCase := usecase.NewVehicleService(vehiclesRepository)
+	vehicleHandler := http.NewVehicleHandler(vehiclesUseCase)
 
 	v1 := router.Group("/v1")
 	addPingRoutes(v1)
-	addUserRoutes(v1)
 	addPartsSupplyRoutes(v1, partsSupplyHandler)
+	addVehicleRoutes(v1, vehicleHandler)
 
 	err := router.Run(":" + strconv.Itoa(PORT))
 	if err != nil {
