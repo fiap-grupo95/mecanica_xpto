@@ -1,7 +1,7 @@
 package main
 
 import (
-	//_ "mecanica_xpto/docs"
+	_ "mecanica_xpto/docs"
 	"mecanica_xpto/internal/infrastructure/http/routes"
 )
 
