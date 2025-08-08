@@ -24,8 +24,10 @@ func NewPartsSupplyUseCase(repo parts_supply.IPartsSupplyRepo) *PartsSupplyUseCa
 	return &PartsSupplyUseCase{repo: repo}
 }
 
-var ErrPartsSupplyNotFound = errors.New("parts supply not found")
-var ErrPartsSupplyAlreadyExists = errors.New("parts supply already exists")
+var (
+	ErrPartsSupplyNotFound      = errors.New("parts supply not found")
+	ErrPartsSupplyAlreadyExists = errors.New("parts supply already exists")
+)
 
 func (h *PartsSupplyUseCase) GetPartsSupplyByID(ctx context.Context, id uint) (entities.PartsSupply, error) {
 	foundPartsSupply, err := h.repo.GetByID(ctx, id)
@@ -67,6 +69,13 @@ func (h *PartsSupplyUseCase) UpdatePartsSupply(ctx context.Context, partsSupply 
 }
 
 func (h *PartsSupplyUseCase) DeletePartsSupply(ctx context.Context, id uint) error {
+	service, err := h.repo.GetByID(ctx, id)
+	if err != nil {
+		return err
+	}
+	if service.ID == 0 {
+		return ErrPartsSupplyNotFound
+	}
 	return h.repo.Delete(ctx, id)
 }
 
