@@ -3,10 +3,11 @@ package http
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"mecanica_xpto/internal/domain/model/entities"
 	"mecanica_xpto/internal/domain/model/valueobject"
+	"mecanica_xpto/internal/domain/usecase"
 	"mecanica_xpto/internal/infrastructure/http/mocks"
+	"mecanica_xpto/pkg"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -15,6 +16,15 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
+
+// Função auxiliar para decodificar o corpo da resposta em uma estrutura ErrorResponse
+func getErrorResponse(body []byte) pkg.ErrorResponse {
+	var response pkg.ErrorResponse
+	if err := json.Unmarshal(body, &response); err != nil {
+		panic("Erro ao decodificar resposta de erro: " + err.Error())
+	}
+	return response
+}
 
 func TestGetVehicles(t *testing.T) {
 	gin.SetMode(gin.TestMode)
@@ -48,11 +58,11 @@ func TestGetVehicles(t *testing.T) {
 		mockService.AssertExpectations(t)
 	})
 
-	t.Run("database error", func(t *testing.T) {
+	t.Run("internal error", func(t *testing.T) {
 		mockService := new(mocks.MockVehicleService)
 		handler := NewVehicleHandler(mockService)
 
-		mockService.On("GetAllVehicles").Return(nil, errors.New("database error"))
+		mockService.On("GetAllVehicles").Return(nil, pkg.NewDomainError("INTERNAL_ERROR", "An internal error occurred", nil, http.StatusInternalServerError))
 
 		w := httptest.NewRecorder()
 		c, _ := gin.CreateTestContext(w)
@@ -60,10 +70,8 @@ func TestGetVehicles(t *testing.T) {
 		handler.GetVehicles(c)
 
 		assert.Equal(t, http.StatusInternalServerError, w.Code)
-		var response map[string]string
-		err := json.Unmarshal(w.Body.Bytes(), &response)
-		assert.NoError(t, err)
-		assert.Contains(t, response["error"], "database error")
+		response := getErrorResponse(w.Body.Bytes())
+		assert.Equal(t, "INTERNAL_ERROR", response.Code)
 		mockService.AssertExpectations(t)
 	})
 }
@@ -112,10 +120,26 @@ func TestGetVehicleByID(t *testing.T) {
 		handler.GetVehicleByID(c)
 
 		assert.Equal(t, http.StatusBadRequest, w.Code)
-		var response map[string]string
-		err := json.Unmarshal(w.Body.Bytes(), &response)
-		assert.NoError(t, err)
-		assert.Contains(t, response["error"], "Invalid vehicle ID")
+		response := getErrorResponse(w.Body.Bytes())
+		assert.Equal(t, "INVALID_VEHICLE_ID", response.Code)
+	})
+
+	t.Run("not found", func(t *testing.T) {
+		mockService := new(mocks.MockVehicleService)
+		handler := NewVehicleHandler(mockService)
+
+		mockService.On("GetVehicleByID", uint(999)).Return(nil, usecase.ErrVehicleNotFound)
+
+		w := httptest.NewRecorder()
+		c, _ := gin.CreateTestContext(w)
+		c.Params = gin.Params{{Key: "id", Value: "999"}}
+
+		handler.GetVehicleByID(c)
+
+		assert.Equal(t, http.StatusNotFound, w.Code)
+		response := getErrorResponse(w.Body.Bytes())
+		assert.Equal(t, "VEHICLE_NOT_FOUND", response.Code)
+		mockService.AssertExpectations(t)
 	})
 }
 
@@ -187,11 +211,14 @@ func TestGetVehicleByPlate(t *testing.T) {
 		c, _ := gin.CreateTestContext(w)
 		c.Params = gin.Params{{Key: "plate", Value: "INVALID"}}
 
-		mockService.On("GetVehicleByPlate", "INVALID").Return(nil, errors.New("invalid plate format"))
+		mockService.On("GetVehicleByPlate", "INVALID").Return(nil, usecase.ErrInvalidPlateFormat)
 
 		handler.GetVehicleByPlate(c)
 
-		assert.Equal(t, http.StatusInternalServerError, w.Code)
+		assert.Equal(t, http.StatusBadRequest, w.Code)
+		response := getErrorResponse(w.Body.Bytes())
+		assert.Equal(t, "INVALID_PLATE_FORMAT", response.Code)
+		mockService.AssertExpectations(t)
 	})
 
 	t.Run("not found", func(t *testing.T) {
@@ -199,7 +226,7 @@ func TestGetVehicleByPlate(t *testing.T) {
 		handler := NewVehicleHandler(mockService)
 
 		plate := "ABC1D23"
-		mockService.On("GetVehicleByPlate", plate).Return(nil, errors.New("not found"))
+		mockService.On("GetVehicleByPlate", plate).Return(nil, usecase.ErrVehicleNotFound)
 
 		w := httptest.NewRecorder()
 		c, _ := gin.CreateTestContext(w)
@@ -207,7 +234,25 @@ func TestGetVehicleByPlate(t *testing.T) {
 
 		handler.GetVehicleByPlate(c)
 
-		assert.Equal(t, http.StatusInternalServerError, w.Code)
+		assert.Equal(t, http.StatusNotFound, w.Code)
+		response := getErrorResponse(w.Body.Bytes())
+		assert.Equal(t, "VEHICLE_NOT_FOUND", response.Code)
+		mockService.AssertExpectations(t)
+	})
+
+	t.Run("empty plate", func(t *testing.T) {
+		mockService := new(mocks.MockVehicleService)
+		handler := NewVehicleHandler(mockService)
+
+		w := httptest.NewRecorder()
+		c, _ := gin.CreateTestContext(w)
+		c.Params = gin.Params{{Key: "plate", Value: ""}}
+
+		handler.GetVehicleByPlate(c)
+
+		assert.Equal(t, http.StatusBadRequest, w.Code)
+		response := getErrorResponse(w.Body.Bytes())
+		assert.Equal(t, "EMPTY_PLATE", response.Code)
 		mockService.AssertExpectations(t)
 	})
 }
@@ -280,7 +325,7 @@ func TestCreateVehicle(t *testing.T) {
 			Plate: valueobject.ParsePlate("INVALID"),
 		}
 
-		mockService.On("CreateVehicle", mock.AnythingOfType("entities.Vehicle")).Return(nil, errors.New("invalid plate format"))
+		mockService.On("CreateVehicle", mock.AnythingOfType("entities.Vehicle")).Return("", usecase.ErrInvalidPlateFormat)
 
 		vehicleJSON, _ := json.Marshal(vehicle)
 		w := httptest.NewRecorder()
@@ -290,19 +335,24 @@ func TestCreateVehicle(t *testing.T) {
 
 		handler.CreateVehicle(c)
 
-		assert.Equal(t, http.StatusInternalServerError, w.Code)
+		assert.Equal(t, http.StatusBadRequest, w.Code)
+		response := getErrorResponse(w.Body.Bytes())
+		assert.Equal(t, "INVALID_PLATE_FORMAT", response.Code)
+		mockService.AssertExpectations(t)
 	})
 
-	t.Run("missing required fields", func(t *testing.T) {
+	t.Run("vehicle already exists", func(t *testing.T) {
 		mockService := new(mocks.MockVehicleService)
 		handler := NewVehicleHandler(mockService)
 
 		vehicle := entities.Vehicle{
 			Brand: "Toyota",
-			// Missing other required fields
+			Model: "Corolla",
+			Year:  "2020",
+			Plate: valueobject.ParsePlate("ABC1234"),
 		}
 
-		mockService.On("CreateVehicle", mock.AnythingOfType("entities.Vehicle")).Return(nil, errors.New("missing required fields"))
+		mockService.On("CreateVehicle", mock.AnythingOfType("entities.Vehicle")).Return("", usecase.ErrVehicleAlreadyExists)
 
 		vehicleJSON, _ := json.Marshal(vehicle)
 		w := httptest.NewRecorder()
@@ -312,7 +362,27 @@ func TestCreateVehicle(t *testing.T) {
 
 		handler.CreateVehicle(c)
 
-		assert.Equal(t, http.StatusInternalServerError, w.Code)
+		assert.Equal(t, http.StatusConflict, w.Code)
+		response := getErrorResponse(w.Body.Bytes())
+		assert.Equal(t, "VEHICLE_EXISTS", response.Code)
+		mockService.AssertExpectations(t)
+	})
+
+	t.Run("invalid input", func(t *testing.T) {
+		mockService := new(mocks.MockVehicleService)
+		handler := NewVehicleHandler(mockService)
+
+		invalidJSON := []byte(`{invalid json`)
+		w := httptest.NewRecorder()
+		c, _ := gin.CreateTestContext(w)
+		c.Request = httptest.NewRequest("POST", "/", bytes.NewBuffer(invalidJSON))
+		c.Request.Header.Set("Content-Type", "application/json")
+
+		handler.CreateVehicle(c)
+
+		assert.Equal(t, http.StatusBadRequest, w.Code)
+		response := getErrorResponse(w.Body.Bytes())
+		assert.Equal(t, "INVALID_INPUT", response.Code)
 	})
 }
 
@@ -353,6 +423,8 @@ func TestUpdateVehicle(t *testing.T) {
 		handler.UpdateVehicle(c)
 
 		assert.Equal(t, http.StatusBadRequest, w.Code)
+		response := getErrorResponse(w.Body.Bytes())
+		assert.Equal(t, "INVALID_VEHICLE_ID", response.Code)
 	})
 
 	t.Run("vehicle not found", func(t *testing.T) {
@@ -363,7 +435,7 @@ func TestUpdateVehicle(t *testing.T) {
 			"model": "Corolla",
 		}
 
-		mockService.On("UpdateVehiclePartial", uint(999), updates).Return("", errors.New("vehicle not found"))
+		mockService.On("UpdateVehiclePartial", uint(999), updates).Return("", usecase.ErrVehicleNotFound)
 
 		updatesJSON, _ := json.Marshal(updates)
 		w := httptest.NewRecorder()
@@ -374,7 +446,35 @@ func TestUpdateVehicle(t *testing.T) {
 
 		handler.UpdateVehicle(c)
 
-		assert.Equal(t, http.StatusInternalServerError, w.Code)
+		assert.Equal(t, http.StatusNotFound, w.Code)
+		response := getErrorResponse(w.Body.Bytes())
+		assert.Equal(t, "VEHICLE_NOT_FOUND", response.Code)
+		mockService.AssertExpectations(t)
+	})
+
+	t.Run("invalid plate format in update", func(t *testing.T) {
+		mockService := new(mocks.MockVehicleService)
+		handler := NewVehicleHandler(mockService)
+
+		updates := map[string]interface{}{
+			"plate": "INVALID",
+		}
+
+		mockService.On("UpdateVehiclePartial", uint(1), updates).Return("", usecase.ErrInvalidPlateFormat)
+
+		updatesJSON, _ := json.Marshal(updates)
+		w := httptest.NewRecorder()
+		c, _ := gin.CreateTestContext(w)
+		c.Params = gin.Params{{Key: "id", Value: "1"}}
+		c.Request = httptest.NewRequest("PATCH", "/", bytes.NewBuffer(updatesJSON))
+		c.Request.Header.Set("Content-Type", "application/json")
+
+		handler.UpdateVehicle(c)
+
+		assert.Equal(t, http.StatusBadRequest, w.Code)
+		response := getErrorResponse(w.Body.Bytes())
+		assert.Equal(t, "INVALID_PLATE_FORMAT", response.Code)
+		mockService.AssertExpectations(t)
 	})
 }
 
@@ -408,13 +508,15 @@ func TestDeleteVehicle(t *testing.T) {
 		handler.DeleteVehicle(c)
 
 		assert.Equal(t, http.StatusBadRequest, w.Code)
+		response := getErrorResponse(w.Body.Bytes())
+		assert.Equal(t, "INVALID_VEHICLE_ID", response.Code)
 	})
 
 	t.Run("not found", func(t *testing.T) {
 		mockService := new(mocks.MockVehicleService)
 		handler := NewVehicleHandler(mockService)
 
-		mockService.On("DeleteVehicle", uint(999)).Return(errors.New("not found"))
+		mockService.On("DeleteVehicle", uint(999)).Return(usecase.ErrVehicleNotFound)
 
 		w := httptest.NewRecorder()
 		c, _ := gin.CreateTestContext(w)
@@ -422,7 +524,27 @@ func TestDeleteVehicle(t *testing.T) {
 
 		handler.DeleteVehicle(c)
 
+		assert.Equal(t, http.StatusNotFound, w.Code)
+		response := getErrorResponse(w.Body.Bytes())
+		assert.Equal(t, "VEHICLE_NOT_FOUND", response.Code)
+		mockService.AssertExpectations(t)
+	})
+
+	t.Run("database error", func(t *testing.T) {
+		mockService := new(mocks.MockVehicleService)
+		handler := NewVehicleHandler(mockService)
+
+		mockService.On("DeleteVehicle", uint(1)).Return(pkg.NewDomainError("DATABASE_ERROR", "Error deleting vehicle", nil, http.StatusInternalServerError))
+
+		w := httptest.NewRecorder()
+		c, _ := gin.CreateTestContext(w)
+		c.Params = gin.Params{{Key: "id", Value: "1"}}
+
+		handler.DeleteVehicle(c)
+
 		assert.Equal(t, http.StatusInternalServerError, w.Code)
+		response := getErrorResponse(w.Body.Bytes())
+		assert.Equal(t, "DATABASE_ERROR", response.Code)
 		mockService.AssertExpectations(t)
 	})
 }
