@@ -1,12 +1,19 @@
 package http
 
 import (
+	"errors"
 	"mecanica_xpto/internal/domain/model/entities"
 	usecase "mecanica_xpto/internal/domain/usecase"
+	"mecanica_xpto/pkg"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+)
+
+var (
+	// Domain errors
+	errInvalidPartsSupplyID = pkg.NewDomainErrorSimple("INVALID_PARTS_SUPPLY_ID", "Invalid parts supply ID", http.StatusBadRequest)
 )
 
 type PartsSupplyHandler struct {
@@ -17,21 +24,31 @@ func NewPartsSupplyHandler(usecase usecase.IPartsSupplyUseCase) *PartsSupplyHand
 	return &PartsSupplyHandler{usecase: usecase}
 }
 
+func mapPartsSupplyError(err error) *pkg.AppError {
+	switch {
+	case errors.Is(err, usecase.ErrPartsSupplyNotFound):
+		return pkg.NewDomainErrorSimple("PARTS_SUPPLY_NOT_FOUND", "parts supply not found", http.StatusNotFound)
+	case errors.Is(err, usecase.ErrInvalidID):
+		return pkg.NewDomainErrorSimple("INVALID_ID", "Invalid parts supply ID", http.StatusBadRequest)
+	case errors.Is(err, usecase.ErrPartsSupplyAlreadyExists):
+		return pkg.NewDomainErrorSimple("PARTS_SUPPLY_EXISTS", "parts supply already exists", http.StatusConflict)
+	default:
+		return pkg.NewDomainError("INTERNAL_ERROR", "An internal error occurred", err, http.StatusInternalServerError)
+	}
+}
+
 func (h *PartsSupplyHandler) GetPartsSupplyByID(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.ParseUint(idStr, 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
+		c.JSON(errInvalidPartsSupplyID.HTTPStatus, errInvalidPartsSupplyID.ToHTTPError())
 		return
 	}
 
 	foundPartsSupply, err := h.usecase.GetPartsSupplyByID(c.Request.Context(), uint(id))
 	if err != nil {
-		if err == usecase.ErrPartsSupplyNotFound {
-			c.JSON(http.StatusNotFound, gin.H{"error": "parts supply not found"})
-			return
-		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
+		appErr := mapPartsSupplyError(err)
+		c.JSON(appErr.HTTPStatus, appErr.ToHTTPError())
 		return
 	}
 
@@ -41,13 +58,14 @@ func (h *PartsSupplyHandler) GetPartsSupplyByID(c *gin.Context) {
 func (h *PartsSupplyHandler) CreatePartsSupply(c *gin.Context) {
 	var partsSupply entities.PartsSupply
 	if err := c.ShouldBindJSON(&partsSupply); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request body"})
+		c.JSON(errInvalidInput.HTTPStatus, errInvalidInput.ToHTTPError())
 		return
 	}
 
 	createdPartsSupply, err := h.usecase.CreatePartsSupply(c.Request.Context(), &partsSupply)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create parts supply"})
+		appErr := mapPartsSupplyError(err)
+		c.JSON(appErr.HTTPStatus, appErr.ToHTTPError())
 		return
 	}
 
@@ -64,17 +82,14 @@ func (h *PartsSupplyHandler) UpdatePartsSupply(c *gin.Context) {
 
 	var partsSupply entities.PartsSupply
 	if err := c.ShouldBindJSON(&partsSupply); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request body"})
+		c.JSON(errInvalidInput.HTTPStatus, errInvalidInput.ToHTTPError())
 		return
 	}
 	partsSupply.ID = uint(id)
 
 	if err := h.usecase.UpdatePartsSupply(c.Request.Context(), &partsSupply); err != nil {
-		if err == usecase.ErrPartsSupplyNotFound {
-			c.JSON(http.StatusNotFound, gin.H{"error": "parts supply not found"})
-			return
-		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update parts supply"})
+		appErr := mapPartsSupplyError(err)
+		c.JSON(appErr.HTTPStatus, appErr.ToHTTPError())
 		return
 	}
 
@@ -85,12 +100,13 @@ func (h *PartsSupplyHandler) DeletePartsSupply(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.ParseUint(idStr, 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
+		c.JSON(errInvalidPartsSupplyID.HTTPStatus, errInvalidPartsSupplyID.ToHTTPError)
 		return
 	}
 
 	if err := h.usecase.DeletePartsSupply(c.Request.Context(), uint(id)); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to delete parts supply"})
+		appErr := mapPartsSupplyError(err)
+		c.JSON(appErr.HTTPStatus, appErr.ToHTTPError())
 		return
 	}
 
@@ -100,7 +116,8 @@ func (h *PartsSupplyHandler) DeletePartsSupply(c *gin.Context) {
 func (h *PartsSupplyHandler) ListPartsSupplies(c *gin.Context) {
 	partsSupplies, err := h.usecase.ListPartsSupplies(c.Request.Context())
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to retrieve parts supplies"})
+		appErr := mapPartsSupplyError(err)
+		c.JSON(appErr.HTTPStatus, appErr.ToHTTPError())
 		return
 	}
 

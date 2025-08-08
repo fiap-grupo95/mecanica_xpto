@@ -1,4 +1,4 @@
-package use_case
+package usecase
 
 import (
 	"context"
@@ -25,8 +25,10 @@ func NewServiceUseCase(repo service.IServiceRepo) *ServiceUseCase {
 	return &ServiceUseCase{repo: repo}
 }
 
-var ErrServiceNotFound = errors.New("service not found")
-var ErrServiceAlreadyExists = errors.New("service already exists")
+var (
+	ErrServiceNotFound      = errors.New("service not found")
+	ErrServiceAlreadyExists = errors.New("service already exists")
+)
 
 func (h *ServiceUseCase) GetServiceByID(ctx context.Context, id uint) (entities.Service, error) {
 	service, err := h.repo.GetByID(ctx, id)
@@ -64,6 +66,13 @@ func (h *ServiceUseCase) UpdateService(ctx context.Context, service *entities.Se
 }
 
 func (h *ServiceUseCase) DeleteService(ctx context.Context, id uint) error {
+	service, err := h.repo.GetByID(ctx, id)
+	if err != nil {
+		return err
+	}
+	if service.ID == 0 {
+		return ErrServiceNotFound
+	}
 	return h.repo.Delete(ctx, id)
 }
 
