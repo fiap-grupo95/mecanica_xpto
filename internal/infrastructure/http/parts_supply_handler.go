@@ -13,7 +13,8 @@ import (
 
 var (
 	// Domain errors
-	errInvalidPartsSupplyID = pkg.NewDomainErrorSimple("INVALID_PARTS_SUPPLY_ID", "Invalid parts supply ID", http.StatusBadRequest)
+	errInvalidPartsSupplyID    = pkg.NewDomainErrorSimple("INVALID_PARTS_SUPPLY_ID", "Invalid parts supply ID", http.StatusBadRequest)
+	errInvalidPartsSupplyInput = pkg.NewDomainErrorSimple("INVALID_INPUT", "Invalid input data", http.StatusBadRequest)
 )
 
 type PartsSupplyHandler struct {
@@ -58,7 +59,7 @@ func (h *PartsSupplyHandler) GetPartsSupplyByID(c *gin.Context) {
 func (h *PartsSupplyHandler) CreatePartsSupply(c *gin.Context) {
 	var partsSupply entities.PartsSupply
 	if err := c.ShouldBindJSON(&partsSupply); err != nil {
-		c.JSON(errInvalidInput.HTTPStatus, errInvalidInput.ToHTTPError())
+		c.JSON(errInvalidPartsSupplyInput.HTTPStatus, errInvalidPartsSupplyInput.ToHTTPError())
 		return
 	}
 
@@ -82,7 +83,7 @@ func (h *PartsSupplyHandler) UpdatePartsSupply(c *gin.Context) {
 
 	var partsSupply entities.PartsSupply
 	if err := c.ShouldBindJSON(&partsSupply); err != nil {
-		c.JSON(errInvalidInput.HTTPStatus, errInvalidInput.ToHTTPError())
+		c.JSON(errInvalidPartsSupplyInput.HTTPStatus, errInvalidPartsSupplyInput.ToHTTPError())
 		return
 	}
 	partsSupply.ID = uint(id)
@@ -100,7 +101,7 @@ func (h *PartsSupplyHandler) DeletePartsSupply(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.ParseUint(idStr, 10, 64)
 	if err != nil {
-		c.JSON(errInvalidPartsSupplyID.HTTPStatus, errInvalidPartsSupplyID.ToHTTPError)
+		c.JSON(errInvalidPartsSupplyID.HTTPStatus, errInvalidPartsSupplyID.ToHTTPError())
 		return
 	}
 

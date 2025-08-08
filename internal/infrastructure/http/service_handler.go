@@ -13,7 +13,8 @@ import (
 
 var (
 	// Domain errors
-	errInvalidServiceID = pkg.NewDomainErrorSimple("INVALID_SERVICE_ID", "Invalid service ID", http.StatusBadRequest)
+	errInvalidServiceID    = pkg.NewDomainErrorSimple("INVALID_SERVICE_ID", "Invalid service ID", http.StatusBadRequest)
+	errInvalidServiceInput = pkg.NewDomainErrorSimple("INVALID_INPUT", "Invalid input data", http.StatusBadRequest)
 )
 
 type ServiceHandler struct {
@@ -55,7 +56,7 @@ func (h *ServiceHandler) GetServiceByID(c *gin.Context) {
 func (h *ServiceHandler) CreateService(c *gin.Context) {
 	var service entities.Service
 	if err := c.ShouldBindJSON(&service); err != nil {
-		c.JSON(errInvalidInput.HTTPStatus, errInvalidInput.ToHTTPError())
+		c.JSON(errInvalidServiceInput.HTTPStatus, errInvalidServiceInput.ToHTTPError())
 		return
 	}
 	createdService, err := h.usecase.CreateService(c.Request.Context(), &service)
@@ -75,7 +76,7 @@ func (h *ServiceHandler) UpdateService(c *gin.Context) {
 	}
 	var service entities.Service
 	if err := c.ShouldBindJSON(&service); err != nil {
-		c.JSON(errInvalidInput.HTTPStatus, errInvalidInput.ToHTTPError())
+		c.JSON(errInvalidServiceInput.HTTPStatus, errInvalidServiceInput.ToHTTPError())
 		return
 	}
 	service.ID = uint(id)
