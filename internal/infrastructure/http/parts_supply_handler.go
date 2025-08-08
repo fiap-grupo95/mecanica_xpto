@@ -2,7 +2,7 @@ package http
 
 import (
 	"mecanica_xpto/internal/domain/model/entities"
-	use_case "mecanica_xpto/internal/domain/usecase"
+	usecase "mecanica_xpto/internal/domain/usecase"
 	"net/http"
 	"strconv"
 
@@ -10,10 +10,10 @@ import (
 )
 
 type PartsSupplyHandler struct {
-	usecase use_case.IPartsSupplyUseCase
+	usecase usecase.IPartsSupplyUseCase
 }
 
-func NewPartsSupplyHandler(usecase use_case.IPartsSupplyUseCase) *PartsSupplyHandler {
+func NewPartsSupplyHandler(usecase usecase.IPartsSupplyUseCase) *PartsSupplyHandler {
 	return &PartsSupplyHandler{usecase: usecase}
 }
 
@@ -27,7 +27,7 @@ func (h *PartsSupplyHandler) GetPartsSupplyByID(c *gin.Context) {
 
 	foundPartsSupply, err := h.usecase.GetPartsSupplyByID(c.Request.Context(), uint(id))
 	if err != nil {
-		if err == use_case.ErrPartsSupplyNotFound {
+		if err == usecase.ErrPartsSupplyNotFound {
 			c.JSON(http.StatusNotFound, gin.H{"error": "parts supply not found"})
 			return
 		}
@@ -70,7 +70,7 @@ func (h *PartsSupplyHandler) UpdatePartsSupply(c *gin.Context) {
 	partsSupply.ID = uint(id)
 
 	if err := h.usecase.UpdatePartsSupply(c.Request.Context(), &partsSupply); err != nil {
-		if err == use_case.ErrPartsSupplyNotFound {
+		if err == usecase.ErrPartsSupplyNotFound {
 			c.JSON(http.StatusNotFound, gin.H{"error": "parts supply not found"})
 			return
 		}
