@@ -3,7 +3,7 @@ package http
 import (
 	"errors"
 	"mecanica_xpto/internal/domain/model/entities"
-	use_case "mecanica_xpto/internal/domain/usecase"
+	usecase "mecanica_xpto/internal/domain/usecase"
 	"net/http"
 	"strconv"
 
@@ -11,10 +11,10 @@ import (
 )
 
 type ServiceHandler struct {
-	usecase use_case.IServiceUseCase
+	usecase usecase.IServiceUseCase
 }
 
-func NewServiceHandler(usecase use_case.IServiceUseCase) *ServiceHandler {
+func NewServiceHandler(usecase usecase.IServiceUseCase) *ServiceHandler {
 	return &ServiceHandler{usecase: usecase}
 }
 
@@ -26,7 +26,7 @@ func (h *ServiceHandler) GetServiceByID(c *gin.Context) {
 	}
 	service, err := h.usecase.GetServiceByID(c.Request.Context(), uint(id))
 	if err != nil {
-		if errors.Is(err, use_case.ErrServiceNotFound) {
+		if errors.Is(err, usecase.ErrServiceNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{"error": "Service not found"})
 			return
 		}
@@ -64,7 +64,7 @@ func (h *ServiceHandler) UpdateService(c *gin.Context) {
 	service.ID = uint(id)
 	err = h.usecase.UpdateService(c.Request.Context(), &service)
 	if err != nil {
-		if errors.Is(err, use_case.ErrServiceNotFound) {
+		if errors.Is(err, usecase.ErrServiceNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{"error": "Service not found"})
 			return
 		}
@@ -82,7 +82,7 @@ func (h *ServiceHandler) DeleteService(c *gin.Context) {
 	}
 	err = h.usecase.DeleteService(c.Request.Context(), uint(id))
 	if err != nil {
-		if errors.Is(err, use_case.ErrServiceNotFound) {
+		if errors.Is(err, usecase.ErrServiceNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{"error": "Service not found"})
 			return
 		}

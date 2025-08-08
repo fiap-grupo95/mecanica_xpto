@@ -3,6 +3,7 @@ package use_case
 import (
 	"context"
 	"errors"
+	"fmt"
 	"mecanica_xpto/internal/domain/model/entities"
 	"mecanica_xpto/internal/domain/repository/service"
 )
@@ -53,7 +54,7 @@ func (h *ServiceUseCase) CreateService(ctx context.Context, service *entities.Se
 func (h *ServiceUseCase) UpdateService(ctx context.Context, service *entities.Service) error {
 	existingService, err := h.repo.GetByID(ctx, service.ID)
 	if err != nil {
-		return errors.New("failed to retrieve service")
+		return fmt.Errorf("failed to retrieve service: %w", err)
 	}
 	if existingService.ID == 0 {
 		return ErrServiceNotFound
