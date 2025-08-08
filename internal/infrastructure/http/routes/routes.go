@@ -3,6 +3,7 @@ package routes
 import (
 	"log"
 	"mecanica_xpto/internal/domain/repository/parts_supply"
+	"mecanica_xpto/internal/domain/repository/service"
 	"mecanica_xpto/internal/domain/repository/vehicles"
 	"mecanica_xpto/internal/domain/usecase"
 	"mecanica_xpto/internal/infrastructure/database"
@@ -46,10 +47,14 @@ func Run() {
 	vehiclesUseCase := usecase.NewVehicleService(vehiclesRepository)
 	vehicleHandler := http.NewVehicleHandler(vehiclesUseCase)
 
+	serviceUseCase := usecase.NewServiceUseCase(service.NewServiceRepository(db))
+	serviceHandler := http.NewServiceHandler(serviceUseCase)
+
 	v1 := router.Group("/v1")
 	addPingRoutes(v1)
 	addPartsSupplyRoutes(v1, partsSupplyHandler)
 	addVehicleRoutes(v1, vehicleHandler)
+	addServiceRoutes(v1, serviceHandler)
 
 	err := router.Run(":" + strconv.Itoa(PORT))
 	if err != nil {

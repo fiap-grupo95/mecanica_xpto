@@ -40,10 +40,23 @@ func NewDBFromEnv() (*gorm.DB, error) {
 		return nil, err
 	}
 
-	db.AutoMigrate(
+	err = db.AutoMigrate(
 		&dto.PartsSupplyDTO{},
 		&dto.ServiceDTO{},
 		&dto.VehicleDTO{},
+		&dto.ServiceOrderDTO{},
+		&dto.CustomerDTO{},
+		&dto.UserDTO{},
+		&dto.ServiceOrderStatusDTO{},
+		&dto.AdditionalRepairDTO{},
+		&dto.PartsSupplyServiceOrderDTO{},
+		&dto.AdditionalRepairStatusDTO{},
+		&dto.UserTypeDTO{},
+		dto.ServiceServiceOrderDTO{},
+		dto.PaymentDTO{},
 	)
+	if err != nil {
+		return nil, err
+	}
 	return db, nil
 }

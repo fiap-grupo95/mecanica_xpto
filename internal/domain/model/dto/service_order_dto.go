@@ -16,7 +16,6 @@ type ServiceOrderStatusDTO struct {
 type PartsSupplyServiceOrderDTO struct {
 	PartsSupplyID  uint `gorm:"primaryKey"`
 	ServiceOrderID uint `gorm:"primaryKey"`
-	Quantity       int  `gorm:"not null;default:1"`
 }
 
 // N:N relationship between Service and ServiceOrder

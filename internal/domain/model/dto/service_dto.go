@@ -16,7 +16,7 @@ type ServiceDTO struct {
 	UpdatedAt         time.Time             `gorm:"autoUpdateTime"`
 	DeletedAt         gorm.DeletedAt        `gorm:"index"`
 	AdditionalRepairs []AdditionalRepairDTO `gorm:"foreignKey:ServiceID"`
-	ServiceOrders     []ServiceOrderDTO     `gorm:"many2many:service_serviceorders;"`
+	ServiceOrders     []ServiceOrderDTO     `gorm:"many2many:tb_service_service_orders;"`
 }
 
 func (m *ServiceDTO) ToDomain() entities.Service {
