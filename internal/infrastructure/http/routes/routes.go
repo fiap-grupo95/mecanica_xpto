@@ -50,9 +50,6 @@ func Run() {
 	vehiclesUseCase := usecase.NewVehicleService(vehiclesRepository)
 	vehicleHandler := http.NewVehicleHandler(vehiclesUseCase)
 
-	serviceUseCase := usecase.NewServiceUseCase(service.NewServiceRepository(db))
-	serviceHandler := http.NewServiceHandler(serviceUseCase)
-
 	v1 := router.Group("/v1")
 	addPingRoutes(v1)
 	addPartsSupplyRoutes(v1, partsSupplyHandler)
