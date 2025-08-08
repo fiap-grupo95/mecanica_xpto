@@ -5,7 +5,6 @@ import (
 	"mecanica_xpto/internal/domain/repository/parts_supply"
 	"mecanica_xpto/internal/domain/repository/vehicles"
 	"mecanica_xpto/internal/domain/usecase"
-	"mecanica_xpto/internal/infrastructure/config"
 	"mecanica_xpto/internal/infrastructure/database"
 	"mecanica_xpto/internal/infrastructure/http"
 	"mecanica_xpto/internal/infrastructure/http/middleware"
@@ -22,9 +21,9 @@ const PORT = 8080
 
 // Run will start the server
 func Run() {
-	secretKey := config.GetSecretKey()
-
-	router.Use(middleware.JWTAuthMiddleware(secretKey))
+	//secretKey := config.GetSecretKey()
+	//
+	//router.Use(middleware.JWTAuthMiddleware(secretKey))
 	// Set trusted proxies
 	middleware.SetTrustedProxies(router)
 	db := database.ConnectDatabase()

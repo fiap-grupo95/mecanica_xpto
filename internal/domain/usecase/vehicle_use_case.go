@@ -77,7 +77,7 @@ func (s *VehicleService) GetVehicleByPlate(plate string) (*entities.Vehicle, err
 		return nil, err
 	}
 	if vehicle == nil {
-		return nil, nil
+		return nil, ErrVehicleNotFound
 	}
 	return vehicle.ToDomain(), nil
 }

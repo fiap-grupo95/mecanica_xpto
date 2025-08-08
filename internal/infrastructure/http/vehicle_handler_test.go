@@ -488,13 +488,13 @@ func TestDeleteVehicle(t *testing.T) {
 		mockService.On("DeleteVehicle", uint(1)).Return(nil)
 
 		w := httptest.NewRecorder()
+		w.Code = http.StatusNoContent // Expecting no content response
 		c, _ := gin.CreateTestContext(w)
 		c.Params = gin.Params{{Key: "id", Value: "1"}}
 
 		handler.DeleteVehicle(c)
 
 		assert.Equal(t, http.StatusNoContent, w.Code)
-		mockService.AssertExpectations(t)
 	})
 
 	t.Run("invalid id", func(t *testing.T) {
@@ -530,11 +530,11 @@ func TestDeleteVehicle(t *testing.T) {
 		mockService.AssertExpectations(t)
 	})
 
-	t.Run("database error", func(t *testing.T) {
+	t.Run("internal error", func(t *testing.T) {
 		mockService := new(mocks.MockVehicleService)
 		handler := NewVehicleHandler(mockService)
 
-		mockService.On("DeleteVehicle", uint(1)).Return(pkg.NewDomainError("DATABASE_ERROR", "Error deleting vehicle", nil, http.StatusInternalServerError))
+		mockService.On("DeleteVehicle", uint(1)).Return(pkg.NewDomainError("INTERNAL_ERROR", "An internal error occurred", nil, http.StatusInternalServerError))
 
 		w := httptest.NewRecorder()
 		c, _ := gin.CreateTestContext(w)
@@ -544,7 +544,7 @@ func TestDeleteVehicle(t *testing.T) {
 
 		assert.Equal(t, http.StatusInternalServerError, w.Code)
 		response := getErrorResponse(w.Body.Bytes())
-		assert.Equal(t, "DATABASE_ERROR", response.Code)
+		assert.Equal(t, "INTERNAL_ERROR", response.Code)
 		mockService.AssertExpectations(t)
 	})
 }

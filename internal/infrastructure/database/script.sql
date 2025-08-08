@@ -35,7 +35,7 @@ CREATE INDEX IF NOT EXISTS idx_vehicle_customer_id ON tb_vehicle (customer_id);
 
 -- Exemplo de inserção de dados na tabela
 INSERT INTO tb_vehicle (plate, customer_id, model, brand, year)
-    VALUES ('BJL5938', 1, 'Corsa', 'Chevrolet', 2005);
+    VALUES ('EXD6183', 1, 'Corsa', 'Chevrolet', 2005);
 
 INSERT INTO tb_vehicle (plate, customer_id, model, brand, year)
-VALUES ('BRE1683', 2, 'Onix', 'Chevrolet', 2014);
+VALUES ('AAA0X00', 2, 'Onix', 'Chevrolet', 2014);
