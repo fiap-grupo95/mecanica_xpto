@@ -4,6 +4,7 @@ import (
 	"mecanica_xpto/internal/domain/model/dto"
 	"mecanica_xpto/internal/domain/model/entities"
 	"mecanica_xpto/internal/domain/model/valueobject"
+	"strings"
 
 	"gorm.io/gorm"
 )
@@ -33,8 +34,8 @@ func (r *VehicleRepository) FindAll() ([]dto.VehicleDTO, error) {
 	}
 
 	vehicles := make([]dto.VehicleDTO, len(vehicleDTOs))
-	for i, dto := range vehicleDTOs {
-		vehicles[i] = dto
+	for i, v := range vehicleDTOs {
+		vehicles[i] = v
 	}
 	return vehicles, nil
 }
@@ -42,7 +43,9 @@ func (r *VehicleRepository) FindAll() ([]dto.VehicleDTO, error) {
 func (r *VehicleRepository) FindByID(id uint) (*dto.VehicleDTO, error) {
 	var vehicleDTO dto.VehicleDTO
 	if err := r.db.Preload("Customer").First(&vehicleDTO, id).Error; err != nil {
-		return nil, err
+		if strings.EqualFold(err.Error(), gorm.ErrRecordNotFound.Error()) {
+			return nil, nil
+		}
 	}
 	return &vehicleDTO, nil
 }
@@ -50,6 +53,9 @@ func (r *VehicleRepository) FindByID(id uint) (*dto.VehicleDTO, error) {
 func (r *VehicleRepository) FindByPlate(plate valueobject.Plate) (*dto.VehicleDTO, error) {
 	var vehicleDTO dto.VehicleDTO
 	if err := r.db.Preload("Customer").Where("plate = ?", plate.String()).First(&vehicleDTO).Error; err != nil {
+		if strings.EqualFold(err.Error(), gorm.ErrRecordNotFound.Error()) {
+			return nil, nil
+		}
 		return nil, err
 	}
 	return &vehicleDTO, nil
@@ -62,8 +68,8 @@ func (r *VehicleRepository) FindByCustomerID(customerID uint) ([]dto.VehicleDTO,
 	}
 
 	vehicles := make([]dto.VehicleDTO, len(vehicleDTOs))
-	for i, dto := range vehicleDTOs {
-		vehicles[i] = dto
+	for i, v := range vehicleDTOs {
+		vehicles[i] = v
 	}
 	return vehicles, nil
 }

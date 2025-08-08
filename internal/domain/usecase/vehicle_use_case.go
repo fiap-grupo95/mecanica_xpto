@@ -7,6 +7,24 @@ import (
 	"mecanica_xpto/internal/domain/repository/vehicles"
 )
 
+var (
+	ErrVehicleNotFound      = errors.New("vehicle not found")
+	ErrInvalidPlateFormat   = errors.New("invalid plate format")
+	ErrVehicleAlreadyExists = errors.New("vehicle already exists")
+	ErrInvalidID            = errors.New("invalid vehicle ID")
+)
+
+var (
+	MessageVehicleCreatedSuccessfully = "Vehicle created successfully"
+	MessageVehicleUpdatedSuccessfully = "Vehicle updated successfully"
+	MessageVehicleNotFound            = "Vehicle not found"
+	MessageInvalidPlateFormat         = "Invalid plate format"
+	MessageErrorCreatingVehicle       = "Error creating a new vehicle"
+	MessageErrorUpdatingVehicle       = "Error updating the vehicle"
+	MessageVehicleAlreadyExists       = "vehicle already exists with the same plate number"
+	MessageErrorSearch                = "Error searching existing vehicles"
+)
+
 type VehicleServiceInterface interface {
 	GetAllVehicles() ([]entities.Vehicle, error)
 	GetVehicleByID(id uint) (*entities.Vehicle, error)
@@ -29,12 +47,12 @@ func NewVehicleService(repo vehicles.VehicleRepositoryInterface) VehicleServiceI
 func (s *VehicleService) GetAllVehicles() ([]entities.Vehicle, error) {
 	var vehiclesList []entities.Vehicle
 
-	vehicles, err := s.repo.FindAll()
+	vehicleList, err := s.repo.FindAll()
 	if err != nil {
 		return nil, err
 	}
 
-	for _, v := range vehicles {
+	for _, v := range vehicleList {
 		vehiclesList = append(vehiclesList, *v.ToDomain())
 	}
 	return vehiclesList, nil
@@ -44,12 +62,15 @@ func (s *VehicleService) GetVehicleByID(id uint) (*entities.Vehicle, error) {
 	if err != nil {
 		return nil, err
 	}
+	if vehicle == nil {
+		return nil, ErrVehicleNotFound
+	}
 	return vehicle.ToDomain(), nil
 }
 func (s *VehicleService) GetVehicleByPlate(plate string) (*entities.Vehicle, error) {
 	voPlate := valueobject.ParsePlate(plate)
 	if !voPlate.IsValidFormat() {
-		return nil, errors.New("invalid plate")
+		return nil, ErrInvalidPlateFormat
 	}
 	vehicle, err := s.repo.FindByPlate(voPlate)
 	if err != nil {
@@ -61,12 +82,12 @@ func (s *VehicleService) GetVehicleByPlate(plate string) (*entities.Vehicle, err
 	return vehicle.ToDomain(), nil
 }
 func (s *VehicleService) GetVehiclesByCustomerID(customerID uint) ([]entities.Vehicle, error) {
-	vehicles, err := s.repo.FindByCustomerID(customerID)
+	result, err := s.repo.FindByCustomerID(customerID)
 	if err != nil {
 		return nil, err
 	}
 	var vehiclesList []entities.Vehicle
-	for _, v := range vehicles {
+	for _, v := range result {
 		vehiclesList = append(vehiclesList, *v.ToDomain())
 	}
 	if len(vehiclesList) > 0 {
@@ -80,24 +101,39 @@ func (s *VehicleService) GetVehiclesByCustomerID(customerID uint) ([]entities.Ve
 }
 func (s *VehicleService) CreateVehicle(vehicle entities.Vehicle) (string, error) {
 	if !vehicle.Plate.IsValidFormat() {
-		return "invalid plate format", errors.New("invalid plate format")
+		return MessageInvalidPlateFormat, ErrInvalidPlateFormat
 	}
-	err := s.repo.Create(vehicle)
+
+	existingVehicle, err := s.repo.FindByPlate(vehicle.Plate)
 	if err != nil {
-		return "error creating a new vehicle", err
+		return MessageErrorSearch, err
 	}
-	return "Vehicle created successfully", nil
+	if existingVehicle != nil {
+		return MessageVehicleAlreadyExists, ErrVehicleAlreadyExists
+	}
+	err = s.repo.Create(vehicle)
+	if err != nil {
+		return MessageErrorCreatingVehicle, err
+	}
+	return MessageVehicleCreatedSuccessfully, nil
 }
 
 func (s *VehicleService) UpdateVehicle(vehicle entities.Vehicle) (string, error) {
 	if !vehicle.Plate.IsValidFormat() {
-		return "invalid plate format", errors.New("invalid plate format")
+		return MessageInvalidPlateFormat, ErrInvalidPlateFormat
 	}
-	err := s.repo.Update(vehicle)
+	existingVehicle, err := s.repo.FindByID(vehicle.ID)
 	if err != nil {
-		return "error updating the vehicle", err
+		return MessageErrorSearch, err
 	}
-	return "Vehicle updated successfully", nil
+	if existingVehicle == nil {
+		return MessageVehicleNotFound, ErrVehicleNotFound
+	}
+	err = s.repo.Update(vehicle)
+	if err != nil {
+		return MessageErrorUpdatingVehicle, err
+	}
+	return MessageVehicleUpdatedSuccessfully, nil
 }
 
 func (s *VehicleService) UpdateVehiclePartial(id uint, updates map[string]interface{}) (string, error) {
@@ -106,11 +142,14 @@ func (s *VehicleService) UpdateVehiclePartial(id uint, updates map[string]interf
 	if err != nil {
 		return "", err
 	}
+	if existingVehicle == nil {
+		return MessageVehicleNotFound, ErrVehicleNotFound
+	}
 
 	// Update only the fields that were provided
 	if plate, ok := updates["plate"].(string); ok {
 		if !valueobject.ParsePlate(plate).IsValidFormat() {
-			return "invalid plate format", errors.New("invalid plate format")
+			return MessageInvalidPlateFormat, ErrInvalidPlateFormat
 		}
 		existingVehicle.Plate = plate
 	}
@@ -132,9 +171,21 @@ func (s *VehicleService) UpdateVehiclePartial(id uint, updates map[string]interf
 		return "", err
 	}
 
-	return "Vehicle updated successfully", nil
+	return MessageVehicleUpdatedSuccessfully, nil
 }
 
 func (s *VehicleService) DeleteVehicle(id uint) error {
-	return s.repo.Delete(id)
+	if id == 0 {
+		return ErrInvalidID
+	}
+	vehicle, err := s.repo.FindByID(id)
+	if err != nil {
+		return err
+	}
+	if vehicle == nil {
+		return ErrVehicleNotFound
+	}
+
+	err = s.repo.Delete(id)
+	return err
 }

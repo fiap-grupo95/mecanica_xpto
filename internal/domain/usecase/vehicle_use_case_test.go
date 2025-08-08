@@ -10,17 +10,11 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
-)
-
-const (
-	MessageVehicleCreated = "Vehicle created successfully"
-	MessageVehicleUpdated = "Vehicle updated successfully"
+	"github.com/stretchr/testify/mock"
 )
 
 var (
-	ErrorUpdatingVehicle = "error updating the vehicle"
-	ErrorCreatingVehicle = "error creating a new vehicle"
-	ErrorDatabase        = errors.New("database error")
+	ErrorDatabase = errors.New("database error")
 )
 
 func TestGetVehicles(t *testing.T) {
@@ -210,12 +204,13 @@ func TestCreateVehicle(t *testing.T) {
 			},
 		}
 
+		mockRepo.On("FindByPlate", vehicle.Plate).Return(nil, nil) // No existing vehicle with this plate
 		mockRepo.On("Create", vehicle).Return(nil)
 
 		result, err := service.CreateVehicle(vehicle)
 
 		assert.NoError(t, err)
-		assert.Equal(t, MessageVehicleCreated, result)
+		assert.Equal(t, MessageVehicleCreatedSuccessfully, result)
 		mockRepo.AssertExpectations(t)
 	})
 
@@ -233,12 +228,61 @@ func TestCreateVehicle(t *testing.T) {
 			},
 		}
 
+		mockRepo.On("FindByPlate", vehicle.Plate).Return(nil, nil) // No existing vehicle with this plate
 		mockRepo.On("Create", vehicle).Return(ErrorDatabase)
 
 		result, err := service.CreateVehicle(vehicle)
 
 		assert.Error(t, err)
-		assert.Equal(t, ErrorCreatingVehicle, result)
+		assert.Equal(t, MessageErrorCreatingVehicle, result)
+		mockRepo.AssertExpectations(t)
+	})
+
+	t.Run("invalid plate format", func(t *testing.T) {
+		mockRepo := new(mocks.MockVehicleRepository)
+		service := NewVehicleService(mockRepo)
+
+		vehicle := entities.Vehicle{
+			Plate: valueobject.ParsePlate("ABC123"), // Placa inválida
+			Model: "Civic",
+			Brand: "Honda",
+			Year:  "2020",
+		}
+
+		result, err := service.CreateVehicle(vehicle)
+
+		assert.Error(t, err)
+		assert.Equal(t, ErrInvalidPlateFormat, err)
+		assert.Equal(t, MessageInvalidPlateFormat, result)
+		mockRepo.AssertExpectations(t)
+	})
+
+	t.Run("vehicle already exists", func(t *testing.T) {
+		mockRepo := new(mocks.MockVehicleRepository)
+		service := NewVehicleService(mockRepo)
+
+		vehicle := entities.Vehicle{
+			Plate: valueobject.ParsePlate("ABC1234"),
+			Model: "Civic",
+			Brand: "Honda",
+			Year:  "2020",
+		}
+
+		existingVehicle := &dto.VehicleDTO{
+			ID:    1,
+			Plate: "ABC1234",
+			Model: "Civic",
+			Brand: "Honda",
+			Year:  "2020",
+		}
+
+		mockRepo.On("FindByPlate", vehicle.Plate).Return(existingVehicle, nil)
+
+		result, err := service.CreateVehicle(vehicle)
+
+		assert.Error(t, err)
+		assert.Equal(t, ErrVehicleAlreadyExists, err)
+		assert.Equal(t, MessageVehicleAlreadyExists, result)
 		mockRepo.AssertExpectations(t)
 	})
 }
@@ -256,12 +300,21 @@ func TestUpdateVehicle(t *testing.T) {
 			Year:  "2020",
 		}
 
+		mockGet := &dto.VehicleDTO{
+			ID:    1,
+			Plate: "ABC1234",
+			Model: "Civic",
+			Brand: "Honda",
+			Year:  "2020",
+		}
+
+		mockRepo.On("FindByID", vehicle.ID).Return(mockGet, nil)
 		mockRepo.On("Update", vehicle).Return(nil)
 
 		result, err := service.UpdateVehicle(vehicle)
 
 		assert.NoError(t, err)
-		assert.Equal(t, MessageVehicleUpdated, result)
+		assert.Equal(t, MessageVehicleUpdatedSuccessfully, result)
 		mockRepo.AssertExpectations(t)
 	})
 
@@ -277,12 +330,209 @@ func TestUpdateVehicle(t *testing.T) {
 			Year:  "2020",
 		}
 
+		mockGet := &dto.VehicleDTO{
+			ID:    1,
+			Plate: "ABC1234",
+			Model: "Civic",
+			Brand: "Honda",
+			Year:  "2020",
+		}
+
+		mockRepo.On("FindByID", vehicle.ID).Return(mockGet, nil)
 		mockRepo.On("Update", vehicle).Return(ErrorDatabase)
 
 		result, err := service.UpdateVehicle(vehicle)
 
 		assert.Error(t, err)
-		assert.Equal(t, ErrorUpdatingVehicle, result)
+		assert.Equal(t, MessageErrorUpdatingVehicle, result)
+		mockRepo.AssertExpectations(t)
+	})
+
+	t.Run("vehicle not found", func(t *testing.T) {
+		mockRepo := new(mocks.MockVehicleRepository)
+		service := NewVehicleService(mockRepo)
+
+		vehicle := entities.Vehicle{
+			ID:    1,
+			Plate: valueobject.ParsePlate("ABC1234"),
+			Model: "Civic",
+			Brand: "Honda",
+			Year:  "2020",
+		}
+
+		mockRepo.On("FindByID", vehicle.ID).Return(nil, nil)
+
+		result, err := service.UpdateVehicle(vehicle)
+
+		assert.Error(t, err)
+		assert.Equal(t, ErrVehicleNotFound, err)
+		assert.Equal(t, MessageVehicleNotFound, result)
+		mockRepo.AssertExpectations(t)
+	})
+
+	t.Run("invalid plate format", func(t *testing.T) {
+		mockRepo := new(mocks.MockVehicleRepository)
+		service := NewVehicleService(mockRepo)
+
+		vehicle := entities.Vehicle{
+			ID:    1,
+			Plate: valueobject.ParsePlate("ABC123"), // Placa inválida
+			Model: "Civic",
+			Brand: "Honda",
+			Year:  "2020",
+		}
+
+		result, err := service.UpdateVehicle(vehicle)
+
+		assert.Error(t, err)
+		assert.Equal(t, ErrInvalidPlateFormat, err)
+		assert.Equal(t, MessageInvalidPlateFormat, result)
+		mockRepo.AssertExpectations(t)
+	})
+}
+
+func TestUpdateVehiclePartial(t *testing.T) {
+	t.Run("success", func(t *testing.T) {
+		mockRepo := new(mocks.MockVehicleRepository)
+		service := NewVehicleService(mockRepo)
+
+		existingVehicle := &dto.VehicleDTO{
+			ID:         1,
+			Plate:      "ABC1234",
+			Model:      "Civic",
+			Brand:      "Honda",
+			Year:       "2020",
+			CustomerID: 1,
+		}
+
+		updates := map[string]interface{}{
+			"model": "Civic Updated",
+			"year":  "2021",
+		}
+
+		mockRepo.On("FindByID", uint(1)).Return(existingVehicle, nil)
+		mockRepo.On("Update", mock.Anything).Return(nil)
+
+		result, err := service.UpdateVehiclePartial(1, updates)
+
+		assert.NoError(t, err)
+		assert.Equal(t, MessageVehicleUpdatedSuccessfully, result)
+		mockRepo.AssertExpectations(t)
+	})
+
+	t.Run("vehicle not found", func(t *testing.T) {
+		mockRepo := new(mocks.MockVehicleRepository)
+		service := NewVehicleService(mockRepo)
+
+		updates := map[string]interface{}{
+			"model": "Civic Updated",
+		}
+
+		mockRepo.On("FindByID", uint(1)).Return(nil, nil)
+
+		result, err := service.UpdateVehiclePartial(1, updates)
+
+		assert.Error(t, err)
+		assert.Equal(t, ErrVehicleNotFound, err)
+		assert.Equal(t, MessageVehicleNotFound, result)
+		mockRepo.AssertExpectations(t)
+	})
+
+	t.Run("invalid plate format", func(t *testing.T) {
+		mockRepo := new(mocks.MockVehicleRepository)
+		service := NewVehicleService(mockRepo)
+
+		existingVehicle := &dto.VehicleDTO{
+			ID:         1,
+			Plate:      "ABC1234",
+			Model:      "Civic",
+			Brand:      "Honda",
+			Year:       "2020",
+			CustomerID: 1,
+		}
+
+		updates := map[string]interface{}{
+			"plate": "ABC123", // Placa inválida
+		}
+
+		mockRepo.On("FindByID", uint(1)).Return(existingVehicle, nil)
+
+		result, err := service.UpdateVehiclePartial(1, updates)
+
+		assert.Error(t, err)
+		assert.Equal(t, ErrInvalidPlateFormat, err)
+		assert.Equal(t, MessageInvalidPlateFormat, result)
+		mockRepo.AssertExpectations(t)
+	})
+}
+
+func TestDeleteVehicle(t *testing.T) {
+	t.Run("success", func(t *testing.T) {
+		mockRepo := new(mocks.MockVehicleRepository)
+		service := NewVehicleService(mockRepo)
+
+		mockVehicle := &dto.VehicleDTO{
+			ID:         1,
+			Plate:      "ABC1234",
+			Model:      "Civic",
+			Brand:      "Honda",
+			Year:       "2020",
+			CustomerID: 1,
+		}
+
+		mockRepo.On("FindByID", uint(1)).Return(mockVehicle, nil)
+		mockRepo.On("Delete", uint(1)).Return(nil)
+
+		err := service.DeleteVehicle(1)
+
+		assert.NoError(t, err)
+		mockRepo.AssertExpectations(t)
+	})
+
+	t.Run("invalid id", func(t *testing.T) {
+		mockRepo := new(mocks.MockVehicleRepository)
+		service := NewVehicleService(mockRepo)
+
+		err := service.DeleteVehicle(0)
+
+		assert.Error(t, err)
+		assert.Equal(t, ErrInvalidID, err)
+		mockRepo.AssertExpectations(t)
+	})
+
+	t.Run("vehicle not found", func(t *testing.T) {
+		mockRepo := new(mocks.MockVehicleRepository)
+		service := NewVehicleService(mockRepo)
+
+		mockRepo.On("FindByID", uint(1)).Return(nil, nil)
+
+		err := service.DeleteVehicle(1)
+
+		assert.Error(t, err)
+		assert.Equal(t, ErrVehicleNotFound, err)
+		mockRepo.AssertExpectations(t)
+	})
+
+	t.Run("database error", func(t *testing.T) {
+		mockRepo := new(mocks.MockVehicleRepository)
+		service := NewVehicleService(mockRepo)
+
+		mockVehicle := &dto.VehicleDTO{
+			ID:         1,
+			Plate:      "ABC1234",
+			Model:      "Civic",
+			Brand:      "Honda",
+			Year:       "2020",
+			CustomerID: 1,
+		}
+
+		mockRepo.On("FindByID", uint(1)).Return(mockVehicle, nil)
+		mockRepo.On("Delete", uint(1)).Return(ErrorDatabase)
+
+		err := service.DeleteVehicle(1)
+
+		assert.Error(t, err)
+		assert.Equal(t, ErrorDatabase, err)
 		mockRepo.AssertExpectations(t)
 	})
 }
