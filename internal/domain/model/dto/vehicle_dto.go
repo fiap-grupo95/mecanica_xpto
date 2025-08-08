@@ -24,21 +24,21 @@ type VehicleDTO struct {
 
 func (v *VehicleDTO) ToDomain() *entities.Vehicle {
 	return &entities.Vehicle{
-		ID:        v.ID,
-		Plate:     valueobject.ParsePlate(v.Plate),
-		Customer:  v.Customer.ToDomain(),
-		Model:     v.Model,
-		Year:      v.Year,
-		Brand:     v.Brand,
-		CreatedAt: v.CreatedAt,
-		UpdatedAt: v.UpdatedAt,
+		ID:         v.ID,
+		Plate:      valueobject.ParsePlate(v.Plate),
+		CustomerID: v.CustomerID,
+		Customer:   v.Customer.ToDomain(),
+		Model:      v.Model,
+		Year:       v.Year,
+		Brand:      v.Brand,
+		CreatedAt:  v.CreatedAt,
+		UpdatedAt:  v.UpdatedAt,
 		DeletedAt: func() *time.Time {
 			if v.DeletedAt.Valid {
 				return &v.DeletedAt.Time
 			}
 			return nil
 		}(),
-		ServiceOrders: nil, // This will be populated by the repository layer
 	}
 }
 

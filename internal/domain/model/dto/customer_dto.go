@@ -31,13 +31,13 @@ func (cm *CustomerDTO) ToDomain() entities.Customer {
 	}
 
 	return entities.Customer{
-		ID:            cm.ID,
-		UserID:        cm.UserID,
-		User:          user,
-		CpfCnpj:       valueobject.CpfCnpj(cm.CpfCnpj),
-		PhoneNumber:   cm.PhoneNumber,
-		FullName:      cm.FullName,
-		Vehicles:      nil, // This will be populated later if needed
-		ServiceOrders: nil, // This will be populated later if needed
+		ID:          cm.ID,
+		UserID:      cm.UserID,
+		User:        user,
+		CpfCnpj:     valueobject.CpfCnpj(cm.CpfCnpj),
+		PhoneNumber: cm.PhoneNumber,
+		FullName:    cm.FullName,
+		//Vehicles:      nil, // This will be populated later if needed
+		//ServiceOrders: nil, // This will be populated later if needed
 	}
 }

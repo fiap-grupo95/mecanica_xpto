@@ -24,14 +24,12 @@ type VehicleHandler struct {
 	service usecase.VehicleServiceInterface
 }
 
-// NewVehicleHandler creates a new vehicle handler instance
 func NewVehicleHandler(service usecase.VehicleServiceInterface) *VehicleHandler {
 	return &VehicleHandler{
 		service: service,
 	}
 }
 
-// mapVehicleError maps domain errors to HTTP errors
 func mapVehicleError(err error) *pkg.AppError {
 	switch {
 	case errors.Is(err, usecase.ErrVehicleNotFound):
