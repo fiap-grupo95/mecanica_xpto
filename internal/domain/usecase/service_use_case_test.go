@@ -19,6 +19,7 @@ func TestGetServiceByID(t *testing.T) {
 	uc := NewServiceUseCase(mockRepo)
 	ctx := context.Background()
 
+	// Sucesso
 	service := entities.Service{ID: 1, Name: "Troca de óleo"}
 	mockRepo.EXPECT().GetByID(ctx, uint(1)).Return(service, nil)
 	result, err := uc.GetServiceByID(ctx, 1)
@@ -29,12 +30,14 @@ func TestGetServiceByID(t *testing.T) {
 		t.Errorf("expected %v, got %v", service, result)
 	}
 
+	// Não encontrado
 	mockRepo.EXPECT().GetByID(ctx, uint(2)).Return(entities.Service{}, nil)
 	_, err = uc.GetServiceByID(ctx, 2)
 	if !errors.Is(err, ErrServiceNotFound) {
 		t.Errorf("expected ErrServiceNotFound, got %v", err)
 	}
 
+	// Erro do repo
 	mockRepo.EXPECT().GetByID(ctx, uint(3)).Return(entities.Service{}, errors.New("fail"))
 	_, err = uc.GetServiceByID(ctx, 3)
 	if err == nil {
@@ -48,9 +51,24 @@ func TestCreateService(t *testing.T) {
 	mockRepo := mocks.NewMockIServiceRepo(ctrl)
 	uc := NewServiceUseCase(mockRepo)
 	ctx := context.Background()
-	service := &entities.Service{ID: 1, Name: "Troca de óleo"}
 
-	mockRepo.EXPECT().GetByName(ctx, service.Name).Return(entities.Service{}, nil).AnyTimes()
+	// Já existe
+	service := &entities.Service{ID: 1, Name: "Troca de óleo"}
+	mockRepo.EXPECT().GetByName(ctx, service.Name).Return(entities.Service{ID: 2, Name: "Troca de óleo"}, nil)
+	_, err := uc.CreateService(ctx, service)
+	if !errors.Is(err, ErrServiceAlreadyExists) {
+		t.Errorf("expected ErrServiceAlreadyExists, got %v", err)
+	}
+
+	// Erro ao buscar por nome
+	mockRepo.EXPECT().GetByName(ctx, service.Name).Return(entities.Service{}, errors.New("fail"))
+	_, err = uc.CreateService(ctx, service)
+	if err == nil {
+		t.Errorf("expected error, got nil")
+	}
+
+	// Sucesso
+	mockRepo.EXPECT().GetByName(ctx, service.Name).Return(entities.Service{}, nil)
 	mockRepo.EXPECT().Create(ctx, service).Return(*service, nil)
 	result, err := uc.CreateService(ctx, service)
 	if err != nil {
@@ -60,7 +78,8 @@ func TestCreateService(t *testing.T) {
 		t.Errorf("expected %v, got %v", *service, result)
 	}
 
-	mockRepo.EXPECT().GetByName(ctx, service.Name).Return(entities.Service{}, nil).AnyTimes()
+	// Erro ao criar
+	mockRepo.EXPECT().GetByName(ctx, service.Name).Return(entities.Service{}, nil)
 	mockRepo.EXPECT().Create(ctx, service).Return(entities.Service{}, errors.New("fail"))
 	_, err = uc.CreateService(ctx, service)
 	if err == nil {
@@ -74,25 +93,32 @@ func TestUpdateService(t *testing.T) {
 	mockRepo := mocks.NewMockIServiceRepo(ctrl)
 	uc := NewServiceUseCase(mockRepo)
 	ctx := context.Background()
+	// Erro ao buscar por ID
 	service := &entities.Service{ID: 1, Name: "Troca de óleo"}
-
-	mockRepo.EXPECT().GetByID(ctx, uint(1)).Return(*service, nil)
-	mockRepo.EXPECT().Update(ctx, service).Return(nil)
+	mockRepo.EXPECT().GetByID(ctx, service.ID).Return(entities.Service{}, errors.New("fail"))
 	err := uc.UpdateService(ctx, service)
-	if err != nil {
-		t.Errorf("expected no error, got %v", err)
+	if err == nil {
+		t.Errorf("expected error, got nil")
 	}
 
-	mockRepo.EXPECT().GetByID(ctx, uint(2)).Return(entities.Service{}, nil)
-	service.ID = 2
+	// Não encontrado
+	mockRepo.EXPECT().GetByID(ctx, service.ID).Return(entities.Service{}, nil)
 	err = uc.UpdateService(ctx, service)
 	if !errors.Is(err, ErrServiceNotFound) {
 		t.Errorf("expected ErrServiceNotFound, got %v", err)
 	}
 
-	mockRepo.EXPECT().GetByID(ctx, uint(3)).Return(*service, nil)
+	// Sucesso
+	mockRepo.EXPECT().GetByID(ctx, service.ID).Return(*service, nil)
+	mockRepo.EXPECT().Update(ctx, service).Return(nil)
+	err = uc.UpdateService(ctx, service)
+	if err != nil {
+		t.Errorf("expected no error, got %v", err)
+	}
+
+	// Erro ao atualizar
+	mockRepo.EXPECT().GetByID(ctx, service.ID).Return(*service, nil)
 	mockRepo.EXPECT().Update(ctx, service).Return(errors.New("fail"))
-	service.ID = 3
 	err = uc.UpdateService(ctx, service)
 	if err == nil {
 		t.Errorf("expected error, got nil")
@@ -106,14 +132,32 @@ func TestDeleteService(t *testing.T) {
 	uc := NewServiceUseCase(mockRepo)
 	ctx := context.Background()
 
-	mockRepo.EXPECT().Delete(ctx, uint(1)).Return(nil)
+	// Erro ao buscar por ID
+	mockRepo.EXPECT().GetByID(ctx, uint(1)).Return(entities.Service{}, errors.New("fail"))
 	err := uc.DeleteService(ctx, 1)
+	if err == nil {
+		t.Errorf("expected error, got nil")
+	}
+
+	// Não encontrado
+	mockRepo.EXPECT().GetByID(ctx, uint(2)).Return(entities.Service{}, nil)
+	err = uc.DeleteService(ctx, 2)
+	if !errors.Is(err, ErrServiceNotFound) {
+		t.Errorf("expected ErrServiceNotFound, got %v", err)
+	}
+
+	// Sucesso
+	mockRepo.EXPECT().GetByID(ctx, uint(3)).Return(entities.Service{ID: 3, Name: "Troca de óleo"}, nil)
+	mockRepo.EXPECT().Delete(ctx, uint(3)).Return(nil)
+	err = uc.DeleteService(ctx, 3)
 	if err != nil {
 		t.Errorf("expected no error, got %v", err)
 	}
 
-	mockRepo.EXPECT().Delete(ctx, uint(2)).Return(errors.New("fail"))
-	err = uc.DeleteService(ctx, 2)
+	// Erro ao deletar
+	mockRepo.EXPECT().GetByID(ctx, uint(4)).Return(entities.Service{ID: 4, Name: "Troca de óleo"}, nil)
+	mockRepo.EXPECT().Delete(ctx, uint(4)).Return(errors.New("fail"))
+	err = uc.DeleteService(ctx, 4)
 	if err == nil {
 		t.Errorf("expected error, got nil")
 	}

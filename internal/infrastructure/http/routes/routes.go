@@ -43,6 +43,9 @@ func Run() {
 	partsSupplyUseCase := usecase.NewPartsSupplyUseCase(parts_supply.NewPartsSupplyRepository(db))
 	partsSupplyHandler := http.NewPartsSupplyHandler(partsSupplyUseCase)
 
+	serviceUseCase := usecase.NewServiceUseCase(service.NewServiceRepository(db))
+	serviceHandler := http.NewServiceHandler(serviceUseCase)
+
 	vehiclesRepository := vehicles.NewVehicleRepository(db)
 	vehiclesUseCase := usecase.NewVehicleService(vehiclesRepository)
 	vehicleHandler := http.NewVehicleHandler(vehiclesUseCase)
