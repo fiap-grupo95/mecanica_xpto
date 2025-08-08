@@ -52,8 +52,8 @@ func NewDBFromEnv() (*gorm.DB, error) {
 		&dto.PartsSupplyServiceOrderDTO{},
 		&dto.AdditionalRepairStatusDTO{},
 		&dto.UserTypeDTO{},
-		dto.ServiceServiceOrderDTO{},
-		dto.PaymentDTO{},
+		&dto.ServiceServiceOrderDTO{},
+		&dto.PaymentDTO{},
 	)
 	if err != nil {
 		return nil, err
