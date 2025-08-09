@@ -3,7 +3,6 @@ package routes
 import (
 	"log"
 	_ "mecanica_xpto/docs" // This will be auto-generated
-	"mecanica_xpto/internal/domain/repository/customers"
 	"mecanica_xpto/internal/domain/repository/parts_supply"
 	"mecanica_xpto/internal/domain/repository/service"
 	"mecanica_xpto/internal/domain/repository/users"

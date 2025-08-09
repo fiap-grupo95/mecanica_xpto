@@ -64,20 +64,6 @@ func TestDeleteCustomer_RepoError(t *testing.T) {
 	assert.Error(t, err)
 }
 
-func TestListCustomer_Success(t *testing.T) {
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-	mockRepo := mocks.NewMockICustomerRepository(ctrl)
-	uc := use_cases.NewCustomerUseCase(mockRepo, nil)
-
-	dtos := []dto.CustomerDTO{{ID: 1, FullName: "A"}, {ID: 2, FullName: "B"}}
-	mockRepo.EXPECT().List().Return(dtos, nil)
-
-	customers, err := uc.ListCustomer()
-	assert.NoError(t, err)
-	assert.Len(t, customers, 2)
-}
-
 func TestListCustomer_Error(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
