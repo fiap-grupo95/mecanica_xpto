@@ -16,7 +16,6 @@ type ServiceOrderStatusDTO struct {
 type PartsSupplyServiceOrderDTO struct {
 	PartsSupplyID  uint `gorm:"primaryKey"`
 	ServiceOrderID uint `gorm:"primaryKey"`
-	Quantity       int  `gorm:"not null;default:1"`
 }
 
 // N:N relationship between Service and ServiceOrder
@@ -40,8 +39,8 @@ type ServiceOrderDTO struct {
 	UpdatedAt            time.Time             `gorm:"autoUpdateTime"`
 	AdditionalRepairs    []AdditionalRepairDTO `gorm:"foreignKey:ServiceOrderID"`
 	Payment              *PaymentDTO           `gorm:"foreignKey:ServiceOrderID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
-	PartsSupplies        []PartsSupplyDTO      `gorm:"many2many:partssupply_serviceorders;"`
-	Services             []ServiceDTO          `gorm:"many2many:service_serviceorders;"`
+	PartsSupplies        []PartsSupplyDTO      `gorm:"many2many:parts_supply_service_order_dtos;"`
+	Services             []ServiceDTO          `gorm:"many2many:service_service_order_dtos;"`
 }
 
 func (m *ServiceOrderStatusDTO) ToDomain() entities.ServiceOrderStatus {

@@ -1,4 +1,4 @@
-package usecase_test
+package usecase
 
 import (
 	"context"
@@ -8,7 +8,6 @@ import (
 
 	"mecanica_xpto/internal/domain/mocks"
 	"mecanica_xpto/internal/domain/model/entities"
-	usecase "mecanica_xpto/internal/domain/usecase"
 
 	"go.uber.org/mock/gomock"
 )
@@ -17,7 +16,7 @@ func TestGetPartsSupplyByID(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	mockRepo := mocks.NewMockIPartsSupplyRepo(ctrl)
-	uc := usecase.NewPartsSupplyUseCase(mockRepo)
+	uc := NewPartsSupplyUseCase(mockRepo)
 	ctx := context.Background()
 
 	ps := entities.PartsSupply{ID: 1, Name: "Filtro"}
@@ -32,7 +31,7 @@ func TestGetPartsSupplyByID(t *testing.T) {
 
 	mockRepo.EXPECT().GetByID(ctx, uint(2)).Return(entities.PartsSupply{}, nil)
 	_, err = uc.GetPartsSupplyByID(ctx, 2)
-	if !errors.Is(err, usecase.ErrPartsSupplyNotFound) {
+	if !errors.Is(err, ErrPartsSupplyNotFound) {
 		t.Errorf("expected ErrPartsSupplyNotFound, got %v", err)
 	}
 
@@ -47,14 +46,14 @@ func TestCreatePartsSupply(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	mockRepo := mocks.NewMockIPartsSupplyRepo(ctrl)
-	uc := usecase.NewPartsSupplyUseCase(mockRepo)
+	uc := NewPartsSupplyUseCase(mockRepo)
 	ctx := context.Background()
 
 	// Test: já existe
 	ps := &entities.PartsSupply{ID: 1, Name: "Filtro"}
 	mockRepo.EXPECT().GetByName(ctx, "Filtro").Return(entities.PartsSupply{ID: 2, Name: "Filtro"}, nil)
 	_, err := uc.CreatePartsSupply(ctx, ps)
-	if !errors.Is(err, usecase.ErrPartsSupplyAlreadyExists) {
+	if !errors.Is(err, ErrPartsSupplyAlreadyExists) {
 		t.Errorf("expected ErrPartsSupplyAlreadyExists, got %v", err)
 	}
 
@@ -81,7 +80,7 @@ func TestUpdatePartsSupply(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	mockRepo := mocks.NewMockIPartsSupplyRepo(ctrl)
-	uc := usecase.NewPartsSupplyUseCase(mockRepo)
+	uc := NewPartsSupplyUseCase(mockRepo)
 	ctx := context.Background()
 
 	// Test: erro ao buscar por ID
@@ -96,7 +95,7 @@ func TestUpdatePartsSupply(t *testing.T) {
 	mockRepo.EXPECT().GetByID(ctx, uint(2)).Return(entities.PartsSupply{}, nil)
 	ps.ID = 2
 	err = uc.UpdatePartsSupply(ctx, ps)
-	if !errors.Is(err, usecase.ErrPartsSupplyNotFound) {
+	if !errors.Is(err, ErrPartsSupplyNotFound) {
 		t.Errorf("expected ErrPartsSupplyNotFound, got %v", err)
 	}
 
@@ -123,7 +122,7 @@ func TestDeletePartsSupply(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	mockRepo := mocks.NewMockIPartsSupplyRepo(ctrl)
-	uc := usecase.NewPartsSupplyUseCase(mockRepo)
+	uc := NewPartsSupplyUseCase(mockRepo)
 	ctx := context.Background()
 
 	// Test: erro ao buscar por ID
@@ -136,7 +135,7 @@ func TestDeletePartsSupply(t *testing.T) {
 	// Test: não encontrado
 	mockRepo.EXPECT().GetByID(ctx, uint(2)).Return(entities.PartsSupply{}, nil)
 	err = uc.DeletePartsSupply(ctx, 2)
-	if !errors.Is(err, usecase.ErrPartsSupplyNotFound) {
+	if !errors.Is(err, ErrPartsSupplyNotFound) {
 		t.Errorf("expected ErrPartsSupplyNotFound, got %v", err)
 	}
 
@@ -161,7 +160,7 @@ func TestListPartsSupplies(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	mockRepo := mocks.NewMockIPartsSupplyRepo(ctrl)
-	uc := usecase.NewPartsSupplyUseCase(mockRepo)
+	uc := NewPartsSupplyUseCase(mockRepo)
 	ctx := context.Background()
 	parts := []entities.PartsSupply{{ID: 1, Name: "Filtro"}, {ID: 2, Name: "Pastilha"}}
 
