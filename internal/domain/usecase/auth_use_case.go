@@ -37,7 +37,7 @@ func (a *authUseCase) Login(userDTO dto.UserDTO) (string, *pkg.AppError) {
 		Email:    userDTO.Email,
 		Password: userDTO.Password,
 	}
-	pass, err := valueobject.NewPassword("12345678")
+	pass, err := valueobject.NewPassword(user.Password)
 	if err != nil {
 		return "", pkg.NewDomainError(ErrCodeInvalidCredential, ErrMsgInvalidCredential, err, http.StatusBadRequest)
 	}
