@@ -2,7 +2,7 @@ package http
 
 import (
 	"mecanica_xpto/internal/domain/model/entities"
-	use_cases "mecanica_xpto/internal/domain/use_cases/customer"
+	use_cases "mecanica_xpto/internal/domain/usecase"
 	"net/http"
 	"strconv"
 

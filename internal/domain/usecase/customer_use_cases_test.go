@@ -1,15 +1,15 @@
-package use_cases_test
+package usecase_test
 
 import (
 	"errors"
+	use_cases "mecanica_xpto/internal/domain/usecase"
+	"mecanica_xpto/internal/domain/usecase/mocks"
 	"testing"
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"mecanica_xpto/internal/domain/model/dto"
 	"mecanica_xpto/internal/domain/model/entities"
-	"mecanica_xpto/internal/domain/repository/customers/mocks"
-	use_cases "mecanica_xpto/internal/domain/use_cases/customer"
 )
 
 func TestUpdateCustomer_Success(t *testing.T) {

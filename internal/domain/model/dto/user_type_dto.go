@@ -5,9 +5,9 @@ import (
 )
 
 type UserTypeDTO struct {
-	ID    uint      `gorm:"primaryKey"`
-	Type  string    `gorm:"size:50;not null"`
-	Users []UserDTO `gorm:"foreignKey:UserTypeID"`
+	ID   uint   `gorm:"primaryKey"`
+	Type string `gorm:"size:50;not null"`
+	//Users []UserDTO `gorm:"foreignKey:UserTypeID"`
 }
 
 func (utm *UserTypeDTO) ToDomain() valueobject.UserType {

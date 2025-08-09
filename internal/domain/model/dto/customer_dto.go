@@ -31,14 +31,14 @@ func (cm *CustomerDTO) ToDomain() *entities.Customer {
 	}
 	if cm.Vehicles != nil {
 		for _, v := range cm.Vehicles {
-			vehicles = append(vehicles, v.ToDomain())
+			vehicles = append(vehicles, *v.ToDomain())
 		}
 	}
 	return &entities.Customer{
 		ID:            cm.ID,
 		UserID:        cm.UserID,
 		Email:         user.Email,
-		CpfCnpj:       valueobject.ParseCPF_CNPJ(cm.CpfCnpj),
+		CpfCnpj:       valueobject.CpfCnpj(cm.CpfCnpj),
 		PhoneNumber:   cm.PhoneNumber,
 		FullName:      cm.FullName,
 		Vehicles:      vehicles,

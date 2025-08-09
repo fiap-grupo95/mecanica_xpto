@@ -1,10 +1,11 @@
-package use_cases
+package usecase
 
 import (
 	"mecanica_xpto/internal/domain/model/dto"
 	"mecanica_xpto/internal/domain/model/entities"
 	"mecanica_xpto/internal/domain/model/valueobject"
-	"mecanica_xpto/internal/domain/repository/customers"
+	customerRepo "mecanica_xpto/internal/domain/repository/customers"
+	"mecanica_xpto/internal/domain/repository/users"
 )
 
 // ICustomerUseCase defines the interface for customers use cases
@@ -17,11 +18,11 @@ type ICustomerUseCase interface {
 	ListCustomer() ([]entities.Customer, error)
 }
 type CustomerUseCase struct {
-	customerRepo repository.ICustomerRepository
-	userRepo     repository.IUserRepository
+	customerRepo customerRepo.ICustomerRepository
+	userRepo     users.IUserRepository
 }
 
-func NewCustomerUseCase(customerRepo repository.ICustomerRepository, userRepo repository.IUserRepository) ICustomerUseCase {
+func NewCustomerUseCase(customerRepo customerRepo.ICustomerRepository, userRepo users.IUserRepository) ICustomerUseCase {
 	return &CustomerUseCase{customerRepo: customerRepo, userRepo: userRepo}
 }
 

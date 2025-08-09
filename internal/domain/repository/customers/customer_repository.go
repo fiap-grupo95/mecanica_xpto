@@ -1,4 +1,4 @@
-package repository
+package customers
 
 import (
 	"gorm.io/gorm"
