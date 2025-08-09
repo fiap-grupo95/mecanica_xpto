@@ -1,11 +1,20 @@
 package usecase
 
 import (
+	"errors"
 	"mecanica_xpto/internal/domain/model/dto"
 	"mecanica_xpto/internal/domain/model/entities"
 	"mecanica_xpto/internal/domain/model/valueobject"
 	customerRepo "mecanica_xpto/internal/domain/repository/customers"
 	"mecanica_xpto/internal/domain/repository/users"
+)
+
+var (
+	ErrGeneric               = errors.New("unknown error")
+	ErrCustomerNotFound      = errors.New("customer not found")
+	ErrInvalidDocumentFormat = errors.New("invalid document format")
+	ErrCustomerAlreadyExists = errors.New("customer already exists")
+	ErrInvalidCustomerID     = errors.New("invalid customer ID")
 )
 
 // ICustomerUseCase defines the interface for customers use cases
@@ -30,7 +39,10 @@ func (uc *CustomerUseCase) GetById(id uint) (*entities.Customer, error) {
 	customerDTO, err := uc.customerRepo.GetByID(id)
 
 	if err != nil {
-		return nil, err
+		return nil, ErrGeneric
+	}
+	if customerDTO == nil {
+		return nil, ErrCustomerNotFound
 	}
 
 	return customerDTO.ToDomain(), nil
@@ -40,13 +52,19 @@ func (uc *CustomerUseCase) GetByDocument(CpfCnpj string) (*entities.Customer, er
 	customerDTO, err := uc.customerRepo.GetByDocument(CpfCnpj)
 
 	if err != nil {
-		return nil, err
+		return nil, ErrGeneric
+	}
+	if customerDTO == nil {
+		return nil, ErrCustomerNotFound
 	}
 
 	return customerDTO.ToDomain(), nil
 }
 
 func (uc *CustomerUseCase) CreateCustomer(customer *entities.Customer) error {
+	if e := customer.CpfCnpj.IsValid(); e != nil {
+		return ErrInvalidDocumentFormat
+	}
 	userDTO := dto.UserDTO{
 		Email:    customer.Email,
 		UserType: valueobject.ParseUserType("admin"),

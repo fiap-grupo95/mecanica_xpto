@@ -13,6 +13,6 @@ func addCustomerRoutes(rg *gin.RouterGroup, customerHandler *http.CustomerHandle
 		customersRoutes.POST("", customerHandler.CreateCustomer)
 		customersRoutes.PATCH("/:id", customerHandler.UpdateCustomer)
 		customersRoutes.DELETE("/:id", customerHandler.DeleteCustomer)
-		customersRoutes.GET("/all", customerHandler.ListCustomer)
+		customersRoutes.GET("/", customerHandler.ListCustomer)
 	}
 }

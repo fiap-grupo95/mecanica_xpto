@@ -1,15 +1,17 @@
 package http
 
 import (
+	"errors"
 	"mecanica_xpto/internal/domain/model/entities"
 	use_cases "mecanica_xpto/internal/domain/usecase"
+	"mecanica_xpto/pkg"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
 
-// CustomerHandler handles HTTP requests for users
+// CustomerHandler handles HTTP requests for customers
 type CustomerHandler struct {
 	ucCustomer use_cases.ICustomerUseCase
 }
@@ -17,6 +19,19 @@ type CustomerHandler struct {
 // NewCustomerHandler creates a new customer http handler
 func NewCustomerHandler(us use_cases.ICustomerUseCase) *CustomerHandler {
 	return &CustomerHandler{ucCustomer: us}
+}
+
+func mapCustomerError(err error) *pkg.AppError {
+	switch {
+	case errors.Is(err, use_cases.ErrCustomerNotFound):
+		return pkg.NewDomainErrorSimple("CUSTOMER_NOT_FOUND", "Customer not found", http.StatusNotFound)
+	case errors.Is(err, use_cases.ErrInvalidDocumentFormat):
+		return pkg.NewDomainErrorSimple("INVALID_DOCUMENT", "Invalid document format", http.StatusBadRequest)
+	case errors.Is(err, use_cases.ErrCustomerAlreadyExists):
+		return pkg.NewDomainErrorSimple("CUSTOMER_EXISTS", "Customer already exists", http.StatusConflict)
+	default:
+		return pkg.NewDomainError("INTERNAL_ERROR", "An internal error occurred", err, http.StatusInternalServerError)
+	}
 }
 
 // GetCustomer godoc
@@ -35,7 +50,8 @@ func (h *CustomerHandler) GetCustomer(c *gin.Context) {
 
 	foundCustomer, err := h.ucCustomer.GetByDocument(doc)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
+		appErr := mapCustomerError(err)
+		c.JSON(appErr.HTTPStatus, appErr.ToHTTPError())
 		return
 	}
 
@@ -57,8 +73,8 @@ func (h *CustomerHandler) GetFullCustomer(c *gin.Context) {
 	id := c.Param("id")
 	idUint, err := strconv.ParseUint(id, 10, 32)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid customer id"})
-		return
+		appErr := pkg.NewDomainErrorSimple("INVALID_ID", "Invalid customer ID", http.StatusBadRequest)
+		c.JSON(appErr.HTTPStatus, appErr.ToHTTPError())
 	}
 
 	foundCustomer, err := h.ucCustomer.GetById(uint(idUint))
@@ -90,7 +106,8 @@ func (h *CustomerHandler) CreateCustomer(c *gin.Context) {
 
 	err := h.ucCustomer.CreateCustomer(&body)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
+		appErr := mapCustomerError(err)
+		c.JSON(appErr.HTTPStatus, appErr.ToHTTPError())
 		return
 	}
 
@@ -113,17 +130,17 @@ func (h *CustomerHandler) UpdateCustomer(c *gin.Context) {
 	id := c.Param("id")
 	idUint, err := strconv.ParseUint(id, 10, 32)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid customer id"})
+		appErr := pkg.NewDomainErrorSimple("INVALID_ID", "Invalid customer ID", http.StatusBadRequest)
+		c.JSON(appErr.HTTPStatus, appErr.ToHTTPError())
+	}
+
+	var customer entities.Customer
+	if err := c.ShouldBindJSON(&customer); err != nil {
+		c.JSON(errInvalidInput.HTTPStatus, errInvalidInput.ToHTTPError())
 		return
 	}
 
-	var body entities.Customer
-	if err := c.BindJSON(&body); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid input"})
-		return
-	}
-
-	err = h.ucCustomer.UpdateCustomer(uint(idUint), &body)
+	err = h.ucCustomer.UpdateCustomer(uint(idUint), &customer)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
 		return
@@ -147,8 +164,8 @@ func (h *CustomerHandler) DeleteCustomer(c *gin.Context) {
 	id := c.Param("id")
 	idUint, err := strconv.ParseUint(id, 10, 32)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid customer id"})
-		return
+		appErr := pkg.NewDomainErrorSimple("INVALID_ID", "Invalid customer ID", http.StatusBadRequest)
+		c.JSON(appErr.HTTPStatus, appErr.ToHTTPError())
 	}
 
 	err = h.ucCustomer.DeleteCustomer(uint(idUint))
