@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"log"
 	"mecanica_xpto/internal/domain/model/dto"
 	"os"
 
@@ -15,6 +16,7 @@ func NewDBFromEnv() (*gorm.DB, error) {
 	// Carrega variáveis do .env
 	err := godotenv.Load()
 	if err != nil {
+		log.Fatalf("Failed to load .env file, using environment variables instead: %v", err)
 		return nil, err
 	}
 
@@ -28,6 +30,7 @@ func NewDBFromEnv() (*gorm.DB, error) {
 		host, port, user, password, database)
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
+		log.Fatalf("Failed to connect to the database: %v", err)
 		return nil, err
 	}
 
