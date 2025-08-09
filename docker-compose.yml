@@ -5,7 +5,7 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "8080:8080"
+      - '8080:8080'
     env_file:
       - .env
     environment:
@@ -14,8 +14,8 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_HOST: ${POSTGRES_HOST}
       POSTGRES_PORT: ${POSTGRES_PORT}
-    volumes:
-      - app_data:/app
+    # volumes:
+    #   - app_data:/app
     networks:
       - app_network
     depends_on:
@@ -29,14 +29,14 @@ services:
     env_file:
       - .env
     ports:
-      - "5432:5432"
+      - '5432:5432'
     volumes:
       - postgresql_data:/var/lib/postgresql/data
-#      - ./internal/infrastructure/database/script.sql:/docker-entrypoint-initdb.d/script.sql
+    #      - ./internal/infrastructure/database/script.sql:/docker-entrypoint-initdb.d/script.sql
     networks:
       - app_network
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}']
       interval: 5s
       timeout: 5s
       retries: 5
@@ -47,7 +47,7 @@ services:
     container_name: sonarqube
     restart: always
     ports:
-      - "9000:9000"
+      - '9000:9000'
     environment:
       SONAR_JDBC_URL: jdbc:postgresql://db_postgres_sonar:5433/${POSTGRES_SONAR_DB}
       SONAR_JDBC_USERNAME: ${POSTGRES_SONAR_USER}
@@ -73,7 +73,7 @@ services:
     networks:
       - sonar-net
     ports:
-      - "5433:5433"
+      - '5433:5433'
     volumes:
       - postgresql_sonar_data:/var/lib/postgresql/data
 
@@ -88,7 +88,7 @@ networks:
     driver: bridge
 
   sonar-net: # Define the network explicitly
-    name: sonar-net   # Give it a specific name
+    name: sonar-net # Give it a specific name
 
 volumes:
   db_data:
