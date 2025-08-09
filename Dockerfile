@@ -15,6 +15,9 @@ FROM alpine:3.22
 
 WORKDIR /app
 
+# Copy the .env file
+COPY .env .
+
 COPY --from=builder /mecanica-xpto-api .
 
 EXPOSE 8080

@@ -16,9 +16,6 @@ coverage.*
 *.coverprofile
 profile.cov
 
-# env file
-.env
-
 # Editor/IDE
 .idea/
 .vscode/
