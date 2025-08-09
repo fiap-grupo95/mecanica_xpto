@@ -26,7 +26,7 @@ func NewCustomerHandler(us use_cases.ICustomerUseCase) *CustomerHandler {
 // @Accept json
 // @Produce json
 // @Param id path string true "Customer ID"
-// @Success 200 {object} customer.Customer
+// @Success 200 {object} entities.Customer
 // @Failure 404 {object} map[string]string "error":"customer not found"
 // @Failure 500 {object} map[string]string "error":"internal server error"
 // @Router /customers/{document} [get]
