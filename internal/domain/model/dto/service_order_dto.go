@@ -36,10 +36,10 @@ type ServiceOrderDTO struct {
 	OSStatusID           uint                  `gorm:"not null"`
 	ServiceOrderStatus   ServiceOrderStatusDTO `gorm:"foreignKey:OSStatusID"`
 	Estimate             float64               `gorm:"type:decimal(10,2)"`
-	StartedExecutionDate time.Time
-	FinalExecutionDate   time.Time
-	CreatedAt            time.Time             `gorm:"autoCreateTime"`
-	UpdatedAt            time.Time             `gorm:"autoUpdateTime"`
+	StartedExecutionDate *time.Time
+	FinalExecutionDate   *time.Time
+	CreatedAt            *time.Time            `gorm:"autoCreateTime"`
+	UpdatedAt            *time.Time            `gorm:"autoUpdateTime"`
 	AdditionalRepairs    []AdditionalRepairDTO `gorm:"foreignKey:ServiceOrderID"`
 	Payment              *PaymentDTO           `gorm:"foreignKey:ServiceOrderID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 	PartsSupplies        []PartsSupplyDTO      `gorm:"many2many:parts_supply_service_order;"`

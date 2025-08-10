@@ -3,36 +3,36 @@ package valueobject
 type ServiceOrderStatus string
 
 const (
-	StatusRecebida            ServiceOrderStatus = "Recebida"
-	StatusEmDiagnostico       ServiceOrderStatus = "Em Diagnóstico"
-	StatusAguardandoAprovacao ServiceOrderStatus = "Aguardando Aprovação"
-	StatusAprovada            ServiceOrderStatus = "Aprovada"
-	StatusRejeitada           ServiceOrderStatus = "Rejeitada"
-	StatusEmExecucao          ServiceOrderStatus = "Em Execução"
-	StatusFinalizada          ServiceOrderStatus = "Finalizada"
-	StatusEntregue            ServiceOrderStatus = "Entregue"
-	StatusCancelada           ServiceOrderStatus = "Cancelada"
+	StatusRecebida            ServiceOrderStatus = "RECEBIDA"
+	StatusEmDiagnostico       ServiceOrderStatus = "EM DIAGNÓSTICO"
+	StatusAguardandoAprovacao ServiceOrderStatus = "AGUARDANDO APROVAÇÃO"
+	StatusAprovada            ServiceOrderStatus = "APROVADA"
+	StatusRejeitada           ServiceOrderStatus = "REJEITADA"
+	StatusEmExecucao          ServiceOrderStatus = "EM EXECUÇÃO"
+	StatusFinalizada          ServiceOrderStatus = "FINALIZADA"
+	StatusEntregue            ServiceOrderStatus = "ENTREGUE"
+	StatusCancelada           ServiceOrderStatus = "CANCELADA"
 )
 
 func ParseServiceOrderStatus(status string) ServiceOrderStatus {
 	switch status {
-	case "Recebida":
+	case "RECEBIDA":
 		return StatusRecebida
-	case "Em Diagnóstico":
+	case "EM DIAGNÓSTICO":
 		return StatusEmDiagnostico
-	case "Aguardando Aprovação":
+	case "AGUARDANDO APROVAÇÃO":
 		return StatusAguardandoAprovacao
-	case "Aprovada":
+	case "APROVADA":
 		return StatusAprovada
-	case "Rejeitada":
+	case "REJEITADA":
 		return StatusRejeitada
-	case "Em Execução":
+	case "EM EXECUÇÃO":
 		return StatusEmExecucao
-	case "Finalizada":
+	case "FINALIZADA":
 		return StatusFinalizada
-	case "Entregue":
+	case "ENTREGUE":
 		return StatusEntregue
-	case "Cancelada":
+	case "CANCELADA":
 		return StatusCancelada
 	default:
 		return ServiceOrderStatus(status)

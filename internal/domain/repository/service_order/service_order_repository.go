@@ -1,10 +1,9 @@
-package service_order
+package serviceorder
 
 import (
 	"mecanica_xpto/internal/domain/model/dto"
 	"mecanica_xpto/internal/domain/model/entities"
 	"mecanica_xpto/internal/domain/model/valueobject"
-	"time"
 
 	"gorm.io/gorm"
 )
@@ -22,7 +21,7 @@ type ServiceOrderRepository struct {
 	db *gorm.DB
 }
 
-func NewServiceOrderRepository(db *gorm.DB) IServiceOrderRepository {
+func NewServiceOrderRepository(db *gorm.DB) *ServiceOrderRepository {
 	return &ServiceOrderRepository{db: db}
 }
 
@@ -55,7 +54,7 @@ func (r *ServiceOrderRepository) Create(serviceOrder *entities.ServiceOrder) err
 		UpdatedAt:            serviceOrder.UpdatedAt,
 	}
 
-	if err := tx.Create(&serviceOrderDto).Error; err != nil {
+	if err := tx.Save(&serviceOrderDto).Error; err != nil {
 		tx.Rollback()
 		return err
 	}
@@ -124,7 +123,6 @@ func (r *ServiceOrderRepository) Update(serviceOrder *entities.ServiceOrder) err
 		Estimate:             serviceOrder.Estimate,
 		StartedExecutionDate: serviceOrder.StartedExecutionDate,
 		FinalExecutionDate:   serviceOrder.FinalExecutionDate,
-		UpdatedAt:            time.Now(),
 	}
 
 	if err := tx.Model(&dto.ServiceOrderDTO{}).Where("id = ?", serviceOrder.ID).Updates(&serviceOrderDto).Error; err != nil {
