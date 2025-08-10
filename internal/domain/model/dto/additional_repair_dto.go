@@ -40,7 +40,7 @@ type AdditionalRepairDTO struct {
 	CreatedAt      time.Time                 `gorm:"autoCreateTime"`
 	UpdatedAt      time.Time                 `gorm:"autoUpdateTime"`
 	PartsSupplies  []PartsSupplyDTO          `gorm:"many2many:parts_supply_additional_repair"`
-	Services       []ServiceDTO              `gorm:"foreignKey:AdditionalRepairID"`
+	Services       []ServiceDTO              `gorm:"many2many:service_additional_repair;"`
 }
 
 func (arm *AdditionalRepairDTO) ToDomain() entities.AdditionalRepair {
