@@ -2,18 +2,17 @@ package entities
 
 import (
 	"mecanica_xpto/internal/domain/model/valueobject"
+	"time"
 )
 
-type AdditionalRepairStatus struct {
-	ID                uint               `json:"id" validate:"required"`
-	Description       string             `json:"description"`
-	AdditionalRepairs []AdditionalRepair `json:"additional_repairs,omitempty"`
-}
-
 type AdditionalRepair struct {
-	ID           uint               `json:"id"`
-	ServiceOrder ServiceOrder       `json:"service_order,omitempty"`
-	Service      Service            `json:"service,omitempty"`
-	PartsSupply  PartsSupply        `json:"parts_supply,omitempty"`
-	ARStatus     valueobject.Status `json:"ar_status,omitempty"`
+	ID             uint                               `json:"id"`
+	ServiceOrderID uint                               `json:"service_order_id"`
+	ServiceOrder   *ServiceOrder                      `json:"service_order,omitempty"`
+	ARStatus       valueobject.AdditionalRepairStatus `json:"ar_status,omitempty"`
+	Estimate       float64                            `json:"estimate"`
+	CreatedAt      time.Time                          `json:"created_at"`
+	UpdatedAt      time.Time                          `json:"updated_at"`
+	PartsSupplies  []PartsSupply                      `json:"parts_supplies,omitempty"`
+	Services       []Service                          `json:"services,omitempty"`
 }

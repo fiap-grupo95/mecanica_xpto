@@ -9,14 +9,14 @@ import (
 )
 
 type UserDTO struct {
-	ID         uint           `gorm:"primaryKey"`
-	Email      string         `gorm:"size:100;not null;unique" json:"email" binding:"required,email"`
-	Password   string         `gorm:"size:255;not null" json:"password" binding:"required"`
+	ID        uint                 `gorm:"primaryKey"`
+	Email     string               `gorm:"size:100;not null;unique" json:"email" binding:"required,email"`
+	Password  string               `gorm:"size:255;not null" json:"password" binding:"required"`
 	UserType  valueobject.UserType `gorm:"not null"`
-	CreatedAt  time.Time      `gorm:"autoCreateTime"`
-	UpdatedAt  time.Time      `gorm:"autoUpdateTime"`
-	DeletedAt  gorm.DeletedAt `gorm:"index"`
-	Customer   *CustomerDTO   `gorm:"foreignKey:UserID;references:ID"`
+	CreatedAt time.Time            `gorm:"autoCreateTime"`
+	UpdatedAt time.Time            `gorm:"autoUpdateTime"`
+	DeletedAt gorm.DeletedAt       `gorm:"index"`
+	Customer  *CustomerDTO         `gorm:"foreignKey:UserID;references:ID"`
 }
 
 func (m *UserDTO) ToDomain() *entities.User {
