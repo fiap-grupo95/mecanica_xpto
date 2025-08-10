@@ -33,7 +33,7 @@ type AdditionalRepairDTO struct {
 	ID             uint                      `gorm:"primaryKey"`
 	ServiceOrderID uint                      `gorm:"not null"`
 	ServiceOrder   ServiceOrderDTO           `gorm:"foreignKey:ServiceOrderID"`
-	ServiceID      uint                      `gorm:"column:service_order_id;not null"`
+	ServiceID      uint                      `gorm:"column:service_id;not null"`
 	ARStatusID     uint                      `gorm:"not null"`
 	ARStatus       AdditionalRepairStatusDTO `gorm:"foreignKey:ARStatusID"`
 	Estimate       float64                   `gorm:"type:decimal(10,2)"`
