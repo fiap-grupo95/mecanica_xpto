@@ -40,7 +40,12 @@ func (r *AdditionalRepairRepository) Create(additionalRepair *entities.Additiona
 		ARStatusID: arStatus.ID,
 		Estimate:   additionalRepair.Estimate,
 		CreatedAt:  additionalRepair.CreatedAt,
-		UpdatedAt:  additionalRepair.UpdatedAt,
+		ID:            additionalRepair.ID,
+		ARStatusID:    arStatus.ID,
+		Estimate:      additionalRepair.Estimate,
+		ServiceOrderID: additionalRepair.ServiceOrderID,
+		CreatedAt:     additionalRepair.CreatedAt,
+		UpdatedAt:     additionalRepair.UpdatedAt,
 	}
 
 	tx := r.db.Begin()
