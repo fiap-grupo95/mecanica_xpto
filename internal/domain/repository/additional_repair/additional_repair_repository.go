@@ -152,7 +152,7 @@ func (r *AdditionalRepairRepository) Update(additionalRepair *entities.Additiona
 	return tx.Commit().Error
 }
 
-func (r *AdditionalRepairRepository) GetByServiceOrder(serviceOrderId int) ([]dto.AdditionalRepairDTO, error) {
+func (r *AdditionalRepairRepository) GetByServiceOrder(serviceOrderId uint) ([]dto.AdditionalRepairDTO, error) {
 	var additionalRepairs []dto.AdditionalRepairDTO
 	// TODO - Avaliar o que posso tirar do Preload e deixar para serem carregados apenas quando necessário
 	err := r.db.Preload("ARStatus").
