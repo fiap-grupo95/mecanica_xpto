@@ -47,11 +47,7 @@ type ServiceOrderUseCase struct {
 	partsSupplyRepo parts_supply.IPartsSupplyRepo
 }
 
-func NewServiceOrderUseCase(repo serviceorder.IServiceOrderRepository,
-	vehicleRepo vehicles.VehicleRepositoryInterface,
-	customerRepo customerRepo.ICustomerRepository,
-	serviceRepo service.IServiceRepo,
-	partsSupplyRepo parts_supply.IPartsSupplyRepo) *ServiceOrderUseCase {
+func NewServiceOrderUseCase(repo serviceorder.IServiceOrderRepository, vehicleRepo vehicles.VehicleRepositoryInterface, customerRepo customerRepo.ICustomerRepository, serviceRepo service.IServiceRepo, partsSupplyRepo parts_supply.IPartsSupplyRepo) *ServiceOrderUseCase {
 	return &ServiceOrderUseCase{
 		repo:            repo,
 		vehicleRepo:     vehicleRepo,
