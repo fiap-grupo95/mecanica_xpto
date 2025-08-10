@@ -27,7 +27,11 @@ const (
 var (
 	ErrServiceOrderNotFound               = errors.New("service order not found")
 	ErrInvalidTransitionStatusToDiagnosis = errors.New("invalid transition status to diagnosis")
+	ErrInvalidTransitionStatusToExecution = errors.New("invalid transition status to execution")
+	ErrInvalidTransitionStatusToDelivery  = errors.New("invalid transition status to delivery")
+	ErrInvalidTransitionStatusToEstimate  = errors.New("invalid transition status to estimate")
 	ErrInvalidStatus                      = errors.New("invalid service order status")
+	ErrInsufficientPartsSupply            = errors.New("insufficient parts supply available")
 )
 
 type IServiceOrderUseCase interface {
@@ -109,22 +113,25 @@ func (u *ServiceOrderUseCase) UpdateServiceOrder(ctx context.Context, request en
 		update, err = ValidateDiagnosis(ctx, &request, serviceOrderDto, update, u.serviceRepo, u.partsSupplyRepo)
 		if err != nil {
 			log.Error().Msgf("Error validating diagnosis: %v", err)
+			return err
 		}
 	} else if flow == ESTIMATE {
 		update, err = ValidateEstimate(ctx, &request, serviceOrderDto, update)
 		if err != nil {
 			log.Error().Msgf("Error validating estimate: %v", err)
+			return err
 		}
 	} else if flow == EXECUTION {
 		update, err = ValidateExecution(ctx, &request, serviceOrderDto, update)
 		if err != nil {
 			log.Error().Msgf("Error validating execution: %v", err)
-
+			return err
 		}
 	} else if flow == DELIVERY {
 		update, err = ValidateDelivery(ctx, &request, serviceOrderDto, update)
 		if err != nil {
 			log.Error().Msgf("Error validating delivery: %v", err)
+			return err
 		}
 	}
 
@@ -149,15 +156,14 @@ func ValidateDiagnosis(ctx context.Context, request *entities.ServiceOrder, serv
 
 	if (oldStatus == valueobject.StatusRecebida && newStatus == valueobject.StatusEmDiagnostico) || oldStatus == valueobject.StatusEmDiagnostico {
 		update.ServiceOrderStatus = valueobject.StatusEmDiagnostico
-
 		if len(request.Services) > 0 {
 			update.Services = request.Services
 
 			// Validate if each Service exists
 			for _, s := range request.Services {
-				err := validateService(ctx, s, serviceRepo)
+				_, err := getSeviceById(ctx, s, serviceRepo)
 				if err != nil {
-					log.Error().Msgf("Error validating service: %v", err)
+					log.Error().Msgf("Error getting service by id %v: %v", s.ID, err)
 					return nil, err
 				}
 			}
@@ -172,17 +178,16 @@ func ValidateDiagnosis(ctx context.Context, request *entities.ServiceOrder, serv
 			// Validate if each PartsSupplies are available
 			// if all exists and ara available, reserve each PartsSupplies
 			for _, ps := range request.PartsSupplies {
-				err := validatePartsSupply(ctx, ps, partsSupplyRepo)
+				err := validateQttPartsSupply(ctx, ps, partsSupplyRepo)
 				if err != nil {
 					log.Error().Msgf("Error validating parts supply: %v", err)
 					return nil, err
 				}
-				if !validatePartsSupply.IsAvailable() {
-					log.Error().Msgf("Parts supply with ID %d is not available", ps.ID)
-					return nil, errors.New("parts supply not available")
-				}
+			}
+
+			for _, ps := range request.PartsSupplies {
 				// Reserve the parts supply
-				err = serviceorder.ReservePartsSupply(ps)
+				err := reservePartsSupply(ctx, ps, partsSupplyRepo)
 				if err != nil {
 					log.Error().Msgf("Error reserving parts supply: %v", err)
 					return nil, err
@@ -194,12 +199,30 @@ func ValidateDiagnosis(ctx context.Context, request *entities.ServiceOrder, serv
 		}
 
 		// Calculate the total cost of PartsSupplies and Services and set it to the estimate
+		update.Estimate = CalculateEstimate(update.Services, update.PartsSupplies)
 
 		// If OK, set a new status to "AguardandoAprovacao"
+		update.ServiceOrderStatus = valueobject.StatusAguardandoAprovacao
+		return update, nil
 	}
 
 	return nil, ErrInvalidTransitionStatusToDiagnosis
 
+}
+
+func CalculateEstimate(services []entities.Service, partsSupplies []entities.PartsSupply) float64 {
+	totalEstimate := 0.0
+	for _, ps := range partsSupplies {
+		if ps.QuantityTotal > 0 {
+			ps.Price = ps.Price * float64(ps.QuantityTotal)
+		} else if ps.QuantityReserve > 0 {
+			ps.Price = ps.Price * float64(ps.QuantityReserve)
+		}
+	}
+	for _, s := range services {
+		totalEstimate += s.Price
+	}
+	return totalEstimate
 }
 
 func ValidateEstimate(ctx context.Context, request *entities.ServiceOrder, serviceOrderDto *dto.ServiceOrderDTO, update *entities.ServiceOrder) (*entities.ServiceOrder, error) {
@@ -209,15 +232,38 @@ func ValidateEstimate(ctx context.Context, request *entities.ServiceOrder, servi
 }
 
 func ValidateExecution(ctx context.Context, request *entities.ServiceOrder, serviceOrderDto *dto.ServiceOrderDTO, update *entities.ServiceOrder) (*entities.ServiceOrder, error) {
+	oldStatus := serviceOrderDto.ServiceOrderStatus.ToDomain()
+
 	if !request.ServiceOrderStatus.IsValid() {
 		return nil, ErrInvalidStatus
 	}
+	if oldStatus.IsAprovada() && request.ServiceOrderStatus.IsEmExecucao() {
+		update.ServiceOrderStatus = valueobject.StatusEmExecucao
+		return update, nil
+	}
+	if oldStatus.IsEmExecucao() && request.ServiceOrderStatus.IsFinalizada() {
+		update.ServiceOrderStatus = valueobject.StatusFinalizada
+		return update, nil
+	}
+	return nil, ErrInvalidTransitionStatusToExecution
 }
 
 func ValidateDelivery(ctx context.Context, request *entities.ServiceOrder, serviceOrderDto *dto.ServiceOrderDTO, update *entities.ServiceOrder) (*entities.ServiceOrder, error) {
+	oldStatus := serviceOrderDto.ServiceOrderStatus.ToDomain()
+
 	if !request.ServiceOrderStatus.IsValid() {
 		return nil, ErrInvalidStatus
 	}
+
+	if oldStatus.IsFinalizada() && request.ServiceOrderStatus.IsEntregue() {
+		if serviceOrderDto.Payment == nil {
+			log.Error().Msg("Payment information is required for delivery")
+			return nil, errors.New("payment information is required for delivery")
+		}
+		update.ServiceOrderStatus = valueobject.StatusEntregue
+		return update, nil
+	}
+	return nil, ErrInvalidTransitionStatusToDelivery
 }
 
 func validateVehicle(ctx context.Context, serviceOrder entities.ServiceOrder, vehicleRepo vehicles.VehicleRepositoryInterface) error {
@@ -250,33 +296,73 @@ func validateCustomer(ctx context.Context, serviceOrder entities.ServiceOrder, c
 	return ErrInvalidCustomerID
 }
 
-func validateService(ctx context.Context, s entities.Service, serviceRepo service.IServiceRepo) error {
-	// Here you would implement the logic to validate the service
-	// For example, check if the service exists in the database
-	// and if it is available for the service order.
-	// This is a placeholder implementation.
+func getSeviceById(ctx context.Context, s entities.Service, serviceRepo service.IServiceRepo) (*entities.Service, error) {
 	if s.ID == 0 {
-		return ErrInvalidID
+		return nil, ErrInvalidID
 	}
 	result, err := serviceRepo.GetByID(ctx, s.ID)
 	if err != nil {
 		log.Error().Msgf("error finding service with id %d: %v", s.ID, err)
-		return err
+		return nil, err
 	}
 	if result.ID == 0 {
 		log.Error().Msgf("service with id %d not found", s.ID)
-		return ErrServiceNotFound
+		return nil, ErrServiceNotFound
+	}
+	return &result, nil
+}
+
+func getPartsSupplyByID(ctx context.Context, id uint, partsSupplyRepo parts_supply.IPartsSupplyRepo) (*entities.PartsSupply, error) {
+	if id == 0 {
+		return nil, ErrInvalidID
+	}
+	result, err := partsSupplyRepo.GetByID(ctx, id)
+	if err != nil {
+		log.Error().Msgf("error finding parts supply with id %d: %v", id, err)
+		return nil, err
+	}
+	if result.ID == 0 {
+		log.Error().Msgf("parts supply with id %d not found", id)
+		return nil, ErrPartsSupplyNotFound
+	}
+	return &result, nil
+}
+
+func validateQttPartsSupply(ctx context.Context, partsSupply entities.PartsSupply, partsSupplyRepo parts_supply.IPartsSupplyRepo) error {
+	current, err := getPartsSupplyByID(ctx, partsSupply.ID, partsSupplyRepo)
+	if err != nil {
+		log.Error().Msgf("error getting parts supply by ID: %v", err)
+		return err
+	}
+
+	totalAvailable := current.QuantityTotal - current.QuantityReserve
+	if (partsSupply.QuantityReserve > totalAvailable) || (partsSupply.QuantityTotal > totalAvailable) {
+		log.Error().Msgf("parts supply with id %d has insufficient quantity available", partsSupply.ID)
+		return ErrInsufficientPartsSupply
 	}
 	return nil
 }
 
-func validatePartsSupply(ctx context.Context, partsSupply entities.PartsSupply, partsSupplyRepo parts_supply.IPartsSupplyRepo) error {
-	// Here you would implement the logic to validate the parts supply
-	// For example, check if the parts supply exists in the database
-	// and if it is available for the service order.
-	// This is a placeholder implementation.
-	if partsSupply.ID == 0 {
-		return ErrInvalidID
+func reservePartsSupply(ctx context.Context, partsSupply entities.PartsSupply, partsSupplyRepo parts_supply.IPartsSupplyRepo) error {
+	current, err := getPartsSupplyByID(ctx, partsSupply.ID, partsSupplyRepo)
+	if err != nil {
+		log.Error().Msgf("error getting parts supply by ID: %v", err)
+		return err
 	}
+
+	if partsSupply.QuantityReserve > 0 {
+		current.QuantityReserve += partsSupply.QuantityReserve
+	} else if partsSupply.QuantityTotal > 0 {
+		current.QuantityTotal += partsSupply.QuantityTotal
+	} else {
+		return errors.New("no quantity to reserve")
+	}
+
+	err = partsSupplyRepo.Update(ctx, current)
+	if err != nil {
+		log.Error().Msgf("error reserving parts supply with id %d: %v", current.ID, err)
+		return err
+	}
+	log.Info().Msgf("Parts supply with id %d reserved successfully", current.ID)
 	return nil
 }
