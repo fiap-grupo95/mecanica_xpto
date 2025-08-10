@@ -46,7 +46,7 @@ type ServiceOrderDTO struct {
 	Services             []ServiceDTO          `gorm:"many2many:service_service_order;"`
 }
 
-func (m *ServiceOrderDTO) ToDomain() entities.ServiceOrder {
+func (m *ServiceOrderDTO) ToDomain() *entities.ServiceOrder {
 	var additionalRepairs []entities.AdditionalRepair
 	var partsSupplies []entities.PartsSupply
 	var services []entities.Service
@@ -83,7 +83,7 @@ func (m *ServiceOrderDTO) ToDomain() entities.ServiceOrder {
 		vehicle = *m.Vehicle.ToDomain()
 	}
 
-	return entities.ServiceOrder{
+	return &entities.ServiceOrder{
 		ID:                   m.ID,
 		CustomerID:           m.CustomerID,
 		Customer:             customer,

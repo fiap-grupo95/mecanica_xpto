@@ -12,7 +12,7 @@ type IAdditionalRepairRepository interface {
 	Create(additionalRepair *entities.AdditionalRepair) error
 	GetByID(id uint) (*dto.AdditionalRepairDTO, error)
 	Update(additionalRepair *entities.AdditionalRepair) error
-	GetByServiceOrder(serviceOrderId int) ([]dto.AdditionalRepairDTO, error)
+	GetByServiceOrder(serviceOrderId uint) ([]dto.AdditionalRepairDTO, error)
 	GetStatus(status string) (*dto.AdditionalRepairStatusDTO, error)
 }
 
@@ -36,16 +36,12 @@ func (r *AdditionalRepairRepository) Create(additionalRepair *entities.Additiona
 	}
 
 	additionalRepairDto := dto.AdditionalRepairDTO{
-		ID:         additionalRepair.ID,
-		ARStatusID: arStatus.ID,
-		Estimate:   additionalRepair.Estimate,
-		CreatedAt:  additionalRepair.CreatedAt,
-		ID:            additionalRepair.ID,
-		ARStatusID:    arStatus.ID,
-		Estimate:      additionalRepair.Estimate,
+		ID:             additionalRepair.ID,
+		ARStatusID:     arStatus.ID,
+		Estimate:       additionalRepair.Estimate,
 		ServiceOrderID: additionalRepair.ServiceOrderID,
-		CreatedAt:     additionalRepair.CreatedAt,
-		UpdatedAt:     additionalRepair.UpdatedAt,
+		CreatedAt:      additionalRepair.CreatedAt,
+		UpdatedAt:      additionalRepair.UpdatedAt,
 	}
 
 	tx := r.db.Begin()

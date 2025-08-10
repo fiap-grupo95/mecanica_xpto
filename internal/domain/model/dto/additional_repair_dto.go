@@ -31,7 +31,7 @@ func (arsm AdditionalRepairStatusDTO) ToDomain() valueobject.AdditionalRepairSta
 
 type AdditionalRepairDTO struct {
 	ID             uint                      `gorm:"primaryKey"`
-	ServiceOrderID uint                      `gorm:"not null"`
+	ServiceOrderID uint                      `gorm:"column:service_order_id;not null"`
 	ServiceOrder   ServiceOrderDTO           `gorm:"foreignKey:ServiceOrderID"`
 	ServiceID      uint                      `gorm:"column:service_id;not null"`
 	ARStatusID     uint                      `gorm:"not null"`
@@ -56,12 +56,14 @@ func (arm *AdditionalRepairDTO) ToDomain() entities.AdditionalRepair {
 	}
 
 	return entities.AdditionalRepair{
-		ID:            arm.ID,
-		ARStatus:      arm.ARStatus.ToDomain(),
-		Estimate:      arm.Estimate,
-		CreatedAt:     arm.CreatedAt,
-		UpdatedAt:     arm.UpdatedAt,
-		PartsSupplies: partsSupplies,
-		Services:      services,
+		ID:             arm.ID,
+		ARStatus:       arm.ARStatus.ToDomain(),
+		Estimate:       arm.Estimate,
+		CreatedAt:      arm.CreatedAt,
+		UpdatedAt:      arm.UpdatedAt,
+		ServiceOrderID: arm.ServiceOrderID,
+		ServiceOrder:   arm.ServiceOrder.ToDomain(),
+		PartsSupplies:  partsSupplies,
+		Services:       services,
 	}
 }
