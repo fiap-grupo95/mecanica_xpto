@@ -185,7 +185,7 @@ func (r *ServiceOrderRepository) List() ([]dto.ServiceOrderDTO, error) {
 
 func (r *ServiceOrderRepository) GetStatus(status valueobject.ServiceOrderStatus) (*dto.ServiceOrderStatusDTO, error) {
 	var serviceOrderStatuses dto.ServiceOrderStatusDTO
-	err := r.db.Where("description = ?", status.String()).Find(&serviceOrderStatuses).Error
+	err := r.db.Where("description = ?", status.String()).First(&serviceOrderStatuses).Error
 	if err != nil {
 		return nil, err
 	}
