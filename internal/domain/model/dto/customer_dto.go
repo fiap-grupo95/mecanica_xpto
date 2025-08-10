@@ -25,19 +25,23 @@ func (cm *CustomerDTO) TableName() string {
 
 func (cm *CustomerDTO) ToDomain() *entities.Customer {
 	var user *entities.User
+	var vehicles []entities.Vehicle
 	if cm.User != nil {
-		u := cm.User.ToDomain()
-		user = &u
+		user = cm.User.ToDomain()
 	}
-
+	if cm.Vehicles != nil {
+		for _, v := range cm.Vehicles {
+			vehicles = append(vehicles, *v.ToDomain())
+		}
+	}
 	return &entities.Customer{
-		ID:          cm.ID,
-		UserID:      cm.UserID,
-		User:        user,
-		CpfCnpj:     valueobject.CpfCnpj(cm.CpfCnpj),
-		PhoneNumber: cm.PhoneNumber,
-		FullName:    cm.FullName,
-		//Vehicles:      nil, // This will be populated later if needed
-		//ServiceOrders: nil, // This will be populated later if needed
+		ID:            cm.ID,
+		UserID:        cm.UserID,
+		Email:         user.Email,
+		CpfCnpj:       valueobject.CpfCnpj(cm.CpfCnpj),
+		PhoneNumber:   cm.PhoneNumber,
+		FullName:      cm.FullName,
+		Vehicles:      vehicles,
+		ServiceOrders: nil, // This will be populated later if needed
 	}
 }

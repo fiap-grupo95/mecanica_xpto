@@ -9,7 +9,7 @@ type Vehicle struct {
 	ID         uint              `json:"id"`
 	Plate      valueobject.Plate `json:"plate"`
 	CustomerID uint              `json:"customer_id"`
-	Customer   Customer          `json:"customer,omitempty"`
+	Customer   *Customer         `json:"customer,omitempty"`
 	Model      string            `json:"model"`
 	Year       string            `json:"year"`
 	Brand      string            `json:"brand"`

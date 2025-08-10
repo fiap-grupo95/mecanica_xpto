@@ -269,7 +269,7 @@ func TestCreateVehicle(t *testing.T) {
 			Model: "Corolla",
 			Year:  "2020",
 			Plate: valueobject.ParsePlate("ABC1D23"),
-			Customer: entities.Customer{
+			Customer: &entities.Customer{
 				ID: 1,
 			},
 		}
@@ -296,7 +296,7 @@ func TestCreateVehicle(t *testing.T) {
 			Model: "Corolla",
 			Year:  "2020",
 			Plate: valueobject.ParsePlate("ABC1234"),
-			Customer: entities.Customer{
+			Customer: &entities.Customer{
 				ID: 1,
 			},
 		}
