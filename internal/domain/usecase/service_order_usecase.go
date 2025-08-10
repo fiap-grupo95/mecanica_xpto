@@ -116,7 +116,7 @@ func (u *ServiceOrderUseCase) UpdateServiceOrder(ctx context.Context, request en
 			return err
 		}
 	} else if flow == ESTIMATE {
-		update, err = ValidateEstimate(ctx, &request, serviceOrderDto, update)
+		update, err = ValidateEstimate(ctx, &request, serviceOrderDto, update, u.partsSupplyRepo)
 		if err != nil {
 			log.Error().Msgf("Error validating estimate: %v", err)
 			return err
@@ -225,10 +225,50 @@ func CalculateEstimate(services []entities.Service, partsSupplies []entities.Par
 	return totalEstimate
 }
 
-func ValidateEstimate(ctx context.Context, request *entities.ServiceOrder, serviceOrderDto *dto.ServiceOrderDTO, update *entities.ServiceOrder) (*entities.ServiceOrder, error) {
+func ValidateEstimate(ctx context.Context, request *entities.ServiceOrder, serviceOrderDto *dto.ServiceOrderDTO, update *entities.ServiceOrder, partsSupplyRepo parts_supply.IPartsSupplyRepo) (*entities.ServiceOrder, error) {
+	oldStatus := serviceOrderDto.ServiceOrderStatus.ToDomain()
+
 	if !request.ServiceOrderStatus.IsValid() {
 		return nil, ErrInvalidStatus
 	}
+
+	if oldStatus.IsAguardandoAprovacao() && request.ServiceOrderStatus.IsAprovada() {
+		update.ServiceOrderStatus = valueobject.StatusAprovada
+		// If the status is "Aprovada", we can subtract the total available quantity of PartsSupplies from the quantity reserve
+		for _, ps := range request.PartsSupplies {
+			err := releaseReservedPartsSupply(ctx, ps, partsSupplyRepo)
+			if err != nil {
+				log.Error().Msgf("Error releasing reserved parts supply: %v", err)
+				return nil, err
+			}
+		}
+		return update, nil
+	}
+	if oldStatus.IsAguardandoAprovacao() && request.ServiceOrderStatus.IsRejeitada() {
+		update.ServiceOrderStatus = valueobject.StatusRejeitada
+		// If the status is "Rejeitada", we can reset the PartsSupplies reserve
+		for _, ps := range request.PartsSupplies {
+			err := unreservePartsSupply(ctx, ps, partsSupplyRepo)
+			if err != nil {
+				log.Error().Msgf("Error unreserving parts supply: %v", err)
+				return nil, err
+			}
+		}
+		return update, nil
+	}
+	if oldStatus.IsAguardandoAprovacao() && request.ServiceOrderStatus.IsEmDiagnostico() {
+		update.ServiceOrderStatus = valueobject.StatusEmDiagnostico
+		// If the status is "EmDiagnostico", we can reset the PartsSupplies reserve
+		for _, ps := range request.PartsSupplies {
+			err := unreservePartsSupply(ctx, ps, partsSupplyRepo)
+			if err != nil {
+				log.Error().Msgf("Error unreserving parts supply: %v", err)
+				return nil, err
+			}
+		}
+		return update, nil
+	}
+	return nil, ErrInvalidTransitionStatusToEstimate
 }
 
 func ValidateExecution(ctx context.Context, request *entities.ServiceOrder, serviceOrderDto *dto.ServiceOrderDTO, update *entities.ServiceOrder) (*entities.ServiceOrder, error) {
@@ -364,5 +404,67 @@ func reservePartsSupply(ctx context.Context, partsSupply entities.PartsSupply, p
 		return err
 	}
 	log.Info().Msgf("Parts supply with id %d reserved successfully", current.ID)
+	return nil
+}
+
+// releaseReservedPartsSupply is when a service order is approved - Baixa de estoque
+func releaseReservedPartsSupply(ctx context.Context, request entities.PartsSupply, partsSupplyRepo parts_supply.IPartsSupplyRepo) error {
+	current, err := getPartsSupplyByID(ctx, request.ID, partsSupplyRepo)
+	if err != nil {
+		log.Error().Msgf("error getting parts supply by ID: %v", err)
+		return err
+	}
+
+	if request.QuantityReserve > 0 {
+		if current.QuantityReserve < request.QuantityReserve {
+			return errors.New("cannot release more than reserved")
+		}
+		if request.QuantityReserve > 0 {
+			current.QuantityReserve -= request.QuantityReserve
+			current.QuantityTotal -= request.QuantityReserve
+		} else if request.QuantityTotal > 0 {
+			current.QuantityReserve -= request.QuantityTotal
+			current.QuantityTotal -= request.QuantityTotal
+		}
+	} else {
+		return errors.New("no quantity to release")
+	}
+
+	err = partsSupplyRepo.Update(ctx, current)
+	if err != nil {
+		log.Error().Msgf("error releasing reserved parts supply with id %d: %v", current.ID, err)
+		return err
+	}
+	log.Info().Msgf("Reserved parts supply with id %d released successfully", current.ID)
+	return nil
+}
+
+// unreservePartsSupply is when a service order is rejected - Liberação de reserva
+func unreservePartsSupply(ctx context.Context, partsSupply entities.PartsSupply, partsSupplyRepo parts_supply.IPartsSupplyRepo) error {
+	current, err := getPartsSupplyByID(ctx, partsSupply.ID, partsSupplyRepo)
+	if err != nil {
+		log.Error().Msgf("error getting parts supply by ID: %v", err)
+		return err
+	}
+
+	if partsSupply.QuantityReserve > 0 {
+		if current.QuantityReserve < partsSupply.QuantityReserve {
+			return errors.New("cannot unreserve more than reserved")
+		}
+		if partsSupply.QuantityReserve > 0 {
+			current.QuantityReserve -= partsSupply.QuantityReserve
+		} else if partsSupply.QuantityTotal > 0 {
+			current.QuantityReserve -= partsSupply.QuantityTotal
+		}
+	} else {
+		return errors.New("no quantity to unreserved")
+	}
+
+	err = partsSupplyRepo.Update(ctx, current)
+	if err != nil {
+		log.Error().Msgf("error unreserving parts supply with id %d: %v", current.ID, err)
+		return err
+	}
+	log.Info().Msgf("Parts supply with id %d unreserved successfully", current.ID)
 	return nil
 }
