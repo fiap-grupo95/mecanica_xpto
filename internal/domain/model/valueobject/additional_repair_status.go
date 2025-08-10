@@ -1,23 +1,29 @@
 package valueobject
 
+type AdditionalRepairStatus string
+
 const (
-	StatusAberta      Status = "ABERTA"
-	StatusEmAndamento Status = "EM_ANDAMENTO"
-	StatusConcluida   Status = "CONCLUIDA"
-	StatusCancelada   Status = "CANCELADA"
+	StatusARAberta              AdditionalRepairStatus = "ABERTA"
+	StatusARAguardandoAprovacao AdditionalRepairStatus = "AGUARDANDO_APROVACAO"
+	StatusAAprovada             AdditionalRepairStatus = "APROVADA"
+	StatusARRejeitada           AdditionalRepairStatus = "REJEITADA"
 )
 
-func ParseAdditionalRepairStatus(desc string) Status {
-	switch desc {
-	case string(StatusAberta):
-		return StatusAberta
-	case string(StatusEmAndamento):
-		return StatusEmAndamento
-	case string(StatusConcluida):
-		return StatusConcluida
-	case string(StatusCancelada):
-		return StatusCancelada
+func ParseAdditionalRepairStatus(status string) AdditionalRepairStatus {
+	switch status {
+	case "ABERTA":
+		return StatusARAberta
+	case "AGUARDANDO_APROVACAO":
+		return StatusARAguardandoAprovacao
+	case "APROVADA":
+		return StatusAAprovada
+	case "REJEITADA":
+		return StatusARRejeitada
 	default:
-		return StatusAberta
+		return AdditionalRepairStatus(status)
 	}
+}
+
+func (s AdditionalRepairStatus) String() string {
+	return string(s)
 }

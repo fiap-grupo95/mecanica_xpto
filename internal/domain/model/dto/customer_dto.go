@@ -23,14 +23,14 @@ func (cm *CustomerDTO) TableName() string {
 	return "tb_customer"
 }
 
-func (cm *CustomerDTO) ToDomain() entities.Customer {
+func (cm *CustomerDTO) ToDomain() *entities.Customer {
 	var user *entities.User
 	if cm.User != nil {
 		u := cm.User.ToDomain()
 		user = &u
 	}
 
-	return entities.Customer{
+	return &entities.Customer{
 		ID:          cm.ID,
 		UserID:      cm.UserID,
 		User:        user,

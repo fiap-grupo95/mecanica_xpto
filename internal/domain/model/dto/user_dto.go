@@ -27,7 +27,7 @@ func (m *UserDTO) ToDomain() entities.User {
 	var customer *entities.Customer
 	if m.Customer != nil {
 		c := m.Customer.ToDomain()
-		customer = &c
+		customer = c
 	}
 	return entities.User{
 		ID:        m.ID,

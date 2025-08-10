@@ -1,35 +1,44 @@
 package valueobject
 
-type Status string
+type ServiceOrderStatus string
 
 const (
-	StatusRecebida            Status = "Recebida"
-	StatusEmDiagnostico       Status = "Em diagnóstico"
-	StatusAguardandoAprovacao Status = "Aguardando aprovação"
-	StatusEmExecucao          Status = "Em execução"
-	StatusFinalizada          Status = "Finalizada"
-	StatusEntregue            Status = "Entregue"
+	StatusRecebida            ServiceOrderStatus = "Recebida"
+	StatusEmDiagnostico       ServiceOrderStatus = "Em Diagnóstico"
+	StatusAguardandoAprovacao ServiceOrderStatus = "Aguardando Aprovação"
+	StatusAprovada            ServiceOrderStatus = "Aprovada"
+	StatusRejeitada           ServiceOrderStatus = "Rejeitada"
+	StatusEmExecucao          ServiceOrderStatus = "Em Execução"
+	StatusFinalizada          ServiceOrderStatus = "Finalizada"
+	StatusEntregue            ServiceOrderStatus = "Entregue"
+	StatusCancelada           ServiceOrderStatus = "Cancelada"
 )
 
-func ParseServiceOrderStatus(desc string) Status {
-	switch desc {
-	case string(StatusRecebida):
+func ParseServiceOrderStatus(status string) ServiceOrderStatus {
+	switch status {
+	case "Recebida":
 		return StatusRecebida
-	case string(StatusEmDiagnostico):
+	case "Em Diagnóstico":
 		return StatusEmDiagnostico
-	case string(StatusAguardandoAprovacao):
+	case "Aguardando Aprovação":
 		return StatusAguardandoAprovacao
-	case string(StatusEmExecucao):
+	case "Aprovada":
+		return StatusAprovada
+	case "Rejeitada":
+		return StatusRejeitada
+	case "Em Execução":
 		return StatusEmExecucao
-	case string(StatusFinalizada):
+	case "Finalizada":
 		return StatusFinalizada
-	case string(StatusEntregue):
+	case "Entregue":
 		return StatusEntregue
+	case "Cancelada":
+		return StatusCancelada
 	default:
-		return StatusRecebida // ou algum valor padrão/erro
+		return ServiceOrderStatus(status)
 	}
 }
 
-func (s Status) String() string {
+func (s ServiceOrderStatus) String() string {
 	return string(s)
 }

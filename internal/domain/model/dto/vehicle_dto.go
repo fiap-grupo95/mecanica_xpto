@@ -27,7 +27,7 @@ func (v *VehicleDTO) ToDomain() *entities.Vehicle {
 		ID:         v.ID,
 		Plate:      valueobject.ParsePlate(v.Plate),
 		CustomerID: v.CustomerID,
-		Customer:   v.Customer.ToDomain(),
+		Customer:   *v.Customer.ToDomain(),
 		Model:      v.Model,
 		Year:       v.Year,
 		Brand:      v.Brand,
