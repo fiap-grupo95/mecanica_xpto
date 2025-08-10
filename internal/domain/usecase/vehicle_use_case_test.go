@@ -199,7 +199,7 @@ func TestCreateVehicle(t *testing.T) {
 			Model: "Civic",
 			Brand: "Honda",
 			Year:  "2020",
-			Customer: entities.Customer{
+			Customer: &entities.Customer{
 				ID: 1,
 			},
 		}
@@ -223,7 +223,7 @@ func TestCreateVehicle(t *testing.T) {
 			Model: "Civic",
 			Brand: "Honda",
 			Year:  "2020",
-			Customer: entities.Customer{
+			Customer: &entities.Customer{
 				ID: 1,
 			},
 		}

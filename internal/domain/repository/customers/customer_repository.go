@@ -3,7 +3,18 @@ package customers
 import (
 	"gorm.io/gorm"
 	"mecanica_xpto/internal/domain/model/dto"
+	"strings"
 )
+
+// ICustomerRepository defines the interface for customers data access
+type ICustomerRepository interface {
+	GetByID(id uint) (*dto.CustomerDTO, error)
+	GetByDocument(CpfCnpj string) (*dto.CustomerDTO, error)
+	Create(customer *dto.CustomerDTO) error
+	Update(customer *dto.CustomerDTO) error
+	Delete(id uint) error
+	List() ([]dto.CustomerDTO, error)
+}
 
 // CustomerRepository implements ICustomerRepository interface
 type CustomerRepository struct {
@@ -20,9 +31,22 @@ func (r *CustomerRepository) Create(customer *dto.CustomerDTO) error {
 
 func (r *CustomerRepository) GetByID(id uint) (*dto.CustomerDTO, error) {
 	var customer dto.CustomerDTO
-	err := r.db.Preload("User").First(&customer, id).Error
+	err := r.db.Preload("User").Preload("Vehicles").First(&customer, id).Error
 	if err != nil {
-		return nil, err
+		if strings.EqualFold(err.Error(), gorm.ErrRecordNotFound.Error()) {
+			return nil, nil
+		}
+	}
+	return &customer, nil
+}
+
+func (r *CustomerRepository) GetByDocument(CpfCnpj string) (*dto.CustomerDTO, error) {
+	var customer dto.CustomerDTO
+	err := r.db.Preload("User").First(&customer, map[string]interface{}{"cpf_cnpj": CpfCnpj}).Error
+	if err != nil {
+		if strings.EqualFold(err.Error(), gorm.ErrRecordNotFound.Error()) {
+			return nil, nil
+		}
 	}
 	return &customer, nil
 }
@@ -32,7 +56,16 @@ func (r *CustomerRepository) Update(customer *dto.CustomerDTO) error {
 }
 
 func (r *CustomerRepository) Delete(id uint) error {
-	return r.db.Delete(&dto.CustomerDTO{}, id).Error
+	var customer dto.CustomerDTO
+	err := r.db.Preload("User").First(&customer, id).Error
+	if err != nil {
+		return err
+	}
+	if err := r.db.Delete(&customer.User).Error; err != nil {
+		return err
+	}
+
+	return r.db.Delete(&customer).Error
 }
 
 func (r *CustomerRepository) List() ([]dto.CustomerDTO, error) {
