@@ -39,6 +39,50 @@ func ParseServiceOrderStatus(status string) ServiceOrderStatus {
 	}
 }
 
+func (s ServiceOrderStatus) IsValid() bool {
+	switch s {
+	case StatusRecebida, StatusEmDiagnostico, StatusAguardandoAprovacao,
+		StatusAprovada, StatusRejeitada, StatusEmExecucao,
+		StatusFinalizada, StatusEntregue, StatusCancelada:
+		return true
+	default:
+		return false
+	}
+}
+
+func (s ServiceOrderStatus) IsSame(c ServiceOrderStatus) bool {
+	return s == c
+}
+
+func (s ServiceOrderStatus) IsRecebida() bool {
+	return s == StatusRecebida
+}
+
+func (s ServiceOrderStatus) IsEmDiagnostico() bool {
+	return s == StatusEmDiagnostico
+}
+func (s ServiceOrderStatus) IsAguardandoAprovacao() bool {
+	return s == StatusAguardandoAprovacao
+}
+func (s ServiceOrderStatus) IsAprovada() bool {
+	return s == StatusAprovada
+}
+func (s ServiceOrderStatus) IsRejeitada() bool {
+	return s == StatusRejeitada
+}
+func (s ServiceOrderStatus) IsEmExecucao() bool {
+	return s == StatusEmExecucao
+}
+func (s ServiceOrderStatus) IsFinalizada() bool {
+	return s == StatusFinalizada
+}
+func (s ServiceOrderStatus) IsEntregue() bool {
+	return s == StatusEntregue
+}
+func (s ServiceOrderStatus) IsCancelada() bool {
+	return s == StatusCancelada
+}
+
 func (s ServiceOrderStatus) String() string {
 	return string(s)
 }

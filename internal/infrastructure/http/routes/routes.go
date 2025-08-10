@@ -57,10 +57,12 @@ func getRoutes() {
 	v1 := router.Group("/v1")
 	v1.POST("/login", authHandler.Login)
 
-	partsSupplyUseCase := usecase.NewPartsSupplyUseCase(parts_supply.NewPartsSupplyRepository(db))
+	partsSupplyRepository := parts_supply.NewPartsSupplyRepository(db)
+	partsSupplyUseCase := usecase.NewPartsSupplyUseCase(partsSupplyRepository)
 	partsSupplyHandler := http.NewPartsSupplyHandler(partsSupplyUseCase)
 
-	serviceUseCase := usecase.NewServiceUseCase(service.NewServiceRepository(db))
+	serviceRepository := service.NewServiceRepository(db)
+	serviceUseCase := usecase.NewServiceUseCase(serviceRepository)
 	serviceHandler := http.NewServiceHandler(serviceUseCase)
 
 	vehiclesRepository := vehicles.NewVehicleRepository(db)
@@ -73,7 +75,12 @@ func getRoutes() {
 	customerHandler := http.NewCustomerHandler(customerUseCase)
 
 	serviceOrderRepository := serviceorder.NewServiceOrderRepository(db)
-	serviceOrderUsecase := usecase.NewServiceOrderUseCase(serviceOrderRepository, vehiclesRepository, customerRepository)
+	serviceOrderUsecase := usecase.NewServiceOrderUseCase(
+		serviceOrderRepository,
+		vehiclesRepository,
+		customerRepository,
+		serviceRepository,
+		partsSupplyRepository)
 	serviceOrderHandler := http.NewServiceOrderHandler(serviceOrderUsecase)
 
 	// Rotas protegidas

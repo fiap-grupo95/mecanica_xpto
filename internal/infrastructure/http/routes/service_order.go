@@ -11,7 +11,10 @@ func addServiceOrderRoutes(rg *gin.RouterGroup, serviceOrderHandler *http.Servic
 	{
 		//serviceOrdersRoutes.GET("/:id", serviceOrderHandler.GetServiceOrder)
 		serviceOrdersRoutes.POST("", serviceOrderHandler.CreateServiceOrder)
-		serviceOrdersRoutes.PATCH("/:id", serviceOrderHandler.UpdateServiceOrder)
+		serviceOrdersRoutes.PATCH("/:id/diagnosis", serviceOrderHandler.UpdateServiceOrderDiagnosis)
+		serviceOrdersRoutes.PATCH("/:id/estimate", serviceOrderHandler.UpdateServiceOrderEstimate)
+		serviceOrdersRoutes.PATCH("/:id/execution", serviceOrderHandler.UpdateServiceOrderExecution)
+		serviceOrdersRoutes.PATCH("/:id/delivery", serviceOrderHandler.UpdateServiceOrderDelivery)
 		//serviceOrdersRoutes.GET("/", serviceOrderHandler.ListServiceOrders)
 	}
 }

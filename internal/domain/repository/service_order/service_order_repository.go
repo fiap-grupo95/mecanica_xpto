@@ -4,7 +4,9 @@ import (
 	"mecanica_xpto/internal/domain/model/dto"
 	"mecanica_xpto/internal/domain/model/entities"
 	"mecanica_xpto/internal/domain/model/valueobject"
+	"strings"
 
+	"github.com/rs/zerolog/log"
 	"gorm.io/gorm"
 )
 
@@ -98,6 +100,10 @@ func (r *ServiceOrderRepository) GetByID(id uint) (*dto.ServiceOrderDTO, error) 
 		Preload("Services").
 		First(&serviceOrder, id).Error
 	if err != nil {
+		log.Error().Msgf("Error finding service order with id %d: %v", id, err)
+		if strings.EqualFold(err.Error(), gorm.ErrRecordNotFound.Error()) {
+			return nil, nil
+		}
 		return nil, err
 	}
 	return &serviceOrder, nil

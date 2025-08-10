@@ -17,8 +17,8 @@ type ServiceOrder struct {
 	FinalExecutionDate   *time.Time                     `json:"final_execution_date"`
 	CreatedAt            *time.Time                     `json:"created_at"`
 	UpdatedAt            *time.Time                     `json:"updated_at"`
-	AdditionalRepairs    []AdditionalRepair             `json:"additional_repairs,omitempty"`
 	Payment              *Payment                       `json:"payment,omitempty"`
+	AdditionalRepairs    []AdditionalRepair             `json:"additional_repairs,omitempty"`
 	PartsSupplies        []PartsSupply                  `json:"parts_supplies,omitempty"`
 	Services             []Service                      `json:"services,omitempty"`
 }
