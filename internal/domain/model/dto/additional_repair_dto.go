@@ -39,7 +39,7 @@ type AdditionalRepairDTO struct {
 	Estimate       float64                   `gorm:"type:decimal(10,2)"`
 	CreatedAt      time.Time                 `gorm:"autoCreateTime"`
 	UpdatedAt      time.Time                 `gorm:"autoUpdateTime"`
-	PartsSupplies  []PartsSupplyDTO          `gorm:"foreignKey:AdditionalRepairID"`
+	PartsSupplies  []PartsSupplyDTO          `gorm:"many2many:parts_supply_additional_repair"`
 	Services       []ServiceDTO              `gorm:"foreignKey:AdditionalRepairID"`
 }
 
