@@ -97,7 +97,7 @@ func (r *ServiceOrderRepository) GetByID(id uint) (*dto.ServiceOrderDTO, error) 
 		Preload("AdditionalRepairs").
 		Preload("Payment").
 		//Preload("PartsSupplies").
-		//Preload("Services").
+		// Preloading "PartsSupplies" and "Services" is intentionally omitted for now; see TODO above for evaluation.
 		First(&serviceOrder, id).Error
 	if err != nil {
 		log.Error().Msgf("Error finding service order with id %d: %v", id, err)
