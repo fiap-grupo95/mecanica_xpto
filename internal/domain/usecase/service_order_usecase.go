@@ -32,6 +32,7 @@ var (
 	ErrInvalidTransitionStatusToEstimate  = errors.New("invalid transition status to estimate")
 	ErrInvalidStatus                      = errors.New("invalid service order status")
 	ErrInsufficientPartsSupply            = errors.New("insufficient parts supply available")
+	ErrInvalidFlow                        = errors.New("invalid flow")
 )
 
 type IServiceOrderUseCase interface {
@@ -97,7 +98,7 @@ func (u *ServiceOrderUseCase) UpdateServiceOrder(ctx context.Context, request en
 
 	serviceOrderDto, err := u.repo.GetByID(request.ID)
 	if err != nil {
-		log.Error().Msgf("Error finding service order with id %v: %v", request, err)
+		log.Error().Msgf("Error finding service order with id %v: %v", request.ID, err)
 		return err
 	}
 	if serviceOrderDto == nil {
@@ -105,30 +106,34 @@ func (u *ServiceOrderUseCase) UpdateServiceOrder(ctx context.Context, request en
 		return ErrServiceOrderNotFound
 	}
 
-	if flow == DIAGNOSIS {
+	switch flow {
+	case DIAGNOSIS:
 		update, err = ValidateDiagnosis(ctx, &request, serviceOrderDto, update, u.serviceRepo, u.partsSupplyRepo)
 		if err != nil {
 			log.Error().Msgf("Error validating diagnosis: %v", err)
 			return err
 		}
-	} else if flow == ESTIMATE {
+	case ESTIMATE:
 		update, err = ValidateEstimate(ctx, &request, serviceOrderDto, update, u.partsSupplyRepo)
 		if err != nil {
 			log.Error().Msgf("Error validating estimate: %v", err)
 			return err
 		}
-	} else if flow == EXECUTION {
+	case EXECUTION:
 		update, err = ValidateExecution(ctx, &request, serviceOrderDto, update)
 		if err != nil {
 			log.Error().Msgf("Error validating execution: %v", err)
 			return err
 		}
-	} else if flow == DELIVERY {
+	case DELIVERY:
 		update, err = ValidateDelivery(ctx, &request, serviceOrderDto, update)
 		if err != nil {
 			log.Error().Msgf("Error validating delivery: %v", err)
 			return err
 		}
+	default:
+		log.Error().Msgf("Invalid flow: %s", flow)
+		return ErrInvalidFlow
 	}
 
 	return u.repo.Update(update)
@@ -208,16 +213,21 @@ func ValidateDiagnosis(ctx context.Context, request *entities.ServiceOrder, serv
 
 func CalculateEstimate(services []entities.Service, partsSupplies []entities.PartsSupply) float64 {
 	totalEstimate := 0.0
-	for _, ps := range partsSupplies {
-		if ps.QuantityTotal > 0 {
-			ps.Price = ps.Price * float64(ps.QuantityTotal)
-		} else if ps.QuantityReserve > 0 {
-			ps.Price = ps.Price * float64(ps.QuantityReserve)
-		}
-	}
+
+	// Calculate services total
 	for _, s := range services {
 		totalEstimate += s.Price
 	}
+
+	// Calculate parts supplies total
+	for _, ps := range partsSupplies {
+		quantity := ps.QuantityReserve // Use reserve quantity by default
+		if ps.QuantityTotal > 0 {      // If total quantity is specified, use that instead
+			quantity = ps.QuantityTotal
+		}
+		totalEstimate += ps.Price * float64(quantity)
+	}
+
 	return totalEstimate
 }
 
