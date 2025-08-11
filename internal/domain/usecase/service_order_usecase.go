@@ -256,30 +256,20 @@ func CalculateEstimate(ctx context.Context, services []entities.Service, partsSu
 
 	log.Debug().Msgf("Total estimate from services: %.2f", totalEstimate)
 
-	// Calculate parts supplies total
+	// Get the price of each partsSupplies from partsSuppliesRegistered and set it to partsSupplies
 	for _, ps := range partsSuppliesRegistered {
-		/* TODO: fazer a soma usando os preços de partsSuppliesRegistered e a quantidade de partsSupplies
-		LOGS:
-			{"level":"info","time":"2025-08-11T14:03:38-03:00","message":"Parts supply with id 1 reserved successfully"}
-			{"level":"info","time":"2025-08-11T14:03:38-03:00","message":"Parts supply with id 2 reserved successfully"}
-			{"level":"debug","time":"2025-08-11T14:03:38-03:00","message":"Service ID: 1, Price: 100.00"}
-			{"level":"debug","time":"2025-08-11T14:03:38-03:00","message":"Service ID: 2, Price: 200.00"}
-			{"level":"debug","time":"2025-08-11T14:03:38-03:00","message":"Total estimate from services: 300.00"}
-			{"level":"debug","time":"2025-08-11T14:03:38-03:00","message":"PartsSupply ID: 1, Price: 50.00, QuantityReserve: 14, QuantityTotal: 100"}
-			{"level":"debug","time":"2025-08-11T14:03:38-03:00","message":"PartsSupply ID: 2, Price: 100.00, QuantityReserve: 102, QuantityTotal: 200"}
-			{"level":"debug","time":"2025-08-11T14:03:38-03:00","message":"Total estimate from parts supplies: 25300.00"}
-			{"level":"debug","time":"2025-08-11T14:03:38-03:00","message":"Estimate: 25300"}
-		*/
-		log.Debug().Msgf("PartsSupply ID: %d, Price: %.2f, QuantityReserve: %d, QuantityTotal: %d", ps.ID, ps.Price, ps.QuantityReserve, ps.QuantityTotal)
-		quantity := ps.QuantityReserve // Use reserve quantity by default
-		if ps.QuantityTotal > 0 {      // If total quantity is specified, use that instead
-			quantity = ps.QuantityTotal
+		for _, reqPS := range partsSupplies {
+			if ps.ID == reqPS.ID {
+				log.Debug().Msgf("PartsSupply ID: %d, Price: %.2f, QuantityReserve: %d, QuantityTotal: %d", ps.ID, ps.Price, reqPS.QuantityReserve, reqPS.QuantityTotal)
+				quantity := reqPS.QuantityReserve // Use reserve quantity by default
+				if reqPS.QuantityTotal > 0 {      // If total quantity is specified, use that instead
+					quantity = reqPS.QuantityTotal
+				}
+				totalEstimate = totalEstimate + (ps.Price * float64(quantity))
+				break
+			}
 		}
-		totalEstimate = totalEstimate + (ps.Price * float64(quantity))
 	}
-
-	log.Debug().Msgf("Total estimate from parts supplies: %.2f", totalEstimate)
-
 	return totalEstimate, nil
 }
 
