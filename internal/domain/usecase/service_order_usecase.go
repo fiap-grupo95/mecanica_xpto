@@ -213,8 +213,14 @@ func ValidateDiagnosis(ctx context.Context, request *entities.ServiceOrder, serv
 		// TODO: a lista de services e peças está errada pois nao é as do banco de dados, é as do request
 		// TODO: Depois validar como fazer um get dos services e parts supplies do banco de dados
 
+		var err error
+
 		// Calculate the total cost of PartsSupplies and Services and set it to the estimate
-		update.Estimate = CalculateEstimate(update.Services, update.PartsSupplies)
+		update.Estimate, err = CalculateEstimate(ctx, update.Services, update.PartsSupplies, serviceRepo, partsSupplyRepo)
+		if err != nil {
+			log.Error().Msgf("Error calculating estimate: %v", err)
+			return nil, err
+		}
 
 		log.Debug().Msgf("Estimate: %v", update.Estimate)
 
@@ -227,11 +233,23 @@ func ValidateDiagnosis(ctx context.Context, request *entities.ServiceOrder, serv
 
 }
 
-func CalculateEstimate(services []entities.Service, partsSupplies []entities.PartsSupply) float64 {
+func CalculateEstimate(ctx context.Context, services []entities.Service, partsSupplies []entities.PartsSupply, serviceRepo service.IServiceRepo, psRepo parts_supply.IPartsSupplyRepo) (float64, error) {
 	var totalEstimate float64
 
+	servicesRegistered, err := getServicesByIDs(ctx, services, serviceRepo)
+	if err != nil {
+		log.Error().Msgf("Error getting services by IDs: %v", err)
+		return 0, err
+	}
+
+	partsSuppliesRegistered, err := getPartsSupplyByIDs(ctx, partsSupplies, psRepo)
+	if err != nil {
+		log.Error().Msgf("Error getting parts supplies by IDs: %v", err)
+		return 0, err
+	}
+
 	// Calculate services total
-	for _, s := range services {
+	for _, s := range servicesRegistered {
 		log.Debug().Msgf("Service ID: %d, Price: %.2f", s.ID, s.Price)
 		totalEstimate = totalEstimate + s.Price
 	}
@@ -239,7 +257,19 @@ func CalculateEstimate(services []entities.Service, partsSupplies []entities.Par
 	log.Debug().Msgf("Total estimate from services: %.2f", totalEstimate)
 
 	// Calculate parts supplies total
-	for _, ps := range partsSupplies {
+	for _, ps := range partsSuppliesRegistered {
+		/* TODO: fazer a soma usando os preços de partsSuppliesRegistered e a quantidade de partsSupplies
+		LOGS:
+			{"level":"info","time":"2025-08-11T14:03:38-03:00","message":"Parts supply with id 1 reserved successfully"}
+			{"level":"info","time":"2025-08-11T14:03:38-03:00","message":"Parts supply with id 2 reserved successfully"}
+			{"level":"debug","time":"2025-08-11T14:03:38-03:00","message":"Service ID: 1, Price: 100.00"}
+			{"level":"debug","time":"2025-08-11T14:03:38-03:00","message":"Service ID: 2, Price: 200.00"}
+			{"level":"debug","time":"2025-08-11T14:03:38-03:00","message":"Total estimate from services: 300.00"}
+			{"level":"debug","time":"2025-08-11T14:03:38-03:00","message":"PartsSupply ID: 1, Price: 50.00, QuantityReserve: 14, QuantityTotal: 100"}
+			{"level":"debug","time":"2025-08-11T14:03:38-03:00","message":"PartsSupply ID: 2, Price: 100.00, QuantityReserve: 102, QuantityTotal: 200"}
+			{"level":"debug","time":"2025-08-11T14:03:38-03:00","message":"Total estimate from parts supplies: 25300.00"}
+			{"level":"debug","time":"2025-08-11T14:03:38-03:00","message":"Estimate: 25300"}
+		*/
 		log.Debug().Msgf("PartsSupply ID: %d, Price: %.2f, QuantityReserve: %d, QuantityTotal: %d", ps.ID, ps.Price, ps.QuantityReserve, ps.QuantityTotal)
 		quantity := ps.QuantityReserve // Use reserve quantity by default
 		if ps.QuantityTotal > 0 {      // If total quantity is specified, use that instead
@@ -250,7 +280,7 @@ func CalculateEstimate(services []entities.Service, partsSupplies []entities.Par
 
 	log.Debug().Msgf("Total estimate from parts supplies: %.2f", totalEstimate)
 
-	return totalEstimate
+	return totalEstimate, nil
 }
 
 func ValidateEstimate(ctx context.Context, request *entities.ServiceOrder, serviceOrderDto *dto.ServiceOrderDTO, update *entities.ServiceOrder, partsSupplyRepo parts_supply.IPartsSupplyRepo) (*entities.ServiceOrder, error) {
@@ -527,4 +557,41 @@ func (u *ServiceOrderUseCase) ListServiceOrders(ctx context.Context) ([]*entitie
 	}
 
 	return serviceOrdersResponse, nil
+}
+
+func getServicesByIDs(ctx context.Context, services []entities.Service, serviceRepo service.IServiceRepo) ([]entities.Service, error) {
+	if len(services) == 0 {
+		return nil, errors.New("no services provided")
+	}
+
+	var serviceDb []entities.Service
+	for _, s := range services {
+		item, err := serviceRepo.GetByID(ctx, s.ID)
+		if err != nil {
+			log.Error().Msgf("error getting service by ID %v: %v", s.ID, err)
+			return nil, err
+		}
+		serviceDb = append(serviceDb, item)
+	}
+
+	// Assuming we have a service repository to get the services by IDs
+	return serviceDb, nil
+}
+
+func getPartsSupplyByIDs(ctx context.Context, partsSupplies []entities.PartsSupply, psRepo parts_supply.IPartsSupplyRepo) ([]entities.PartsSupply, error) {
+	if len(partsSupplies) == 0 {
+		return nil, errors.New("no services provided")
+	}
+
+	var psDb []entities.PartsSupply
+	for _, ps := range partsSupplies {
+		item, err := psRepo.GetByID(ctx, ps.ID)
+		if err != nil {
+			log.Error().Msgf("error getting Parts Supplies by ID %v: %v", ps.ID, err)
+			return nil, err
+		}
+		psDb = append(psDb, item)
+	}
+
+	return psDb, nil
 }
