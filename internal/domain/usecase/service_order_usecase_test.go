@@ -735,3 +735,58 @@ func TestInvalidServiceOrder(t *testing.T) {
 		})
 	}
 }
+
+func TestGetServiceOrder(t *testing.T) {
+	serviceOrderRepo := new(MockServiceOrderRepository)
+	vehicleRepo := new(MockVehicleRepository)
+	customerRepo := new(MockCustomerRepository)
+	serviceRepo := new(ServiceRepoMock)
+	partsSupplyRepo := new(MockPartsSupplyRepository)
+	useCase := NewServiceOrderUseCase(serviceOrderRepo, vehicleRepo, customerRepo, serviceRepo, partsSupplyRepo)
+
+	ctx := context.Background()
+	validID := uint(1)
+	invalidID := uint(999)
+	serviceOrderEntity := entities.ServiceOrder{ID: validID}
+	serviceOrderDTO := &dto.ServiceOrderDTO{ID: validID}
+
+	t.Run("success", func(t *testing.T) {
+		serviceOrderRepo.On("GetByID", validID).Return(serviceOrderDTO, nil)
+		result, err := useCase.GetServiceOrder(ctx, serviceOrderEntity)
+		assert.NoError(t, err)
+		assert.NotNil(t, result)
+		serviceOrderRepo.AssertCalled(t, "GetByID", validID)
+	})
+
+	t.Run("not found", func(t *testing.T) {
+		serviceOrderRepo.On("GetByID", invalidID).Return(nil, nil)
+		result, err := useCase.GetServiceOrder(ctx, entities.ServiceOrder{ID: invalidID})
+		assert.Error(t, err)
+		assert.Nil(t, result)
+		assert.Equal(t, ErrServiceOrderNotFound, err)
+		serviceOrderRepo.AssertCalled(t, "GetByID", invalidID)
+	})
+}
+
+func TestListServiceOrders(t *testing.T) {
+	serviceOrderRepo := new(MockServiceOrderRepository)
+	vehicleRepo := new(MockVehicleRepository)
+	customerRepo := new(MockCustomerRepository)
+	serviceRepo := new(ServiceRepoMock)
+	partsSupplyRepo := new(MockPartsSupplyRepository)
+	useCase := NewServiceOrderUseCase(serviceOrderRepo, vehicleRepo, customerRepo, serviceRepo, partsSupplyRepo)
+
+	ctx := context.Background()
+	serviceOrderDTOs := []dto.ServiceOrderDTO{
+		{ID: 1},
+		{ID: 2},
+	}
+
+	t.Run("success", func(t *testing.T) {
+		serviceOrderRepo.On("List").Return(serviceOrderDTOs, nil)
+		result, err := useCase.ListServiceOrders(ctx)
+		assert.NoError(t, err)
+		assert.Len(t, result, 2)
+		serviceOrderRepo.AssertCalled(t, "List")
+	})
+}

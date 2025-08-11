@@ -6,7 +6,7 @@ import (
 	"mecanica_xpto/internal/domain/repository/customers"
 	"mecanica_xpto/internal/domain/repository/parts_supply"
 	"mecanica_xpto/internal/domain/repository/service"
-	"mecanica_xpto/internal/domain/repository/service_order"
+	serviceorder "mecanica_xpto/internal/domain/repository/service_order"
 	"mecanica_xpto/internal/domain/repository/users"
 	"mecanica_xpto/internal/domain/repository/vehicles"
 	"mecanica_xpto/internal/domain/usecase"
@@ -81,7 +81,7 @@ func getRoutes() {
 		customerRepository,
 		serviceRepository,
 		partsSupplyRepository)
-	serviceOrderHandler := http.NewServiceOrderHandler(*serviceOrderUsecase)
+	serviceOrderHandler := http.NewServiceOrderHandler(serviceOrderUsecase)
 
 	// Rotas protegidas
 	authGroup := v1.Group("/")
