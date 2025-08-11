@@ -210,8 +210,13 @@ func ValidateDiagnosis(ctx context.Context, request *entities.ServiceOrder, serv
 			return nil, errors.New("no parts supplies provided for diagnosis")
 		}
 
+		// TODO: a lista de services e peças está errada pois nao é as do banco de dados, é as do request
+		// TODO: Depois validar como fazer um get dos services e parts supplies do banco de dados
+
 		// Calculate the total cost of PartsSupplies and Services and set it to the estimate
 		update.Estimate = CalculateEstimate(update.Services, update.PartsSupplies)
+
+		log.Debug().Msgf("Estimate: %v", update.Estimate)
 
 		// If OK, set a new status to "AguardandoAprovacao"
 		update.ServiceOrderStatus = valueobject.StatusAguardandoAprovacao
@@ -223,21 +228,27 @@ func ValidateDiagnosis(ctx context.Context, request *entities.ServiceOrder, serv
 }
 
 func CalculateEstimate(services []entities.Service, partsSupplies []entities.PartsSupply) float64 {
-	totalEstimate := 0.0
+	var totalEstimate float64
 
 	// Calculate services total
 	for _, s := range services {
-		totalEstimate += s.Price
+		log.Debug().Msgf("Service ID: %d, Price: %.2f", s.ID, s.Price)
+		totalEstimate = totalEstimate + s.Price
 	}
+
+	log.Debug().Msgf("Total estimate from services: %.2f", totalEstimate)
 
 	// Calculate parts supplies total
 	for _, ps := range partsSupplies {
+		log.Debug().Msgf("PartsSupply ID: %d, Price: %.2f, QuantityReserve: %d, QuantityTotal: %d", ps.ID, ps.Price, ps.QuantityReserve, ps.QuantityTotal)
 		quantity := ps.QuantityReserve // Use reserve quantity by default
 		if ps.QuantityTotal > 0 {      // If total quantity is specified, use that instead
 			quantity = ps.QuantityTotal
 		}
-		totalEstimate += ps.Price * float64(quantity)
+		totalEstimate = totalEstimate + (ps.Price * float64(quantity))
 	}
+
+	log.Debug().Msgf("Total estimate from parts supplies: %.2f", totalEstimate)
 
 	return totalEstimate
 }
@@ -436,16 +447,21 @@ func releaseReservedPartsSupply(ctx context.Context, request entities.PartsSuppl
 		if current.QuantityReserve < request.QuantityReserve {
 			return errors.New("cannot release more than reserved")
 		}
-		if request.QuantityReserve > 0 {
-			current.QuantityReserve -= request.QuantityReserve
-			current.QuantityTotal -= request.QuantityReserve
-		} else if request.QuantityTotal > 0 {
-			current.QuantityReserve -= request.QuantityTotal
-			current.QuantityTotal -= request.QuantityTotal
+		current.QuantityReserve -= request.QuantityReserve
+		current.QuantityTotal -= request.QuantityReserve
+	} else if request.QuantityTotal > 0 {
+		if current.QuantityReserve < request.QuantityTotal {
+			return errors.New("cannot release more than reserved")
 		}
+		current.QuantityReserve -= request.QuantityTotal
+		current.QuantityTotal -= request.QuantityTotal
 	} else {
 		return errors.New("no quantity to release")
 	}
+
+	//TODO Remove logs when done
+	log.Debug().Msgf("db qtt reserve: %d, qtt total: %d", current.QuantityReserve, current.QuantityTotal)
+	log.Debug().Msgf("request qtt reserve: %d, qtt total: %d", request.QuantityReserve, request.QuantityTotal)
 
 	err = partsSupplyRepo.Update(ctx, current)
 	if err != nil {
