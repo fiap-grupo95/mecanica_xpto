@@ -6,6 +6,7 @@ import (
 	"mecanica_xpto/internal/domain/repository/customers"
 	"mecanica_xpto/internal/domain/repository/parts_supply"
 	"mecanica_xpto/internal/domain/repository/service"
+	"mecanica_xpto/internal/domain/repository/service_order"
 	"mecanica_xpto/internal/domain/repository/users"
 	"mecanica_xpto/internal/domain/repository/vehicles"
 	"mecanica_xpto/internal/domain/usecase"
@@ -56,10 +57,12 @@ func getRoutes() {
 	v1 := router.Group("/v1")
 	v1.POST("/login", authHandler.Login)
 
-	partsSupplyUseCase := usecase.NewPartsSupplyUseCase(parts_supply.NewPartsSupplyRepository(db))
+	partsSupplyRepository := parts_supply.NewPartsSupplyRepository(db)
+	partsSupplyUseCase := usecase.NewPartsSupplyUseCase(partsSupplyRepository)
 	partsSupplyHandler := http.NewPartsSupplyHandler(partsSupplyUseCase)
 
-	serviceUseCase := usecase.NewServiceUseCase(service.NewServiceRepository(db))
+	serviceRepository := service.NewServiceRepository(db)
+	serviceUseCase := usecase.NewServiceUseCase(serviceRepository)
 	serviceHandler := http.NewServiceHandler(serviceUseCase)
 
 	vehiclesRepository := vehicles.NewVehicleRepository(db)
@@ -71,6 +74,15 @@ func getRoutes() {
 	customerUseCase := usecase.NewCustomerUseCase(customerRepository, userRepository)
 	customerHandler := http.NewCustomerHandler(customerUseCase)
 
+	serviceOrderRepository := serviceorder.NewServiceOrderRepository(db)
+	serviceOrderUsecase := usecase.NewServiceOrderUseCase(
+		serviceOrderRepository,
+		vehiclesRepository,
+		customerRepository,
+		serviceRepository,
+		partsSupplyRepository)
+	serviceOrderHandler := http.NewServiceOrderHandler(*serviceOrderUsecase)
+
 	// Rotas protegidas
 	authGroup := v1.Group("/")
 	authGroup.Use(middleware.AuthMiddleware(jwtService))
@@ -79,6 +91,7 @@ func getRoutes() {
 	addVehicleRoutes(authGroup, vehicleHandler)
 	addServiceRoutes(authGroup, serviceHandler)
 	addCustomerRoutes(authGroup, customerHandler)
+	addServiceOrderRoutes(authGroup, serviceOrderHandler)
 }
 
 func setMiddlewares() {

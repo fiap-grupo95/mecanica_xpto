@@ -13,12 +13,12 @@ type ServiceOrder struct {
 	Vehicle              Vehicle                        `json:"vehicle,omitempty"`
 	ServiceOrderStatus   valueobject.ServiceOrderStatus `json:"service_order_status"`
 	Estimate             float64                        `json:"estimate"`
-	StartedExecutionDate time.Time                      `json:"started_execution_date"`
-	FinalExecutionDate   time.Time                      `json:"final_execution_date"`
-	CreatedAt            time.Time                      `json:"created_at"`
-	UpdatedAt            time.Time                      `json:"updated_at"`
-	AdditionalRepairs    []AdditionalRepair             `json:"additional_repairs,omitempty"`
+	StartedExecutionDate *time.Time                     `json:"started_execution_date"`
+	FinalExecutionDate   *time.Time                     `json:"final_execution_date"`
+	CreatedAt            *time.Time                     `json:"created_at"`
+	UpdatedAt            *time.Time                     `json:"updated_at"`
 	Payment              *Payment                       `json:"payment,omitempty"`
+	AdditionalRepairs    []AdditionalRepair             `json:"additional_repairs,omitempty"`
 	PartsSupplies        []PartsSupply                  `json:"parts_supplies,omitempty"`
 	Services             []Service                      `json:"services,omitempty"`
 }

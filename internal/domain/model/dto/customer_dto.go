@@ -34,10 +34,14 @@ func (cm *CustomerDTO) ToDomain() *entities.Customer {
 			vehicles = append(vehicles, *v.ToDomain())
 		}
 	}
+	var email string
+	if user != nil {
+		email = user.Email
+	}
 	return &entities.Customer{
 		ID:            cm.ID,
 		UserID:        cm.UserID,
-		Email:         user.Email,
+		Email:         email,
 		CpfCnpj:       valueobject.CpfCnpj(cm.CpfCnpj),
 		PhoneNumber:   cm.PhoneNumber,
 		FullName:      cm.FullName,

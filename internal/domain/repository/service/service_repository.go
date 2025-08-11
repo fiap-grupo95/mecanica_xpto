@@ -54,7 +54,7 @@ func (s *ServiceRepository) GetByID(ctx context.Context, id uint) (entities.Serv
 func (s *ServiceRepository) GetByName(ctx context.Context, name string) (entities.Service, error) {
 	var dto dto.ServiceDTO
 	if err := s.db.WithContext(ctx).Where("name = ?", name).First(&dto).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
+		if err.Error() == gorm.ErrRecordNotFound.Error() {
 			return entities.Service{}, nil
 		}
 		return entities.Service{}, err
