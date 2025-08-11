@@ -100,6 +100,8 @@ func (u *ServiceOrderUseCase) UpdateServiceOrder(ctx context.Context, request en
 		return ErrInvalidID
 	}
 
+	update.ID = request.ID
+
 	serviceOrderDto, err := u.repo.GetByID(request.ID)
 	if err != nil {
 		log.Error().Msgf("Error finding service order with id %v: %v", request.ID, err)
@@ -154,13 +156,18 @@ func ValidateDiagnosis(ctx context.Context, request *entities.ServiceOrder, serv
 		return nil, ErrInvalidStatus
 	}
 
-	if oldStatus == valueobject.StatusRecebida && newStatus == valueobject.StatusCancelada {
+	if (oldStatus.IsRecebida() || oldStatus.IsEmDiagnostico()) && newStatus.IsCancelada() {
 		update.ServiceOrderStatus = valueobject.StatusCancelada
 		return update, nil
 	}
 
-	if (oldStatus == valueobject.StatusRecebida && newStatus == valueobject.StatusEmDiagnostico) || oldStatus == valueobject.StatusEmDiagnostico {
+	if (oldStatus.IsRecebida() && newStatus.IsEmDiagnostico()) || oldStatus.IsEmDiagnostico() {
 		update.ServiceOrderStatus = valueobject.StatusEmDiagnostico
+
+		if len(request.Services) <= 0 && len(request.PartsSupplies) <= 0 {
+			return update, nil
+		}
+
 		if len(request.Services) > 0 {
 			update.Services = request.Services
 
