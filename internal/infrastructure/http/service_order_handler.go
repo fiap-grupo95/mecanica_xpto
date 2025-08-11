@@ -3,6 +3,7 @@ package http
 import (
 	"mecanica_xpto/internal/domain/model/entities"
 	"mecanica_xpto/internal/domain/usecase"
+	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -128,24 +129,24 @@ func (h *ServiceOrderHandler) UpdateServiceOrderDelivery(g *gin.Context) {
 
 	id, err := strconv.Atoi(g.Param("id"))
 	if err != nil || id <= 0 {
-		g.JSON(400, gin.H{"error": "Invalid service order ID"})
+		g.JSON(http.StatusBadRequest, gin.H{"error": "Invalid service order ID"})
 		return
 	}
 	serviceOrder.ID = uint(id)
 
 	if err := g.ShouldBindJSON(&serviceOrder); err != nil {
 		log.Error().Msgf("Error binding JSON: %v", err)
-		g.JSON(400, gin.H{"error": "Invalid input"})
+		g.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
 		return
 	}
 
 	err = h.serviceOrderUseCase.UpdateServiceOrder(g.Request.Context(), serviceOrder, DELIVERY)
 	if err != nil {
-		g.JSON(500, gin.H{"error": "Failed to update service order"})
+		g.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update service order"})
 		return
 	}
 
-	g.JSON(200, gin.H{"message": "Service order updated successfully"})
+	g.JSON(http.StatusOK, gin.H{"message": "Service order updated successfully"})
 }
 
 func (h *ServiceOrderHandler) GetServiceOrder(g *gin.Context) {
@@ -153,26 +154,26 @@ func (h *ServiceOrderHandler) GetServiceOrder(g *gin.Context) {
 
 	id, err := strconv.Atoi(g.Param("id"))
 	if err != nil || id <= 0 {
-		g.JSON(400, gin.H{"error": "Invalid service order ID"})
+		g.JSON(http.StatusBadRequest, gin.H{"error": "Invalid service order ID"})
 		return
 	}
 	serviceOrder.ID = uint(id)
 
 	ServiceOrderResponse, err := h.serviceOrderUseCase.GetServiceOrder(g.Request.Context(), serviceOrder)
 	if err != nil {
-		g.JSON(500, gin.H{"error": "Failed to retrieve service order"})
+		g.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve service order"})
 		return
 	}
 
-	g.JSON(200, ServiceOrderResponse)
+	g.JSON(http.StatusOK, ServiceOrderResponse)
 }
 
 func (h *ServiceOrderHandler) ListServiceOrders(g *gin.Context) {
 	serviceOrders, err := h.serviceOrderUseCase.ListServiceOrders(g.Request.Context())
 	if err != nil {
-		g.JSON(500, gin.H{"error": "Failed to retrieve service orders"})
+		g.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve service orders"})
 		return
 	}
 
-	g.JSON(200, serviceOrders)
+	g.JSON(http.StatusOK, serviceOrders)
 }
