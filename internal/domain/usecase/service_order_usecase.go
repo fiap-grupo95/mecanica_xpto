@@ -12,7 +12,7 @@ import (
 	"mecanica_xpto/internal/domain/model/valueobject"
 	customerRepo "mecanica_xpto/internal/domain/repository/customers"
 	"mecanica_xpto/internal/domain/repository/service"
-	"mecanica_xpto/internal/domain/repository/service_order"
+	serviceorder "mecanica_xpto/internal/domain/repository/service_order"
 	"mecanica_xpto/internal/domain/repository/vehicles"
 )
 
@@ -38,6 +38,8 @@ var (
 type IServiceOrderUseCase interface {
 	CreateServiceOrder(ctx context.Context, serviceOrder entities.ServiceOrder) error
 	UpdateServiceOrder(ctx context.Context, serviceOrder entities.ServiceOrder, flow string) error
+	GetServiceOrder(ctx context.Context, serviceOrder entities.ServiceOrder) (*entities.ServiceOrder, error)
+	ListServiceOrders(ctx context.Context) ([]*entities.ServiceOrder, error)
 }
 
 type ServiceOrderUseCase struct {
@@ -47,6 +49,8 @@ type ServiceOrderUseCase struct {
 	serviceRepo     service.IServiceRepo
 	partsSupplyRepo parts_supply.IPartsSupplyRepo
 }
+
+var _ IServiceOrderUseCase = (*ServiceOrderUseCase)(nil)
 
 func NewServiceOrderUseCase(repo serviceorder.IServiceOrderRepository, vehicleRepo vehicles.VehicleRepositoryInterface, customerRepo customerRepo.ICustomerRepository, serviceRepo service.IServiceRepo, partsSupplyRepo parts_supply.IPartsSupplyRepo) *ServiceOrderUseCase {
 	return &ServiceOrderUseCase{
@@ -473,4 +477,30 @@ func unreservePartsSupply(ctx context.Context, partsSupply entities.PartsSupply,
 	}
 	log.Info().Msgf("Parts supply with id %d unreserved successfully", current.ID)
 	return nil
+}
+
+func (u *ServiceOrderUseCase) GetServiceOrder(ctx context.Context, serviceOrder entities.ServiceOrder) (*entities.ServiceOrder, error) {
+	serviceOrderDto, err := u.repo.GetByID(serviceOrder.ID)
+	if err != nil {
+		log.Error().Msgf("error finding service order with id %d: %v", serviceOrder.ID, err)
+		return nil, err
+	}
+	if serviceOrderDto == nil {
+		log.Error().Msgf("service order with id %d not found", serviceOrder.ID)
+		return nil, ErrServiceOrderNotFound
+	}
+	return serviceOrderDto.ToDomain(), nil
+}
+
+func (u *ServiceOrderUseCase) ListServiceOrders(ctx context.Context) ([]*entities.ServiceOrder, error) {
+	var serviceOrdersResponse []*entities.ServiceOrder
+	serviceOrders, err := u.repo.List()
+	if err != nil {
+		log.Error().Msgf("error listing service orders: %v", err)
+		return nil, err
+	}
+	for _, so := range serviceOrders {
+		serviceOrdersResponse = append(serviceOrdersResponse, so.ToDomain())
+	}
+	return serviceOrdersResponse, nil
 }

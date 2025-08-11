@@ -18,10 +18,10 @@ const (
 )
 
 type ServiceOrderHandler struct {
-	serviceOrderUseCase usecase.ServiceOrderUseCase
+	serviceOrderUseCase usecase.IServiceOrderUseCase
 }
 
-func NewServiceOrderHandler(useCase usecase.ServiceOrderUseCase) *ServiceOrderHandler {
+func NewServiceOrderHandler(useCase usecase.IServiceOrderUseCase) *ServiceOrderHandler {
 	return &ServiceOrderHandler{
 		serviceOrderUseCase: useCase,
 	}
@@ -146,4 +146,33 @@ func (h *ServiceOrderHandler) UpdateServiceOrderDelivery(g *gin.Context) {
 	}
 
 	g.JSON(200, gin.H{"message": "Service order updated successfully"})
+}
+
+func (h *ServiceOrderHandler) GetServiceOrder(g *gin.Context) {
+	var serviceOrder entities.ServiceOrder
+
+	id, err := strconv.Atoi(g.Param("id"))
+	if err != nil || id <= 0 {
+		g.JSON(400, gin.H{"error": "Invalid service order ID"})
+		return
+	}
+	serviceOrder.ID = uint(id)
+
+	ServiceOrderResponse, err := h.serviceOrderUseCase.GetServiceOrder(g.Request.Context(), serviceOrder)
+	if err != nil {
+		g.JSON(500, gin.H{"error": "Failed to retrieve service order"})
+		return
+	}
+
+	g.JSON(200, ServiceOrderResponse)
+}
+
+func (h *ServiceOrderHandler) ListServiceOrders(g *gin.Context) {
+	serviceOrders, err := h.serviceOrderUseCase.ListServiceOrders(g.Request.Context())
+	if err != nil {
+		g.JSON(500, gin.H{"error": "Failed to retrieve service orders"})
+		return
+	}
+
+	g.JSON(200, serviceOrders)
 }

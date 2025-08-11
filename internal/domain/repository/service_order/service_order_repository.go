@@ -92,6 +92,7 @@ func (r *ServiceOrderRepository) GetByID(id uint) (*dto.ServiceOrderDTO, error) 
 	var serviceOrder dto.ServiceOrderDTO
 	// TODO - Avaliar o que posso tirar do Preload e deixar para serem carregados apenas quando necessário
 	err := r.db.Preload("Customer").
+		Preload("Customer.User").
 		Preload("Vehicle").
 		Preload("ServiceOrderStatus").
 		Preload("AdditionalRepairs").
@@ -176,7 +177,9 @@ func (r *ServiceOrderRepository) Update(serviceOrder *entities.ServiceOrder) err
 func (r *ServiceOrderRepository) List() ([]dto.ServiceOrderDTO, error) {
 	var serviceOrders []dto.ServiceOrderDTO
 	// TODO - Avaliar o que posso tirar do Preload e deixar para serem carregados apenas quando necessário
-	err := r.db.Preload("Customer").
+	err := r.db.
+		Preload("Customer").
+		Preload("Customer.User").
 		Preload("Vehicle").
 		Preload("ServiceOrderStatus").
 		Preload("AdditionalRepairs").
