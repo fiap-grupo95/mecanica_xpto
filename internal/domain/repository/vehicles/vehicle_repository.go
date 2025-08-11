@@ -77,7 +77,7 @@ func (r *VehicleRepository) FindByCustomerID(customerID uint) ([]dto.VehicleDTO,
 func (r *VehicleRepository) Create(vehicle entities.Vehicle) error {
 	vehicleDTO := dto.VehicleDTO{
 		Plate:      string(vehicle.Plate),
-		CustomerID: vehicle.Customer.ID,
+		CustomerID: vehicle.CustomerID,
 		Model:      vehicle.Model,
 		Year:       vehicle.Year,
 		Brand:      vehicle.Brand,
