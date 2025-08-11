@@ -509,5 +509,6 @@ func (u *ServiceOrderUseCase) ListServiceOrders(ctx context.Context) ([]*entitie
 	for _, so := range serviceOrders {
 		serviceOrdersResponse = append(serviceOrdersResponse, so.ToDomain())
 	}
+
 	return serviceOrdersResponse, nil
 }
