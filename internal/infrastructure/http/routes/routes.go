@@ -81,7 +81,7 @@ func getRoutes() {
 		customerRepository,
 		serviceRepository,
 		partsSupplyRepository)
-	serviceOrderHandler := http.NewServiceOrderHandler(serviceOrderUsecase)
+	serviceOrderHandler := http.NewServiceOrderHandler(*serviceOrderUsecase)
 
 	// Rotas protegidas
 	authGroup := v1.Group("/")

@@ -399,7 +399,7 @@ func reservePartsSupply(ctx context.Context, partsSupply entities.PartsSupply, p
 	if partsSupply.QuantityReserve > 0 {
 		current.QuantityReserve += partsSupply.QuantityReserve
 	} else if partsSupply.QuantityTotal > 0 {
-		current.QuantityTotal += partsSupply.QuantityTotal
+		current.QuantityReserve += partsSupply.QuantityTotal
 	} else {
 		return errors.New("no quantity to reserve")
 	}
@@ -463,7 +463,7 @@ func unreservePartsSupply(ctx context.Context, partsSupply entities.PartsSupply,
 			current.QuantityReserve -= partsSupply.QuantityTotal
 		}
 	} else {
-		return errors.New("no quantity to unreserved")
+		return errors.New("no quantity to unreserve")
 	}
 
 	err = partsSupplyRepo.Update(ctx, current)

@@ -21,9 +21,9 @@ type ServiceOrderHandler struct {
 	serviceOrderUseCase usecase.ServiceOrderUseCase
 }
 
-func NewServiceOrderHandler(useCase *usecase.ServiceOrderUseCase) *ServiceOrderHandler {
+func NewServiceOrderHandler(useCase usecase.ServiceOrderUseCase) *ServiceOrderHandler {
 	return &ServiceOrderHandler{
-		serviceOrderUseCase: *useCase,
+		serviceOrderUseCase: useCase,
 	}
 }
 
