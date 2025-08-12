@@ -3,6 +3,7 @@ package routes
 import (
 	"log"
 	_ "mecanica_xpto/docs" // This will be auto-generated
+	"mecanica_xpto/internal/domain/repository/additional_repair"
 	"mecanica_xpto/internal/domain/repository/customers"
 	"mecanica_xpto/internal/domain/repository/parts_supply"
 	"mecanica_xpto/internal/domain/repository/payment"
@@ -87,6 +88,14 @@ func getRoutes() {
 	paymentUseCase := usecase.NewPaymentUseCase(paymentRepository, serviceOrderRepository)
 	paymentHandler := http.NewPaymentHandler(paymentUseCase)
 
+	additionalRepairRepository := additional_repair.NewAdditionalRepairRepository(db)
+	additionalRepairUsecase := usecase.NewSOAdditionalRepairUseCase(
+		additionalRepairRepository,
+		serviceOrderRepository,
+		serviceRepository,
+		partsSupplyRepository)
+	additionalRepairHandler := http.NewAdditionalRepairHandler(additionalRepairUsecase)
+
 	// Rotas protegidas
 	authGroup := v1.Group("/")
 	authGroup.Use(middleware.AuthMiddleware(jwtService))
@@ -97,6 +106,7 @@ func getRoutes() {
 	addCustomerRoutes(authGroup, customerHandler)
 	addServiceOrderRoutes(authGroup, serviceOrderHandler)
 	addPaymentRoutes(authGroup, paymentHandler)
+	addAdditionalRepairRoutes(authGroup, additionalRepairHandler)
 }
 
 func setMiddlewares() {

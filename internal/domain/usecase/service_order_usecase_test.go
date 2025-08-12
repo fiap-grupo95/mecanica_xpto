@@ -192,6 +192,11 @@ type MockServiceOrderRepository struct {
 	mock.Mock
 }
 
+func (m *MockServiceOrderRepository) UpdateEstimate(id uint, estimate float64) error {
+	args := m.Called(id, estimate)
+	return args.Error(0)
+}
+
 func (m *MockServiceOrderRepository) GetByName(ctx context.Context, name string) (entities.Service, error) {
 	args := m.Called(ctx, name)
 	if args.Get(0) == nil {

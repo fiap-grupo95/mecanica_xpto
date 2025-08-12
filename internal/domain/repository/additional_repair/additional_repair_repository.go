@@ -1,19 +1,19 @@
 package additional_repair
 
 import (
+	"gorm.io/gorm"
 	"mecanica_xpto/internal/domain/model/dto"
 	"mecanica_xpto/internal/domain/model/entities"
-	"time"
-
-	"gorm.io/gorm"
 )
 
 type IAdditionalRepairRepository interface {
-	Create(additionalRepair *entities.AdditionalRepair) error
+	Create(additionalRepair *dto.AdditionalRepairDTO) error
 	GetByID(id uint) (*dto.AdditionalRepairDTO, error)
-	Update(additionalRepair *entities.AdditionalRepair) error
+	AddPartSupplyAndService(additionalRepair, updatedAdditionalRepair *dto.AdditionalRepairDTO) error
+	RemovePartSupplyAndService(additionalRepair, updatedAdditionalRepair *dto.AdditionalRepairDTO) error
 	GetByServiceOrder(serviceOrderId uint) ([]dto.AdditionalRepairDTO, error)
 	GetStatus(status string) (*dto.AdditionalRepairStatusDTO, error)
+	CustomerApprovalStatus(id uint, status entities.AdditionalRepairStatusDTO) error
 }
 
 // AdditionalRepairRepository implements IAdditionalRepairRepository interface
@@ -25,53 +25,16 @@ func NewAdditionalRepairRepository(db *gorm.DB) IAdditionalRepairRepository {
 	return &AdditionalRepairRepository{db: db}
 }
 
-func (r *AdditionalRepairRepository) Create(additionalRepair *entities.AdditionalRepair) error {
-	arStatus, err := r.GetStatus(string(additionalRepair.ARStatus))
+func (r *AdditionalRepairRepository) Create(additionalRepair *dto.AdditionalRepairDTO) error {
+	dtoStatus, err := r.GetStatus(additionalRepair.ARStatus.Description)
 	if err != nil {
 		return gorm.ErrInvalidData
 	}
-
-	if arStatus == nil {
-		return gorm.ErrInvalidData
-	}
-
-	additionalRepairDto := dto.AdditionalRepairDTO{
-		ID:             additionalRepair.ID,
-		ARStatusID:     arStatus.ID,
-		Estimate:       additionalRepair.Estimate,
-		ServiceOrderID: additionalRepair.ServiceOrderID,
-		CreatedAt:      additionalRepair.CreatedAt,
-		UpdatedAt:      additionalRepair.UpdatedAt,
-	}
-
+	additionalRepair.ARStatus = *dtoStatus
 	tx := r.db.Begin()
-	if err := tx.Create(&additionalRepairDto).Error; err != nil {
+	if err := tx.Create(&additionalRepair).Error; err != nil {
 		tx.Rollback()
 		return err
-	}
-
-	// Handle PartsSupplies N:N relationship
-	for _, partsSupply := range additionalRepair.PartsSupplies {
-		relation := dto.PartsSupplyAdditionalRepairDTO{
-			PartsSupplyID:      partsSupply.ID,
-			AdditionalRepairID: additionalRepairDto.ID,
-		}
-		if err := tx.Create(&relation).Error; err != nil {
-			tx.Rollback()
-			return err
-		}
-	}
-
-	// Handle Services N:N relationship
-	for _, service := range additionalRepair.Services {
-		relation := dto.ServiceAdditionalRepairDTO{
-			ServiceID:          service.ID,
-			AdditionalRepairID: additionalRepairDto.ID,
-		}
-		if err := tx.Create(&relation).Error; err != nil {
-			tx.Rollback()
-			return err
-		}
 	}
 
 	return tx.Commit().Error
@@ -79,7 +42,6 @@ func (r *AdditionalRepairRepository) Create(additionalRepair *entities.Additiona
 
 func (r *AdditionalRepairRepository) GetByID(id uint) (*dto.AdditionalRepairDTO, error) {
 	var additionalRepair dto.AdditionalRepairDTO
-	// TODO - Avaliar o que posso tirar do Preload e deixar para serem carregados apenas quando necessário
 	err := r.db.Preload("ARStatus").
 		Preload("PartsSupplies").
 		Preload("Services").
@@ -90,41 +52,12 @@ func (r *AdditionalRepairRepository) GetByID(id uint) (*dto.AdditionalRepairDTO,
 	return &additionalRepair, nil
 }
 
-func (r *AdditionalRepairRepository) Update(additionalRepair *entities.AdditionalRepair) error {
-	arStatus, err := r.GetStatus(string(additionalRepair.ARStatus))
-	if err != nil {
-		return gorm.ErrInvalidData
-	}
-
+func (r *AdditionalRepairRepository) AddPartSupplyAndService(additionalRepair, updatedAdditionalRepair *dto.AdditionalRepairDTO) error {
 	tx := r.db.Begin()
 
-	// Update main AdditionalRepair record
-	additionalRepairDto := dto.AdditionalRepairDTO{
-		ID:         additionalRepair.ID,
-		ARStatusID: arStatus.ID,
-		Estimate:   additionalRepair.Estimate,
-		UpdatedAt:  time.Now(),
-	}
-
-	if err := tx.Model(&dto.AdditionalRepairDTO{}).Where("id = ?", additionalRepair.ID).Updates(&additionalRepairDto).Error; err != nil {
-		tx.Rollback()
-		return err
-	}
-
-	// Delete existing relationships
-	if err := tx.Where("additional_repair_id = ?", additionalRepair.ID).Delete(&dto.PartsSupplyAdditionalRepairDTO{}).Error; err != nil {
-		tx.Rollback()
-		return err
-	}
-	if err := tx.Where("additional_repair_id = ?", additionalRepair.ID).Delete(&dto.ServiceAdditionalRepairDTO{}).Error; err != nil {
-		tx.Rollback()
-		return err
-	}
-
-	// Recreate PartsSupplies relationships
-	for _, partsSupply := range additionalRepair.PartsSupplies {
+	for _, ps := range updatedAdditionalRepair.PartsSupplies {
 		relation := dto.PartsSupplyAdditionalRepairDTO{
-			PartsSupplyID:      partsSupply.ID,
+			PartsSupplyID:      ps.ID,
 			AdditionalRepairID: additionalRepair.ID,
 		}
 		if err := tx.Create(&relation).Error; err != nil {
@@ -133,24 +66,73 @@ func (r *AdditionalRepairRepository) Update(additionalRepair *entities.Additiona
 		}
 	}
 
-	// Recreate Services relationships
-	for _, service := range additionalRepair.Services {
+	for _, svc := range updatedAdditionalRepair.Services {
 		relation := dto.ServiceAdditionalRepairDTO{
-			ServiceID:          service.ID,
+			ServiceID:          svc.ID,
 			AdditionalRepairID: additionalRepair.ID,
 		}
 		if err := tx.Create(&relation).Error; err != nil {
 			tx.Rollback()
 			return err
 		}
+	}
+	newEstimate := calculateEstimate(updatedAdditionalRepair.Services, updatedAdditionalRepair.PartsSupplies)
+
+	// Update only the Estimate field
+	if err := tx.Model(&dto.AdditionalRepairDTO{}).
+		Where("id = ?", additionalRepair.ID).
+		Update("estimate", newEstimate).Error; err != nil {
+		tx.Rollback()
+		return err
 	}
 
 	return tx.Commit().Error
 }
 
+func (r *AdditionalRepairRepository) RemovePartSupplyAndService(additionalRepair, updatedAdditionalRepair *dto.AdditionalRepairDTO) error {
+	tx := r.db.Begin()
+
+	if err := tx.Where("additional_repair_id = ?", additionalRepair.ID).
+		Delete(&dto.PartsSupplyAdditionalRepairDTO{}).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	if err := tx.Where("additional_repair_id = ?", additionalRepair.ID).
+		Delete(&dto.ServiceAdditionalRepairDTO{}).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	newEstimate := recalculateEstimateAfterRemoval(additionalRepair, updatedAdditionalRepair.PartsSupplies, updatedAdditionalRepair.Services)
+
+	// Update only the Estimate field
+	if err := tx.Model(&dto.AdditionalRepairDTO{}).
+		Where("id = ?", additionalRepair.ID).
+		Update("estimate", newEstimate).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return tx.Commit().Error
+}
+
+func (r *AdditionalRepairRepository) CustomerApprovalStatus(id uint, status entities.AdditionalRepairStatusDTO) error {
+	var dtoDB dto.AdditionalRepairDTO
+	if err := r.db.First(&dtoDB, id).Error; err != nil {
+		return err
+	}
+	dtoStatus, err := r.GetStatus(status.ApprovalStatus)
+	if err != nil {
+		return gorm.ErrInvalidData
+	}
+
+	return r.db.Model(&dto.AdditionalRepairDTO{}).
+		Where("id = ?", id).
+		Update("ar_status_id", dtoStatus.ID).Error
+}
+
 func (r *AdditionalRepairRepository) GetByServiceOrder(serviceOrderId uint) ([]dto.AdditionalRepairDTO, error) {
 	var additionalRepairs []dto.AdditionalRepairDTO
-	// TODO - Avaliar o que posso tirar do Preload e deixar para serem carregados apenas quando necessário
 	err := r.db.Preload("ARStatus").
 		Preload("PartsSupplies").
 		Preload("Services").
@@ -169,4 +151,29 @@ func (r *AdditionalRepairRepository) GetStatus(status string) (*dto.AdditionalRe
 		return nil, err
 	}
 	return &additionalRepairStatus, nil
+}
+
+func calculateEstimate(services []dto.ServiceDTO, partsSupplies []dto.PartsSupplyDTO) float64 {
+	var total float64
+	for _, svc := range services {
+		total += svc.Price
+	}
+	for _, ps := range partsSupplies {
+		total += ps.Price
+	}
+	return total
+}
+
+func recalculateEstimateAfterRemoval(additionalRepair *dto.AdditionalRepairDTO, removedPartsSupplies []dto.PartsSupplyDTO, removedServices []dto.ServiceDTO) float64 {
+	estimate := additionalRepair.Estimate
+	for _, svc := range removedServices {
+		estimate -= svc.Price
+	}
+	for _, ps := range removedPartsSupplies {
+		estimate -= ps.Price
+	}
+	if estimate < 0 {
+		estimate = 0
+	}
+	return estimate
 }

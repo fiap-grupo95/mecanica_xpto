@@ -9,4 +9,5 @@ const (
 	PathService       = "/service"
 	PathServiceOrders = "/service-orders"
 	PathPayments      = "/payments"
+	PathAdditionalRepair = "/additional-repair"
 )
