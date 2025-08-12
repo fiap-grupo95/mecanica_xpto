@@ -8,15 +8,17 @@ import (
 	"golang.org/x/crypto/argon2"
 )
 
+var generateSaltFunc = generateSalt
+
 func HashPassword(password string) (string, error) {
-	salt, err := generateSalt(16)
+	salt, err := generateSaltFunc(16)
 	if err != nil {
 		return "", fmt.Errorf("failed to generate salt: %w", err)
 	}
 	hash := argon2.IDKey([]byte(password), salt, 1, 64*1024, 4, 32)
 
-	saltBase64 := base64.StdEncoding.EncodeToString(salt) // <-- StdEncoding com padding
-	hashBase64 := base64.StdEncoding.EncodeToString(hash) // <-- StdEncoding com padding
+	saltBase64 := base64.StdEncoding.EncodeToString(salt)
+	hashBase64 := base64.StdEncoding.EncodeToString(hash)
 
 	return fmt.Sprintf("%s.%s", saltBase64, hashBase64), nil
 }
