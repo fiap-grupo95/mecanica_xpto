@@ -10,6 +10,7 @@ import (
 type PartsSupplyServiceOrderDTO struct {
 	PartsSupplyID  uint `gorm:"column:parts_supply_id;primaryKey"`
 	ServiceOrderID uint `gorm:"column:service_order_id;primaryKey"`
+	Quantity       int  `gorm:"column:quantity"`
 }
 
 // N:N relationship between Service and ServiceOrder

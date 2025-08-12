@@ -114,13 +114,13 @@ func (u *ServiceOrderUseCase) UpdateServiceOrder(ctx context.Context, request en
 
 	switch flow {
 	case DIAGNOSIS:
-		update, err = ValidateDiagnosis(ctx, &request, serviceOrderDto, update, u.serviceRepo, u.partsSupplyRepo)
+		update, err = ValidateDiagnosis(ctx, &request, serviceOrderDto, update, u.serviceRepo, u.partsSupplyRepo, u.repo)
 		if err != nil {
 			log.Error().Msgf("Error validating diagnosis: %v", err)
 			return err
 		}
 	case ESTIMATE:
-		update, err = ValidateEstimate(ctx, &request, serviceOrderDto, update, u.partsSupplyRepo)
+		update, err = ValidateEstimate(ctx, &request, serviceOrderDto, update, u.partsSupplyRepo, u.repo)
 		if err != nil {
 			log.Error().Msgf("Error validating estimate: %v", err)
 			return err
@@ -148,7 +148,7 @@ func (u *ServiceOrderUseCase) UpdateServiceOrder(ctx context.Context, request en
 // ValidateDiagnosis checks if the service order status is valid for diagnosis.
 // If the status is "Recebida" or "EmDiagnostico" and the request status is "EmDiagnostico",
 // it updates the service order status to "EmDiagnostico".
-func ValidateDiagnosis(ctx context.Context, request *entities.ServiceOrder, serviceOrderDto *dto.ServiceOrderDTO, update *entities.ServiceOrder, serviceRepo service.IServiceRepo, partsSupplyRepo parts_supply.IPartsSupplyRepo) (*entities.ServiceOrder, error) {
+func ValidateDiagnosis(ctx context.Context, request *entities.ServiceOrder, serviceOrderDto *dto.ServiceOrderDTO, update *entities.ServiceOrder, serviceRepo service.IServiceRepo, partsSupplyRepo parts_supply.IPartsSupplyRepo, serviceOrderRepo serviceorder.IServiceOrderRepository) (*entities.ServiceOrder, error) {
 	newStatus := request.ServiceOrderStatus
 	oldStatus := serviceOrderDto.ServiceOrderStatus.ToDomain()
 
@@ -197,6 +197,7 @@ func ValidateDiagnosis(ctx context.Context, request *entities.ServiceOrder, serv
 				}
 			}
 
+			// Reserve each PartsSupply
 			for _, ps := range request.PartsSupplies {
 				// Reserve the parts supply
 				err := reservePartsSupply(ctx, ps, partsSupplyRepo)
@@ -234,29 +235,23 @@ func CalculateEstimate(ctx context.Context, services []entities.Service, partsSu
 
 	servicesRegistered, err := getServicesByIDs(ctx, services, serviceRepo)
 	if err != nil {
-		log.Error().Msgf("Error getting services by IDs: %v", err)
 		return 0, err
 	}
 
 	partsSuppliesRegistered, err := getPartsSupplyByIDs(ctx, partsSupplies, psRepo)
 	if err != nil {
-		log.Error().Msgf("Error getting parts supplies by IDs: %v", err)
 		return 0, err
 	}
 
 	// Calculate services total
 	for _, s := range servicesRegistered {
-		log.Debug().Msgf("Service ID: %d, Price: %.2f", s.ID, s.Price)
 		totalEstimate = totalEstimate + s.Price
 	}
-
-	log.Debug().Msgf("Total estimate from services: %.2f", totalEstimate)
 
 	// Get the price of each partsSupplies from partsSuppliesRegistered and set it to partsSupplies
 	for _, ps := range partsSuppliesRegistered {
 		for _, reqPS := range partsSupplies {
 			if ps.ID == reqPS.ID {
-				log.Debug().Msgf("PartsSupply ID: %d, Price: %.2f, QuantityReserve: %d, QuantityTotal: %d", ps.ID, ps.Price, reqPS.QuantityReserve, reqPS.QuantityTotal)
 				quantity := reqPS.QuantityReserve // Use reserve quantity by default
 				if reqPS.QuantityTotal > 0 {      // If total quantity is specified, use that instead
 					quantity = reqPS.QuantityTotal
@@ -269,7 +264,7 @@ func CalculateEstimate(ctx context.Context, services []entities.Service, partsSu
 	return totalEstimate, nil
 }
 
-func ValidateEstimate(ctx context.Context, request *entities.ServiceOrder, serviceOrderDto *dto.ServiceOrderDTO, update *entities.ServiceOrder, partsSupplyRepo parts_supply.IPartsSupplyRepo) (*entities.ServiceOrder, error) {
+func ValidateEstimate(ctx context.Context, request *entities.ServiceOrder, serviceOrderDto *dto.ServiceOrderDTO, update *entities.ServiceOrder, partsSupplyRepo parts_supply.IPartsSupplyRepo, serviceOrderRepo serviceorder.IServiceOrderRepository) (*entities.ServiceOrder, error) {
 	oldStatus := serviceOrderDto.ServiceOrderStatus.ToDomain()
 
 	if !request.ServiceOrderStatus.IsValid() {
@@ -279,18 +274,25 @@ func ValidateEstimate(ctx context.Context, request *entities.ServiceOrder, servi
 	if oldStatus.IsAguardandoAprovacao() && request.ServiceOrderStatus.IsAprovada() {
 		update.ServiceOrderStatus = valueobject.StatusAprovada
 		// If the status is "Aprovada", we can subtract the total available quantity of PartsSupplies from the quantity reserve
-		//partsSupplies, err := getPartsSuppliesByServiceOrderID(ctx, serviceOrderDto.ID, partsSupplyRepo)
-		for _, ps := range request.PartsSupplies {
-			//if err != nil {
-			//	log.Error().Msgf("Error getting parts supplies by service order ID: %v", err)
-			//	return nil, err
-			//}
-			//entity := entities.PartsSupply{
-			//	ID:              ps.ID,
-			//	QuantityReserve: ps.QuantityReserve,
-			//	QuantityTotal:   ps.QuantityTotal,
-			//}
-			err := releaseReservedPartsSupply(ctx, ps, partsSupplyRepo)
+		partsSupplies, err := getPartsSuppliesByServiceOrderID(ctx, serviceOrderDto.ID, partsSupplyRepo)
+		if err != nil {
+			log.Error().Msgf("Error getting parts supplies by service order ID: %v", err)
+			return nil, err
+		}
+
+		for _, ps := range partsSupplies {
+			relation, err := serviceOrderRepo.GetPartsSupplyServiceOrder(ps.ID, serviceOrderDto.ID)
+			if err != nil {
+				log.Error().Msgf("Error getting parts supply service order relation: %v", err)
+				return nil, err
+			}
+
+			entity := entities.PartsSupply{
+				ID:              ps.ID,
+				QuantityReserve: relation.Quantity, // Use the quantity from the relationship
+				QuantityTotal:   relation.Quantity,
+			}
+			err = releaseReservedPartsSupply(ctx, entity, partsSupplyRepo)
 			if err != nil {
 				log.Error().Msgf("Error releasing reserved parts supply: %v", err)
 				return nil, err
@@ -301,13 +303,13 @@ func ValidateEstimate(ctx context.Context, request *entities.ServiceOrder, servi
 	if oldStatus.IsAguardandoAprovacao() && request.ServiceOrderStatus.IsRejeitada() {
 		update.ServiceOrderStatus = valueobject.StatusRejeitada
 		// If the status is "Rejeitada", we can reset the PartsSupplies reserve
-		//partsSupplies, err := getPartsSuppliesByServiceOrderID(ctx, serviceOrderDto.ID, partsSupplyRepo)
-		//if err != nil {
-		//	log.Error().Msgf("Error getting parts supplies by service order ID: %v", err)
-		//	return nil, err
-		//
-		//}
-		for _, ps := range request.PartsSupplies {
+		partsSupplies, err := getPartsSuppliesByServiceOrderID(ctx, serviceOrderDto.ID, partsSupplyRepo)
+		if err != nil {
+			log.Error().Msgf("Error getting parts supplies by service order ID: %v", err)
+			return nil, err
+
+		}
+		for _, ps := range partsSupplies {
 			err := unreservePartsSupply(ctx, ps, partsSupplyRepo)
 			if err != nil {
 				log.Error().Msgf("Error unreserving parts supply: %v", err)
@@ -599,16 +601,16 @@ func getPartsSupplyByIDs(ctx context.Context, partsSupplies []entities.PartsSupp
 	return psDb, nil
 }
 
-//func getPartsSuppliesByServiceOrderID(ctx context.Context, serviceOrderID uint, partsSupplyRepo parts_supply.IPartsSupplyRepo) ([]entities.PartsSupply, error) {
-//	if serviceOrderID == 0 {
-//		return nil, ErrInvalidID
-//	}
-//
-//	partsSupplies, err := partsSupplyRepo.GetByServiceOrderID(ctx, serviceOrderID)
-//	if err != nil {
-//		log.Error().Msgf("error getting parts supplies for service order %d: %v", serviceOrderID, err)
-//		return nil, err
-//	}
-//
-//	return partsSupplies, nil
-//}
+func getPartsSuppliesByServiceOrderID(ctx context.Context, serviceOrderID uint, partsSupplyRepo parts_supply.IPartsSupplyRepo) ([]entities.PartsSupply, error) {
+	if serviceOrderID == 0 {
+		return nil, ErrInvalidID
+	}
+
+	partsSupplies, err := partsSupplyRepo.GetByServiceOrderID(ctx, serviceOrderID)
+	if err != nil {
+		log.Error().Msgf("error getting parts supplies for service order %d: %v", serviceOrderID, err)
+		return nil, err
+	}
+
+	return partsSupplies, nil
+}
