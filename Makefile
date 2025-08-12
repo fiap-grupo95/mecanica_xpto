@@ -8,6 +8,7 @@ GO_BIN=$(shell go env GOPATH)/bin
 .PHONY: init up down logs swag-install swag-generate swag-run
 
 init: swag-install swag-generate
+	cp .env-example .env
 	docker compose up -d --build
 
 	@echo "Aguardando banco ficar pronto..."
