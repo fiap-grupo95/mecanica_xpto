@@ -8,17 +8,18 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/gin-gonic/gin"
-	"github.com/golang/mock/gomock"
-	"github.com/stretchr/testify/assert"
 	"mecanica_xpto/internal/domain/model/entities"
 	handler "mecanica_xpto/internal/infrastructure/http"
 	"mecanica_xpto/internal/infrastructure/http/mocks"
+
+	"github.com/gin-gonic/gin"
+	"github.com/golang/mock/gomock"
+	"github.com/stretchr/testify/assert"
 )
 
 func setupADRRouter(h *handler.AdditionalRepairHandler) *gin.Engine {
 	r := gin.Default()
-	r.POST("/additional-repair", h.CreateSOAdditionalRepair)
+	r.POST("/additional-repair", h.CreateAdditionalRepair)
 	r.GET("/additional-repair/:id", h.GetAdditionalRepair)
 	r.POST("/additional-repair/:id/part", h.AddPartSupplyAndService)
 	r.DELETE("/additional-repair/:id/part", h.RemovePartSupplyAndService)

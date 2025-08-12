@@ -20,6 +20,8 @@ var (
 
 // VehicleHandler handles HTTP requests for vehicle operations
 // @title Vehicle API
+// @version 1.0
+// @description API for managing vehicles in the workshop management system
 type VehicleHandler struct {
 	service usecase.VehicleServiceInterface
 }
@@ -48,7 +50,8 @@ func mapVehicleError(err error) *pkg.AppError {
 // GetVehicles godoc
 // @Summary Get all vehicles
 // @Description Retrieves a list of all vehicles
-// @Tags vehicles
+// @Tags Vehicles
+// @Security Bearer
 // @Accept json
 // @Produce json
 // @Success 200 {array} entities.Vehicle
@@ -67,7 +70,8 @@ func (v VehicleHandler) GetVehicles(c *gin.Context) {
 // GetVehicleByCustomerID godoc
 // @Summary Get vehicles by customer ID
 // @Description Retrieves all vehicles belonging to a specific customer
-// @Tags vehicles
+// @Tags Vehicles
+// @Security Bearer
 // @Accept json
 // @Produce json
 // @Param customerID path int true "Customer ID"
@@ -95,7 +99,8 @@ func (v VehicleHandler) GetVehicleByCustomerID(c *gin.Context) {
 // GetVehicleByID godoc
 // @Summary Get vehicle by ID
 // @Description Retrieves a vehicle by its ID
-// @Tags vehicles
+// @Tags Vehicles
+// @Security Bearer
 // @Accept json
 // @Produce json
 // @Param id path int true "Vehicle ID"
@@ -124,7 +129,8 @@ func (v VehicleHandler) GetVehicleByID(c *gin.Context) {
 // GetVehicleByPlate godoc
 // @Summary Get vehicle by plate
 // @Description Retrieves a vehicle by its license plate
-// @Tags vehicles
+// @Tags Vehicles
+// @Security Bearer
 // @Accept json
 // @Produce json
 // @Param plate path string true "Vehicle license plate"
@@ -152,7 +158,8 @@ func (v VehicleHandler) GetVehicleByPlate(c *gin.Context) {
 // CreateVehicle godoc
 // @Summary Create a new vehicle
 // @Description Creates a new vehicle record
-// @Tags vehicles
+// @Tags Vehicles
+// @Security Bearer
 // @Accept json
 // @Produce json
 // @Param vehicle body entities.Vehicle true "Vehicle information"
@@ -180,7 +187,8 @@ func (v VehicleHandler) CreateVehicle(c *gin.Context) {
 // UpdateVehicle godoc
 // @Summary Update a vehicle partially
 // @Description Updates specific fields of an existing vehicle
-// @Tags vehicles
+// @Tags Vehicles
+// @Security Bearer
 // @Accept json
 // @Produce json
 // @Param id path int true "Vehicle ID"
@@ -215,7 +223,8 @@ func (v VehicleHandler) UpdateVehicle(c *gin.Context) {
 // DeleteVehicle godoc
 // @Summary Delete a vehicle
 // @Description Deletes a vehicle by its ID
-// @Tags vehicles
+// @Tags Vehicles
+// @Security Bearer
 // @Accept json
 // @Produce json
 // @Param id path int true "Vehicle ID"
