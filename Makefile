@@ -3,11 +3,10 @@ APP_CONTAINER_NAME=mecanica_xpto
 DB_SERVICE_NAME=db
 DB_CONTAINER_NAME=db
 APP_BINARY_PATH=/app/mecanica-xpto-api
-GO_BIN=$(shell go env GOPATH)/bin
 
-.PHONY: init up down logs swag-install swag-generate swag-run test coverage coverage-html
+.PHONY: init up down logs swag-generate-docker swag-run-docker test coverage coverage-html
 
-init: swag-install swag-generate
+init:
 	cp .env-example .env
 	docker compose up -d --build
 
@@ -40,23 +39,13 @@ down:
 logs:
 	docker compose logs -f $(APP_SERVICE_NAME)
 
-# Instala swag globalmente via Go (requer Go instalado no host)
-swag-install:
-	@echo "Instalando swag (se já instalado, ignorar)..."
-	go install github.com/swaggo/swag/cmd/swag@latest
-
-# Gera documentação Swagger a partir dos comentários no código
-swag-generate:
-	@echo "Gerando documentação Swagger..."
-	@if [ ! -f "$(GO_BIN)/swag" ]; then \
-		echo "swag não encontrado em $(GO_BIN), por favor rode 'make swag-install' primeiro" && exit 1; \
-	fi
-	$(GO_BIN)/swag init -g internal/infrastructure/http/routes/routes.go --output ./docs --parseDependency --parseInternal
-
-# Gera documentação Swagger e executa o servidor localmente (fora do Docker)
-swag-run: swag-generate
-	@echo "Rodando a aplicação localmente..."
-	go run cmd/api/main.go
+# Gera documentação Swagger dentro do container Go (opcional, caso queira rodar isolado)
+swag-generate-docker:
+	@echo "Gerando documentação Swagger dentro do container Go..."
+	docker run --rm -v $(PWD):/app -w /app golang:1.24.4 \
+		sh -c "go install github.com/swaggo/swag/cmd/swag@latest && \
+		       /go/bin/swag init -g internal/infrastructure/http/routes/routes.go \
+		       --output ./docs --parseDependency --parseInternal"
 
 dev-up:
 	cp .env-example .env
