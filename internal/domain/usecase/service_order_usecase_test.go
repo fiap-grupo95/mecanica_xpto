@@ -715,7 +715,7 @@ func TestValidateDelivery(t *testing.T) {
 				ServiceOrderStatus: valueobject.StatusEntregue,
 				Payment: &entities.Payment{
 					ID:           1,
-					ServiceOrder: entities.ServiceOrder{ID: 1},
+					ServiceOrder: &entities.ServiceOrder{ID: 1},
 					PaymentDate:  time.Now(),
 				},
 			},

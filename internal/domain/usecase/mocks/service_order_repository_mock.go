@@ -43,3 +43,11 @@ func (m *MockServiceOrderRepository) GetStatus(status valueobject.ServiceOrderSt
 	}
 	return args.Get(0).(*dto.ServiceOrderStatusDTO), args.Error(1)
 }
+
+func (m *MockServiceOrderRepository) GetPartsSupplyServiceOrder(serviceOrderID uint, partsSupplyID uint) (*dto.PartsSupplyServiceOrderDTO, error) {
+	args := m.Called(serviceOrderID, partsSupplyID)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*dto.PartsSupplyServiceOrderDTO), args.Error(1)
+}

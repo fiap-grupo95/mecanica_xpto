@@ -71,7 +71,7 @@ func (m *ServiceOrderDTO) ToDomain() *entities.ServiceOrder {
 	var payment *entities.Payment
 	if m.Payment != nil {
 		p := m.Payment.ToDomain()
-		payment = &p
+		payment = p
 	}
 
 	// Convert Customer and Vehicle if they are loaded
