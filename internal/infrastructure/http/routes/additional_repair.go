@@ -13,5 +13,6 @@ func addAdditionalRepairRoutes(rg *gin.RouterGroup, additionalRepair *http.Addit
 		serviceOrdersRoutes.GET("/:id", additionalRepair.GetAdditionalRepair)
 		serviceOrdersRoutes.PATCH("/:id/add", additionalRepair.AddPartSupplyAndService)
 		serviceOrdersRoutes.PATCH("/:id/remove", additionalRepair.RemovePartSupplyAndService)
+		serviceOrdersRoutes.PATCH("/:id/customer_approval", additionalRepair.CustomerApproval)
 	}
 }

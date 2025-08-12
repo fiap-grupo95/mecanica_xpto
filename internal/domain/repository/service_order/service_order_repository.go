@@ -17,6 +17,7 @@ type IServiceOrderRepository interface {
 	List() ([]dto.ServiceOrderDTO, error)
 	GetStatus(status valueobject.ServiceOrderStatus) (*dto.ServiceOrderStatusDTO, error)
 	GetPartsSupplyServiceOrder(partsSupplyID uint, serviceOrderID uint) (*dto.PartsSupplyServiceOrderDTO, error)
+	UpdateEstimate(id uint, estimate float64) error
 }
 
 // ServiceOrderRepository implements IServiceOrderRepository interface
@@ -92,6 +93,18 @@ func (r *ServiceOrderRepository) GetByID(id uint) (*dto.ServiceOrderDTO, error) 
 		return nil, err
 	}
 	return &serviceOrder, nil
+}
+
+func (r *ServiceOrderRepository) UpdateEstimate(id uint, estimate float64) error {
+	var dtoDB dto.ServiceOrderDTO
+	if err := r.db.First(&dtoDB, id).Error; err != nil {
+		return err
+	}
+	newEstimate := dtoDB.Estimate + estimate
+
+	return r.db.Model(&dto.ServiceOrderDTO{}).
+		Where("id = ?", id).
+		Update("estimate", newEstimate).Error
 }
 
 func (r *ServiceOrderRepository) Update(serviceOrder *entities.ServiceOrder) error {

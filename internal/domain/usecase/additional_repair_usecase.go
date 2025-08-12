@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"errors"
 	"mecanica_xpto/internal/domain/model/dto"
 	"mecanica_xpto/internal/domain/repository/additional_repair"
 	"mecanica_xpto/internal/domain/repository/parts_supply"
@@ -11,6 +12,11 @@ import (
 	"mecanica_xpto/internal/domain/model/entities"
 	"mecanica_xpto/internal/domain/repository/service"
 	serviceorder "mecanica_xpto/internal/domain/repository/service_order"
+)
+
+var (
+	ErrAdditionalRepairNotFound = errors.New("additional repair not found")
+	ErrStatusNotPermitted       = errors.New("additional repair status not permitted")
 )
 
 type IAdditionalRepairUseCase interface {
@@ -78,10 +84,17 @@ func (u *AdditionalRepairUseCase) CreateAdditionalRepair(ctx context.Context, ad
 	return nil
 }
 
-func (u *AdditionalRepairUseCase) AddPartSupplyAndService(ctx context.Context, adrId uint, adr entities.AdditionalRepair) error {
+func (u *AdditionalRepairUseCase) AddPartSupplyAndService(ctx context.Context, additionalRepairId uint, adr entities.AdditionalRepair) error {
+	additionalRepairDto, err := u.repo.GetByID(additionalRepairId)
+	if err != nil {
+		log.Error().Msgf("error finding additional repair with id %d: %v", additionalRepairId, err)
+		return err
+	}
+	if err := u.ValidateAdditionalRepairStatus(additionalRepairDto.ARStatus.Description); err != nil {
+		return err
+	}
 	var estimatedPartsSupply float64
 	var estimatedService float64
-	var err error
 
 	var listServices []dto.ServiceDTO
 	var listPartsSupply []dto.PartsSupplyDTO
@@ -94,14 +107,14 @@ func (u *AdditionalRepairUseCase) AddPartSupplyAndService(ctx context.Context, a
 		return err
 	}
 
-	additionalRepair := dto.AdditionalRepairDTO{
+	updated := dto.AdditionalRepairDTO{
 		ServiceOrderID: adr.ServiceOrderID,
 		Description:    adr.Description,
 		Estimate:       estimatedService + estimatedPartsSupply,
 		Services:       listServices,
 		PartsSupplies:  listPartsSupply,
 	}
-	err = u.repo.AddPartSupplyAndService(adrId, &additionalRepair)
+	err = u.repo.AddPartSupplyAndService(additionalRepairDto, &updated)
 	if err != nil {
 		log.Error().Msgf("Error adding part suplly and services for additional repair: %v", err)
 		return err
@@ -109,10 +122,17 @@ func (u *AdditionalRepairUseCase) AddPartSupplyAndService(ctx context.Context, a
 	return nil
 }
 
-func (u *AdditionalRepairUseCase) RemovePartSupplyAndService(ctx context.Context, adrId uint, adr entities.AdditionalRepair) error {
+func (u *AdditionalRepairUseCase) RemovePartSupplyAndService(ctx context.Context, additionalRepairId uint, adr entities.AdditionalRepair) error {
+	additionalRepairDto, err := u.repo.GetByID(additionalRepairId)
+	if err != nil {
+		log.Error().Msgf("error finding additional repair with id %d: %v", additionalRepairId, err)
+		return err
+	}
+	if err := u.ValidateAdditionalRepairStatus(additionalRepairDto.ARStatus.Description); err != nil {
+		return err
+	}
 	var estimatedPartsSupply float64
 	var estimatedService float64
-	var err error
 
 	var listServices []dto.ServiceDTO
 	var listPartsSupply []dto.PartsSupplyDTO
@@ -125,14 +145,14 @@ func (u *AdditionalRepairUseCase) RemovePartSupplyAndService(ctx context.Context
 		return err
 	}
 
-	additionalRepair := dto.AdditionalRepairDTO{
+	updated := dto.AdditionalRepairDTO{
 		ServiceOrderID: adr.ServiceOrderID,
 		Description:    adr.Description,
 		Estimate:       estimatedService + estimatedPartsSupply,
 		Services:       listServices,
 		PartsSupplies:  listPartsSupply,
 	}
-	err = u.repo.AddPartSupplyAndService(adrId, &additionalRepair)
+	err = u.repo.AddPartSupplyAndService(additionalRepairDto, &updated)
 	if err != nil {
 		log.Error().Msgf("Error adding part suplly and services for additional repair: %v", err)
 		return err
@@ -151,6 +171,30 @@ func (u *AdditionalRepairUseCase) GetAdditionalRepair(ctx context.Context, addit
 		return entities.AdditionalRepair{}, ErrServiceOrderNotFound
 	}
 	return additionalRepairDto.ToDomain(), nil
+}
+
+func (u *AdditionalRepairUseCase) CustomerApprovalStatus(ctx context.Context, additionalRepairId uint, status entities.AdditionalRepairStatusDTO) error {
+	additionalRepairDto, err := u.repo.GetByID(additionalRepairId)
+	if err != nil {
+		log.Error().Msgf("error finding additional repair with id %d: %v", additionalRepairId, err)
+		return err
+	}
+	if err := u.ValidateAdditionalRepairStatus(additionalRepairDto.ARStatus.Description); err != nil {
+		return err
+	}
+	err = u.repo.CustomerApprovalStatus(additionalRepairId, status)
+	if err != nil {
+		log.Error().Msgf("error updating customer approval with id %d: %v", additionalRepairId, err)
+		return err
+	}
+
+	err = u.repoOS.UpdateEstimate(additionalRepairDto.ServiceOrderID, additionalRepairDto.Estimate)
+	if err != nil {
+		log.Error().Msgf("error updating service order estimate with id %d: %v", additionalRepairDto.ServiceOrderID, err)
+		return err
+	}
+
+	return nil
 }
 
 func (u *AdditionalRepairUseCase) addPartsSupplyToAdditionalRepair(ctx context.Context, partsSupplyId []entities.PartsSupply) ([]dto.PartsSupplyDTO, float64, error) {
@@ -189,4 +233,12 @@ func (u *AdditionalRepairUseCase) addServiceToAdditionalRepair(ctx context.Conte
 		listServices = append(listServices, dto.ServiceDTO{ID: s.ID})
 	}
 	return listServices, estimatedPrice, nil
+}
+
+func (u *AdditionalRepairUseCase) ValidateAdditionalRepairStatus(status string) error {
+	if status != "IN_ANALYSIS" {
+		log.Error().Msgf("invalid additional repair status: %s", status)
+		return ErrStatusNotPermitted
+	}
+	return nil
 }

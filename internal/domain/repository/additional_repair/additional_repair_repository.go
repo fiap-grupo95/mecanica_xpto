@@ -3,15 +3,17 @@ package additional_repair
 import (
 	"gorm.io/gorm"
 	"mecanica_xpto/internal/domain/model/dto"
+	"mecanica_xpto/internal/domain/model/entities"
 )
 
 type IAdditionalRepairRepository interface {
 	Create(additionalRepair *dto.AdditionalRepairDTO) error
 	GetByID(id uint) (*dto.AdditionalRepairDTO, error)
-	AddPartSupplyAndService(id uint, updatedAdditionalRepair *dto.AdditionalRepairDTO) error
-	RemovePartSupplyAndService(id uint, updatedAdditionalRepair *dto.AdditionalRepairDTO) error
+	AddPartSupplyAndService(additionalRepair, updatedAdditionalRepair *dto.AdditionalRepairDTO) error
+	RemovePartSupplyAndService(additionalRepair, updatedAdditionalRepair *dto.AdditionalRepairDTO) error
 	GetByServiceOrder(serviceOrderId uint) ([]dto.AdditionalRepairDTO, error)
 	GetStatus(status string) (*dto.AdditionalRepairStatusDTO, error)
+	CustomerApprovalStatus(id uint, status entities.AdditionalRepairStatusDTO) error
 }
 
 // AdditionalRepairRepository implements IAdditionalRepairRepository interface
@@ -50,17 +52,13 @@ func (r *AdditionalRepairRepository) GetByID(id uint) (*dto.AdditionalRepairDTO,
 	return &additionalRepair, nil
 }
 
-func (r *AdditionalRepairRepository) AddPartSupplyAndService(id uint, updatedAdditionalRepair *dto.AdditionalRepairDTO) error {
-	var dtoDB dto.AdditionalRepairDTO
-	if err := r.db.First(&dtoDB, id).Error; err != nil {
-		return err
-	}
+func (r *AdditionalRepairRepository) AddPartSupplyAndService(additionalRepair, updatedAdditionalRepair *dto.AdditionalRepairDTO) error {
 	tx := r.db.Begin()
 
 	for _, ps := range updatedAdditionalRepair.PartsSupplies {
 		relation := dto.PartsSupplyAdditionalRepairDTO{
 			PartsSupplyID:      ps.ID,
-			AdditionalRepairID: id,
+			AdditionalRepairID: additionalRepair.ID,
 		}
 		if err := tx.Create(&relation).Error; err != nil {
 			tx.Rollback()
@@ -71,7 +69,7 @@ func (r *AdditionalRepairRepository) AddPartSupplyAndService(id uint, updatedAdd
 	for _, svc := range updatedAdditionalRepair.Services {
 		relation := dto.ServiceAdditionalRepairDTO{
 			ServiceID:          svc.ID,
-			AdditionalRepairID: id,
+			AdditionalRepairID: additionalRepair.ID,
 		}
 		if err := tx.Create(&relation).Error; err != nil {
 			tx.Rollback()
@@ -82,7 +80,7 @@ func (r *AdditionalRepairRepository) AddPartSupplyAndService(id uint, updatedAdd
 
 	// Update only the Estimate field
 	if err := tx.Model(&dto.AdditionalRepairDTO{}).
-		Where("id = ?", id).
+		Where("id = ?", additionalRepair.ID).
 		Update("estimate", newEstimate).Error; err != nil {
 		tx.Rollback()
 		return err
@@ -91,35 +89,46 @@ func (r *AdditionalRepairRepository) AddPartSupplyAndService(id uint, updatedAdd
 	return tx.Commit().Error
 }
 
-func (r *AdditionalRepairRepository) RemovePartSupplyAndService(id uint, updatedAdditionalRepair *dto.AdditionalRepairDTO) error {
-	var dtoDB dto.AdditionalRepairDTO
-	if err := r.db.First(&dtoDB, id).Error; err != nil {
-		return err
-	}
+func (r *AdditionalRepairRepository) RemovePartSupplyAndService(additionalRepair, updatedAdditionalRepair *dto.AdditionalRepairDTO) error {
 	tx := r.db.Begin()
 
-	if err := tx.Where("additional_repair_id = ?", id).
+	if err := tx.Where("additional_repair_id = ?", additionalRepair.ID).
 		Delete(&dto.PartsSupplyAdditionalRepairDTO{}).Error; err != nil {
 		tx.Rollback()
 		return err
 	}
 
-	if err := tx.Where("additional_repair_id = ?", id).
+	if err := tx.Where("additional_repair_id = ?", additionalRepair.ID).
 		Delete(&dto.ServiceAdditionalRepairDTO{}).Error; err != nil {
 		tx.Rollback()
 		return err
 	}
-	newEstimate := recalculateEstimateAfterRemoval(&dtoDB, updatedAdditionalRepair.PartsSupplies, updatedAdditionalRepair.Services)
+	newEstimate := recalculateEstimateAfterRemoval(additionalRepair, updatedAdditionalRepair.PartsSupplies, updatedAdditionalRepair.Services)
 
 	// Update only the Estimate field
 	if err := tx.Model(&dto.AdditionalRepairDTO{}).
-		Where("id = ?", id).
+		Where("id = ?", additionalRepair.ID).
 		Update("estimate", newEstimate).Error; err != nil {
 		tx.Rollback()
 		return err
 	}
 
 	return tx.Commit().Error
+}
+
+func (r *AdditionalRepairRepository) CustomerApprovalStatus(id uint, status entities.AdditionalRepairStatusDTO) error {
+	var dtoDB dto.AdditionalRepairDTO
+	if err := r.db.First(&dtoDB, id).Error; err != nil {
+		return err
+	}
+	dtoStatus, err := r.GetStatus(status.ApprovalStatus)
+	if err != nil {
+		return gorm.ErrInvalidData
+	}
+
+	return r.db.Model(&dto.AdditionalRepairDTO{}).
+		Where("id = ?", id).
+		Update("ar_status_id", dtoStatus.ID).Error
 }
 
 func (r *AdditionalRepairRepository) GetByServiceOrder(serviceOrderId uint) ([]dto.AdditionalRepairDTO, error) {

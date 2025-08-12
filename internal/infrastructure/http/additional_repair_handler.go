@@ -97,3 +97,25 @@ func (h *AdditionalRepairHandler) RemovePartSupplyAndService(g *gin.Context) {
 
 	g.JSON(201, gin.H{"message": "Additional repair updated successfully"})
 }
+
+func (h *AdditionalRepairHandler) CustomerApproval(g *gin.Context) {
+	idStr := g.Param("id")
+	id, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil {
+		appErr := pkg.NewDomainErrorSimple("INVALID_ID", "Invalid customer ID", http.StatusBadRequest)
+		g.JSON(appErr.HTTPStatus, appErr.ToHTTPError())
+	}
+	var adr entities.AdditionalRepairStatusDTO
+	if err := g.ShouldBindJSON(&adr); err != nil {
+		g.JSON(400, gin.H{"error": "Invalid input"})
+		return
+	}
+
+	err = h.additionalRepairUseCase.CustomerApprovalStatus(g.Request.Context(), uint(id), adr)
+	if err != nil {
+		g.JSON(500, gin.H{"error": "Failed to update additional repair"})
+		return
+	}
+
+	g.JSON(201, gin.H{"message": "Additional repair updated successfully"})
+}

@@ -17,3 +17,7 @@ type AdditionalRepair struct {
 	PartsSupplies  []PartsSupply                      `json:"parts_supplies,omitempty"`
 	Services       []Service                          `json:"services,omitempty"`
 }
+
+type AdditionalRepairStatusDTO struct {
+	ApprovalStatus string `json:"approval_status" binding:"required,oneof=APPROVED DENIED"`
+}
