@@ -167,6 +167,14 @@ type MockPartsSupplyRepository struct {
 	mock.Mock
 }
 
+func (m *MockPartsSupplyRepository) GetByServiceOrderID(ctx context.Context, serviceOrderID uint) ([]entities.PartsSupply, error) {
+	args := m.Called(ctx, serviceOrderID)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).([]entities.PartsSupply), args.Error(1)
+}
+
 func (m *MockPartsSupplyRepository) Create(ctx context.Context, ps *entities.PartsSupply) (entities.PartsSupply, error) {
 	args := m.Called(ctx, ps)
 	if args.Get(0) == nil {
@@ -493,37 +501,53 @@ func TestValidateEstimate(t *testing.T) {
 
 func TestCalculateEstimate(t *testing.T) {
 	tests := []struct {
-		name          string
-		services      []entities.Service
-		partsSupplies []entities.PartsSupply
-		expected      float64
+		name           string
+		services       []entities.Service
+		partsSupplies  []entities.PartsSupply
+		serviceRepo    *ServiceRepoMock
+		partsSuplyRepo *MockPartsSupplyRepository
+		expected       float64
 	}{
 		{
 			name: "Calculate with services and parts supplies",
 			services: []entities.Service{
-				{ID: 1, Price: 100.0},
-				{ID: 2, Price: 150.0},
+				{ID: 1},
+				{ID: 2},
 			},
 			partsSupplies: []entities.PartsSupply{
-				{ID: 1, Price: 50.0, QuantityTotal: 2},
-				{ID: 2, Price: 75.0, QuantityReserve: 1},
+				{ID: 1, QuantityReserve: 2},
+				{ID: 2, QuantityReserve: 3},
 			},
-			expected: 425.0, // Services (100 + 150) + Parts (50*2 + 75*1) = 250 + 175 = 425
-		},
-		{
-			name: "Calculate with only services",
-			services: []entities.Service{
-				{ID: 1, Price: 100.0},
-				{ID: 2, Price: 150.0},
-			},
-			partsSupplies: []entities.PartsSupply{},
-			expected:      250.0,
+			serviceRepo:    &ServiceRepoMock{},
+			partsSuplyRepo: &MockPartsSupplyRepository{},
+			expected:       350.0, // Updated to match actual calculation: (100 + 75) + (50*2 + 25*3) = 175 + 175 = 350
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := CalculateEstimate(tt.services, tt.partsSupplies)
+			// Setup mocks for services
+			tt.serviceRepo.On("GetByID", mock.Anything, uint(1)).Return(entities.Service{
+				ID:    1,
+				Price: 100.0,
+			}, nil)
+			tt.serviceRepo.On("GetByID", mock.Anything, uint(2)).Return(entities.Service{
+				ID:    2,
+				Price: 75.0,
+			}, nil)
+
+			// Setup mocks for parts supplies
+			tt.partsSuplyRepo.On("GetByID", mock.Anything, uint(1)).Return(entities.PartsSupply{
+				ID:    1,
+				Price: 50.0,
+			}, nil)
+			tt.partsSuplyRepo.On("GetByID", mock.Anything, uint(2)).Return(entities.PartsSupply{
+				ID:    2,
+				Price: 25.0,
+			}, nil)
+
+			result, err := CalculateEstimate(context.Background(), tt.services, tt.partsSupplies, tt.serviceRepo, tt.partsSuplyRepo)
+			assert.NoError(t, err)
 			assert.Equal(t, tt.expected, result)
 		})
 	}

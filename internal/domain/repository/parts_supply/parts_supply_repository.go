@@ -18,6 +18,7 @@ type IPartsSupplyRepo interface {
 	Update(ctx context.Context, ps *entities.PartsSupply) error
 	Delete(ctx context.Context, id uint) error
 	List(ctx context.Context) ([]entities.PartsSupply, error)
+	GetByServiceOrderID(ctx context.Context, serviceOrderID uint) ([]entities.PartsSupply, error)
 }
 
 type PartsSupplyRepository struct {
@@ -113,4 +114,20 @@ func (s *PartsSupplyRepository) List(ctx context.Context) ([]entities.PartsSuppl
 		result[i] = dto.ToDomain()
 	}
 	return result, nil
+}
+
+func (s *PartsSupplyRepository) GetByServiceOrderID(ctx context.Context, serviceOrderID uint) ([]entities.PartsSupply, error) {
+	var dtos []dto.PartsSupplyDTO
+	if err := s.db.WithContext(ctx).
+		Joins("JOIN parts_supply_service_order_dtos ON parts_supply_service_order_dtos.parts_supply_id = parts_supply_dtos.id").
+		Where("parts_supply_service_order_dtos.service_order_id = ?", serviceOrderID).
+		Find(&dtos).Error; err != nil {
+		return nil, err
+	}
+
+	var partsSupplies []entities.PartsSupply
+	for _, dto := range dtos {
+		partsSupplies = append(partsSupplies, dto.ToDomain())
+	}
+	return partsSupplies, nil
 }

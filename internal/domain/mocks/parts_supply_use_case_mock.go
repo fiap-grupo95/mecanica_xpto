@@ -41,6 +41,14 @@ func (m *MockIPartsSupplyUseCase) EXPECT() *MockIPartsSupplyUseCaseMockRecorder 
 	return m.recorder
 }
 
+func (m *MockIPartsSupplyUseCase) GetPartsSupplyByServiceOrderID(ctx context.Context, serviceOrderID uint) ([]entities.PartsSupply, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetPartsSupplyByServiceOrderID", ctx, serviceOrderID)
+	ret0, _ := ret[0].([]entities.PartsSupply)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
 // CreatePartsSupply mocks base method.
 func (m *MockIPartsSupplyUseCase) CreatePartsSupply(ctx context.Context, partsSupply *entities.PartsSupply) (entities.PartsSupply, error) {
 	m.ctrl.T.Helper()

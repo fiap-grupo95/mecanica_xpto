@@ -13,6 +13,7 @@ type IPartsSupplyUseCase interface {
 	UpdatePartsSupply(ctx context.Context, partsSupply *entities.PartsSupply) error
 	DeletePartsSupply(ctx context.Context, id uint) error
 	ListPartsSupplies(ctx context.Context) ([]entities.PartsSupply, error)
+	GetPartsSupplyByServiceOrderID(ctx context.Context, serviceOrderID uint) ([]entities.PartsSupply, error)
 }
 type PartsSupplyUseCase struct {
 	repo parts_supply.IPartsSupplyRepo
@@ -28,6 +29,19 @@ var (
 	ErrPartsSupplyNotFound      = errors.New("parts supply not found")
 	ErrPartsSupplyAlreadyExists = errors.New("parts supply already exists")
 )
+
+func (h *PartsSupplyUseCase) GetPartsSupplyByServiceOrderID(ctx context.Context, serviceOrderID uint) ([]entities.PartsSupply, error) {
+	partsSupplies, err := h.repo.GetByServiceOrderID(ctx, serviceOrderID)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(partsSupplies) == 0 {
+		return nil, ErrPartsSupplyNotFound
+	}
+
+	return partsSupplies, nil
+}
 
 func (h *PartsSupplyUseCase) GetPartsSupplyByID(ctx context.Context, id uint) (entities.PartsSupply, error) {
 	foundPartsSupply, err := h.repo.GetByID(ctx, id)
