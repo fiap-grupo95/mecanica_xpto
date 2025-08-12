@@ -94,7 +94,7 @@ func (h *AdditionalRepairHandler) CreateAdditionalRepair(g *gin.Context) {
 // @Success 201 {object} map[string]string
 // @Failure 400 {object} pkg.AppError
 // @Failure 500 {object} pkg.AppError
-// @Router /additional-repairs/{id}/parts-and-services [post]
+// @Router /additional-repairs/{id}/add [post]
 func (h *AdditionalRepairHandler) AddPartSupplyAndService(g *gin.Context) {
 	idStr := g.Param("id")
 	id, err := strconv.ParseUint(idStr, 10, 64)
@@ -129,7 +129,7 @@ func (h *AdditionalRepairHandler) AddPartSupplyAndService(g *gin.Context) {
 // @Success 201 {object} map[string]string
 // @Failure 400 {object} pkg.AppError
 // @Failure 500 {object} pkg.AppError
-// @Router /additional-repairs/{id}/parts-and-services [delete]
+// @Router /additional-repairs/{id}/remove [delete]
 func (h *AdditionalRepairHandler) RemovePartSupplyAndService(g *gin.Context) {
 	idStr := g.Param("id")
 	id, err := strconv.ParseUint(idStr, 10, 64)
@@ -164,7 +164,7 @@ func (h *AdditionalRepairHandler) RemovePartSupplyAndService(g *gin.Context) {
 // @Success 201 {object} map[string]string
 // @Failure 400 {object} pkg.AppError
 // @Failure 500 {object} pkg.AppError
-// @Router /additional-repairs/{id}/approval [post]
+// @Router /additional-repairs/{id}/customer_approval [post]
 func (h *AdditionalRepairHandler) CustomerApproval(g *gin.Context) {
 	idStr := g.Param("id")
 	id, err := strconv.ParseUint(idStr, 10, 64)
