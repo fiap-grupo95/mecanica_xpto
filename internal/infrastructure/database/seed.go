@@ -5,6 +5,11 @@ import (
 	"mecanica_xpto/internal/domain/model/dto"
 )
 
+const (
+	defaultPassword = "jKHN1SmGKuGKyiXhbnaOZg==.0/rdilUJyR5raIXVdOCaX8szZCEUzIpIhYTQIMaLwc8="
+	defaultUserType = "admin"
+)
+
 func Seed() {
 	db := ConnectDatabase()
 
@@ -15,18 +20,18 @@ func Seed() {
 		users := []dto.UserDTO{
 			{
 				Email:    "admin@xpto.com",
-				Password: "admin123",
-				UserType: "admin",
+				Password: defaultPassword,
+				UserType: defaultUserType,
 			},
 			{
 				Email:    "joao@xpto.com",
-				Password: "admin123",
-				UserType: "admin",
+				Password: defaultPassword,
+				UserType: defaultUserType,
 			},
 			{
 				Email:    "joana@xpto.com",
-				Password: "admin123",
-				UserType: "admin",
+				Password: defaultPassword,
+				UserType: defaultUserType,
 			},
 		}
 
