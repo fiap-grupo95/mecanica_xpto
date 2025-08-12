@@ -64,18 +64,6 @@ Event Storming: <https://miro.com/app/board/uXjVIgU2y2I=/>
   make logs
   ```
 
-- Para gerar a documentação Swagger (a partir dos comentários no código):
-
-  ```bash
-  make swag-generate
-  ```
-
-- Para rodar a aplicação localmente (fora do Docker) junto com a geração da documentação Swagger:
-
-  ```bash
-  make swag-run
-  ```
-
 ## Testes
 
 - Para rodar os testes automatizados dentro do docker:
@@ -98,6 +86,12 @@ make coverage-html
 ```
 
 ## Documentação da API
+
+- Para gerar a documentação Swagger (a partir dos comentários no código):
+
+  ```bash
+  make swag-generate
+  ```
 
 A documentação Swagger estará disponível em:  
 `http://localhost:8080/swagger/index.html` enquanto a aplicação estiver rodando.

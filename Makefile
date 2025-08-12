@@ -39,17 +39,12 @@ down:
 logs:
 	docker compose logs -f $(APP_SERVICE_NAME)
 
-# Gera documentação Swagger dentro do container Go (opcional, caso queira rodar isolado)
-swag-generate-docker:
-	@echo "Gerando documentação Swagger dentro do container Go..."
-	docker run --rm -v $(PWD):/app -w /app golang:1.24.4 \
-		sh -c "go install github.com/swaggo/swag/cmd/swag@latest && \
-		       /go/bin/swag init -g internal/infrastructure/http/routes/routes.go \
-		       --output ./docs --parseDependency --parseInternal"
-
 dev-up:
 	cp .env-example .env
 	docker compose up -d dev
+
+swag-generate: dev-up
+	docker compose exec dev sh -c "go install github.com/swaggo/swag/cmd/swag@latest && swag init -g internal/infrastructure/http/routes/routes.go --output ./docs --parseDependency --parseInternal"
 
 test: dev-up
 	docker compose exec dev go test ./... -v
