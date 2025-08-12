@@ -7,6 +7,7 @@ import (
 
 type AdditionalRepair struct {
 	ID             uint                               `json:"id"`
+	Description    string                             `json:"description"`
 	ServiceOrderID uint                               `json:"service_order_id"`
 	ServiceOrder   *ServiceOrder                      `json:"service_order,omitempty"`
 	ARStatus       valueobject.AdditionalRepairStatus `json:"ar_status,omitempty"`

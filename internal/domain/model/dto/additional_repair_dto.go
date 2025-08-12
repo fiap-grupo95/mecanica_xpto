@@ -31,9 +31,9 @@ func (arsm AdditionalRepairStatusDTO) ToDomain() valueobject.AdditionalRepairSta
 
 type AdditionalRepairDTO struct {
 	ID             uint                      `gorm:"primaryKey"`
+	Description    string                    `gorm:"column:description;not null"`
 	ServiceOrderID uint                      `gorm:"column:service_order_id;not null"`
 	ServiceOrder   ServiceOrderDTO           `gorm:"foreignKey:ServiceOrderID"`
-	ServiceID      uint                      `gorm:"column:service_id;not null"`
 	ARStatusID     uint                      `gorm:"not null"`
 	ARStatus       AdditionalRepairStatusDTO `gorm:"foreignKey:ARStatusID"`
 	Estimate       float64                   `gorm:"type:decimal(10,2)"`

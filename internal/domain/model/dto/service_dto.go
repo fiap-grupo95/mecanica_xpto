@@ -15,7 +15,7 @@ type ServiceDTO struct {
 	CreatedAt         time.Time             `gorm:"autoCreateTime"`
 	UpdatedAt         time.Time             `gorm:"autoUpdateTime"`
 	DeletedAt         gorm.DeletedAt        `gorm:"index"`
-	AdditionalRepairs []AdditionalRepairDTO `gorm:"foreignKey:ServiceID"`
+	AdditionalRepairs []AdditionalRepairDTO `gorm:"many2many:service_additional_repair"`
 	ServiceOrders     []ServiceOrderDTO     `gorm:"many2many:service_service_order_dtos;joinForeignKey:service_id;joinReferences:service_order_id"`
 }
 
