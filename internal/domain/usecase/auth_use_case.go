@@ -17,7 +17,7 @@ const (
 )
 
 type AuthInterface interface {
-	Login(userDTO dto.UserDTO) (string, *pkg.AppError)
+	Login(authDTO dto.AuthDTO) (string, *pkg.AppError)
 }
 
 type authUseCase struct {
@@ -33,15 +33,15 @@ func NewAuthUseCase(jwtService *utils.JWTService, userRepo users.IUserRepository
 }
 
 // Login handles user login and returns a JWT token
-func (a *authUseCase) Login(userDTO dto.UserDTO) (string, *pkg.AppError) {
-	userFromDB, err := a.userRepo.GetByEmail(userDTO.Email)
+func (a *authUseCase) Login(authDTO dto.AuthDTO) (string, *pkg.AppError) {
+	userFromDB, err := a.userRepo.GetByEmail(authDTO.Email)
 	if err != nil {
 		return "", pkg.NewDomainErrorSimple(ErrCodeInvalidCredential, ErrMsgInvalidCredential, http.StatusUnauthorized)
 	}
 
 	hashedPass := valueobject.Password(userFromDB.Password)
 
-	if !hashedPass.Verify(userDTO.Password) {
+	if !hashedPass.Verify(authDTO.Password) {
 		return "", pkg.NewDomainErrorSimple(ErrCodeInvalidCredential, ErrMsgInvalidCredential, http.StatusUnauthorized)
 	}
 

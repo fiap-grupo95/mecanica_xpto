@@ -10,8 +10,8 @@ import (
 
 type UserDTO struct {
 	ID        uint                 `gorm:"primaryKey"`
-	Email     string               `gorm:"size:100;not null;unique" json:"email" binding:"required,email"`
-	Password  string               `gorm:"size:255;not null" json:"password" binding:"required"`
+	Email     string               `gorm:"size:100;not null;unique" json:"email"`
+	Password  string               `gorm:"size:255;not null" json:"password"`
 	UserType  valueobject.UserType `gorm:"not null"`
 	CreatedAt time.Time            `gorm:"autoCreateTime"`
 	UpdatedAt time.Time            `gorm:"autoUpdateTime"`
