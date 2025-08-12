@@ -42,11 +42,12 @@ func (m *MockIServiceOrderUseCase) EXPECT() *MockIServiceOrderUseCaseMockRecorde
 }
 
 // CreateServiceOrder mocks base method.
-func (m *MockIServiceOrderUseCase) CreateServiceOrder(ctx context.Context, serviceOrder entities.ServiceOrder) error {
+func (m *MockIServiceOrderUseCase) CreateServiceOrder(ctx context.Context, serviceOrder entities.ServiceOrder) (*entities.ServiceOrder, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateServiceOrder", ctx, serviceOrder)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret0, _ := ret[0].(*entities.ServiceOrder)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // CreateServiceOrder indicates an expected call of CreateServiceOrder.
@@ -86,11 +87,12 @@ func (mr *MockIServiceOrderUseCaseMockRecorder) ListServiceOrders(ctx any) *gomo
 }
 
 // UpdateServiceOrder mocks base method.
-func (m *MockIServiceOrderUseCase) UpdateServiceOrder(ctx context.Context, serviceOrder entities.ServiceOrder, flow string) error {
+func (m *MockIServiceOrderUseCase) UpdateServiceOrder(ctx context.Context, serviceOrder entities.ServiceOrder, flow string) (*entities.ServiceOrder, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateServiceOrder", ctx, serviceOrder, flow)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret0, _ := ret[0].(*entities.ServiceOrder)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // UpdateServiceOrder indicates an expected call of UpdateServiceOrder.

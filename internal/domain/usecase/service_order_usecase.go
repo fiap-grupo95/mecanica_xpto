@@ -36,8 +36,8 @@ var (
 )
 
 type IServiceOrderUseCase interface {
-	CreateServiceOrder(ctx context.Context, serviceOrder entities.ServiceOrder) error
-	UpdateServiceOrder(ctx context.Context, serviceOrder entities.ServiceOrder, flow string) error
+	CreateServiceOrder(ctx context.Context, serviceOrder entities.ServiceOrder) (*entities.ServiceOrder, error)
+	UpdateServiceOrder(ctx context.Context, serviceOrder entities.ServiceOrder, flow string) (*entities.ServiceOrder, error)
 	GetServiceOrder(ctx context.Context, serviceOrder entities.ServiceOrder) (*entities.ServiceOrder, error)
 	ListServiceOrders(ctx context.Context) ([]*entities.ServiceOrder, error)
 }
@@ -65,17 +65,17 @@ func NewServiceOrderUseCase(repo serviceorder.IServiceOrderRepository, vehicleRe
 // CreateServiceOrder creates a new service order after validating the vehicle and customer.
 // It sets the initial status of the service order to "Recebida".
 // If the vehicle or customer validation fails, it logs the error and returns it.
-func (u *ServiceOrderUseCase) CreateServiceOrder(ctx context.Context, serviceOrder entities.ServiceOrder) error {
+func (u *ServiceOrderUseCase) CreateServiceOrder(ctx context.Context, serviceOrder entities.ServiceOrder) (*entities.ServiceOrder, error) {
 	err := validateVehicle(ctx, serviceOrder, u.vehicleRepo)
 	if err != nil {
 		log.Error().Msgf("Error validating vehicle: %v", err)
-		return err
+		return nil, err
 	}
 
 	err = validateCustomer(ctx, serviceOrder, u.customerRepo)
 	if err != nil {
 		log.Error().Msgf("Error validating customer: %v", err)
-		return err
+		return nil, err
 	}
 
 	newServiceOrder := entities.ServiceOrder{
@@ -84,20 +84,25 @@ func (u *ServiceOrderUseCase) CreateServiceOrder(ctx context.Context, serviceOrd
 		ServiceOrderStatus: valueobject.StatusRecebida,
 	}
 
-	err = u.repo.Create(&newServiceOrder)
+	register, err := u.repo.Create(&newServiceOrder)
 	if err != nil {
 		log.Error().Msgf("Error creating service order: %v", err)
-		return err
+		return nil, err
 	}
-	return nil
+
+	// clean fields that are not needed in the response
+	register.Vehicle = nil
+	register.Customer = nil
+
+	return register, nil
 }
 
 // UpdateServiceOrder updates an existing service order.
-func (u *ServiceOrderUseCase) UpdateServiceOrder(ctx context.Context, request entities.ServiceOrder, flow string) error {
+func (u *ServiceOrderUseCase) UpdateServiceOrder(ctx context.Context, request entities.ServiceOrder, flow string) (*entities.ServiceOrder, error) {
 	var update = &entities.ServiceOrder{}
 
 	if request.ID == 0 {
-		return ErrInvalidID
+		return nil, ErrInvalidID
 	}
 
 	update.ID = request.ID
@@ -105,11 +110,11 @@ func (u *ServiceOrderUseCase) UpdateServiceOrder(ctx context.Context, request en
 	serviceOrderDto, err := u.repo.GetByID(request.ID)
 	if err != nil {
 		log.Error().Msgf("Error finding service order with id %v: %v", request.ID, err)
-		return err
+		return nil, err
 	}
 	if serviceOrderDto == nil {
 		log.Error().Msgf("Service order with id %d not found", request.ID)
-		return ErrServiceOrderNotFound
+		return nil, ErrServiceOrderNotFound
 	}
 
 	switch flow {
@@ -117,32 +122,49 @@ func (u *ServiceOrderUseCase) UpdateServiceOrder(ctx context.Context, request en
 		update, err = ValidateDiagnosis(ctx, &request, serviceOrderDto, update, u.serviceRepo, u.partsSupplyRepo, u.repo)
 		if err != nil {
 			log.Error().Msgf("Error validating diagnosis: %v", err)
-			return err
+			return nil, err
 		}
 	case ESTIMATE:
 		update, err = ValidateEstimate(ctx, &request, serviceOrderDto, update, u.partsSupplyRepo, u.repo)
 		if err != nil {
 			log.Error().Msgf("Error validating estimate: %v", err)
-			return err
+			return nil, err
 		}
 	case EXECUTION:
 		update, err = ValidateExecution(ctx, &request, serviceOrderDto, update)
 		if err != nil {
 			log.Error().Msgf("Error validating execution: %v", err)
-			return err
+			return nil, err
 		}
 	case DELIVERY:
 		update, err = ValidateDelivery(ctx, &request, serviceOrderDto, update)
 		if err != nil {
 			log.Error().Msgf("Error validating delivery: %v", err)
-			return err
+			return nil, err
 		}
 	default:
 		log.Error().Msgf("Invalid flow: %s", flow)
-		return ErrInvalidFlow
+		return nil, ErrInvalidFlow
 	}
 
-	return u.repo.Update(update)
+	err = u.repo.Update(update)
+	if err != nil {
+		log.Error().Msgf("Error updating service order: %v", err)
+		return nil, err
+	}
+
+	updatedSODTO, err := u.repo.GetByID(request.ID)
+	if err != nil || updatedSODTO == nil {
+		log.Error().Msgf("Error finding service order with id %v: %v", request.ID, err)
+		return nil, err
+	}
+	updatedSO := updatedSODTO.ToDomain()
+
+	if updatedSO.Payment != nil {
+		updatedSO.Payment.ServiceOrder = nil
+	}
+
+	return updatedSO, nil
 }
 
 // ValidateDiagnosis checks if the service order status is valid for diagnosis.
