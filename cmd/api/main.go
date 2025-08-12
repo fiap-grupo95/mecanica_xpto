@@ -22,7 +22,11 @@ import (
 // @host localhost:8080
 
 // @BasePath  /v1
-// @securityDefinitions.basic  BasicAuth
+
+// @securityDefinitions.apikey Bearer
+// @in header
+// @name Authorization
+// @description Type "Bearer" followed by a space and JWT token.
 
 func main() {
 	if len(os.Args) > 1 {
