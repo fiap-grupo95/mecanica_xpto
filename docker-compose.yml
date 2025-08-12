@@ -37,7 +37,6 @@ services:
       - '5432:5432'
     volumes:
       - postgresql_data:/var/lib/postgresql/data
-    #      - ./internal/infrastructure/database/script.sql:/docker-entrypoint-initdb.d/script.sql
     networks:
       - app_network
     healthcheck:
@@ -92,8 +91,8 @@ networks:
   db_network:
     driver: bridge
 
-  sonar-net: # Define the network explicitly
-    name: sonar-net # Give it a specific name
+  sonar-net:
+    name: sonar-net
 
 volumes:
   db_data:
