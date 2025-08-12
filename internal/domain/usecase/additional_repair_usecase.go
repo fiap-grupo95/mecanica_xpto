@@ -24,6 +24,7 @@ type IAdditionalRepairUseCase interface {
 	AddPartSupplyAndService(ctx context.Context, adrId uint, adr entities.AdditionalRepair) error
 	RemovePartSupplyAndService(ctx context.Context, adrId uint, adr entities.AdditionalRepair) error
 	GetAdditionalRepair(ctx context.Context, additionalRepairId uint) (entities.AdditionalRepair, error)
+	CustomerApprovalStatus(ctx context.Context, additionalRepairId uint, status entities.AdditionalRepairStatusDTO) error
 }
 
 type AdditionalRepairUseCase struct {

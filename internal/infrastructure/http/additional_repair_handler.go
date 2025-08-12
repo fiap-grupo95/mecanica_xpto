@@ -11,10 +11,10 @@ import (
 )
 
 type AdditionalRepairHandler struct {
-	additionalRepairUseCase *usecase.AdditionalRepairUseCase
+	additionalRepairUseCase usecase.IAdditionalRepairUseCase
 }
 
-func NewAdditionalRepairHandler(useCase *usecase.AdditionalRepairUseCase) *AdditionalRepairHandler {
+func NewAdditionalRepairHandler(useCase usecase.IAdditionalRepairUseCase) *AdditionalRepairHandler {
 	return &AdditionalRepairHandler{
 		additionalRepairUseCase: useCase,
 	}
