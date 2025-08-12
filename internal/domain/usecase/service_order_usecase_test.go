@@ -128,9 +128,12 @@ type MockServiceOrderRepository struct {
 	mock.Mock
 }
 
-func (m *MockServiceOrderRepository) Create(serviceOrder *entities.ServiceOrder) error {
+func (m *MockServiceOrderRepository) Create(serviceOrder *entities.ServiceOrder) (*entities.ServiceOrder, error) {
 	args := m.Called(serviceOrder)
-	return args.Error(0)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*entities.ServiceOrder), args.Error(1)
 }
 
 func (m *MockServiceOrderRepository) List() ([]dto.ServiceOrderDTO, error) {
@@ -286,7 +289,12 @@ func TestCreateServiceOrder(t *testing.T) {
 			setupMocks: func() {
 				vehicleRepo.On("FindByID", uint(1)).Return(&dto.VehicleDTO{ID: 1}, nil)
 				customerRepo.On("GetByID", uint(1)).Return(&dto.CustomerDTO{ID: 1}, nil)
-				serviceOrderRepo.On("Create", mock.AnythingOfType("*entities.ServiceOrder")).Return(nil)
+				serviceOrderRepo.On("Create", mock.AnythingOfType("*entities.ServiceOrder")).Return(&entities.ServiceOrder{
+					ID:                 1,
+					CustomerID:         1,
+					VehicleID:          1,
+					ServiceOrderStatus: valueobject.StatusRecebida,
+				}, nil)
 			},
 			expectedError: nil,
 		},
@@ -318,11 +326,12 @@ func TestCreateServiceOrder(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.setupMocks()
-			err := useCase.CreateServiceOrder(context.Background(), tt.serviceOrder)
+			result, err := useCase.CreateServiceOrder(context.Background(), tt.serviceOrder)
 			if tt.expectedError != nil && err != nil {
 				assert.Error(t, err)
 				assert.Equal(t, tt.expectedError.Error(), err.Error())
 			} else {
+				assert.NotNil(t, result)
 				assert.NoError(t, err)
 			}
 		})
@@ -404,11 +413,12 @@ func TestUpdateServiceOrder(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.setupMocks()
-			err := useCase.UpdateServiceOrder(context.Background(), tt.serviceOrder, tt.flow)
+			r, err := useCase.UpdateServiceOrder(context.Background(), tt.serviceOrder, tt.flow)
 			if tt.expectedError != nil && err != nil {
 				assert.Error(t, err)
 				assert.Equal(t, tt.expectedError.Error(), err.Error())
 			} else {
+				assert.NotNil(t, r)
 				assert.NoError(t, err)
 			}
 		})
@@ -668,7 +678,7 @@ func TestValidateDelivery(t *testing.T) {
 				ServiceOrderStatus: valueobject.StatusEntregue,
 				Payment: &entities.Payment{
 					ID:           1,
-					ServiceOrder: entities.ServiceOrder{ID: 1},
+					ServiceOrder: &entities.ServiceOrder{ID: 1},
 					PaymentDate:  time.Now(),
 				},
 			},
@@ -749,11 +759,12 @@ func TestInvalidServiceOrder(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.setupMocks()
-			err := useCase.UpdateServiceOrder(context.Background(), tt.serviceOrder, tt.flow)
+			r, err := useCase.UpdateServiceOrder(context.Background(), tt.serviceOrder, tt.flow)
 			if tt.expectedError != nil {
 				assert.Error(t, err)
 				assert.Equal(t, tt.expectedError.Error(), err.Error())
 			} else {
+				assert.NotNil(t, r)
 				assert.NoError(t, err)
 			}
 		})
