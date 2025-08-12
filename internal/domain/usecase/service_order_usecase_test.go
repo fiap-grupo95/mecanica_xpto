@@ -616,10 +616,11 @@ func TestCalculateEstimate(t *testing.T) {
 
 func TestValidateExecution(t *testing.T) {
 	tests := []struct {
-		name            string
-		request         *entities.ServiceOrder
-		serviceOrderDTO *dto.ServiceOrderDTO
-		expectedError   error
+		name             string
+		request          *entities.ServiceOrder
+		serviceOrderDTO  *dto.ServiceOrderDTO
+		expectedError    error
+		expectedDuration float64 // Espera-se que a duração da execução seja arredondada para 2 casas decimais
 	}{
 		{
 			name: "Success - Start Execution",
@@ -646,8 +647,14 @@ func TestValidateExecution(t *testing.T) {
 				ServiceOrderStatus: dto.ServiceOrderStatusDTO{
 					Description: string(valueobject.StatusEmExecucao),
 				},
+				StartedExecutionDate: func() *time.Time {
+					// Cria uma data que ocorreu 1.25 horas no passado
+					t := time.Now().Add(-75 * time.Minute)
+					return &t
+				}(),
 			},
-			expectedError: nil,
+			expectedDuration: 1.25, // Exemplo de duração esperada com 2 casas decimais
+			expectedError:    nil,
 		},
 		{
 			name: "Error - Invalid Status Transition",
@@ -677,6 +684,7 @@ func TestValidateExecution(t *testing.T) {
 				assert.NoError(t, err)
 				assert.NotNil(t, result)
 				assert.Equal(t, tt.request.ServiceOrderStatus, result.ServiceOrderStatus)
+				assert.Equal(t, tt.expectedDuration, result.ExecutionDurationInHours)
 			}
 		})
 	}
