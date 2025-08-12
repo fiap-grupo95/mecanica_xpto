@@ -86,9 +86,9 @@ func (m *ServiceOrderDTO) ToDomain() *entities.ServiceOrder {
 	return &entities.ServiceOrder{
 		ID:                   m.ID,
 		CustomerID:           m.CustomerID,
-		Customer:             customer,
+		Customer:             &customer,
 		VehicleID:            m.VehicleID,
-		Vehicle:              vehicle,
+		Vehicle:              &vehicle,
 		ServiceOrderStatus:   m.ServiceOrderStatus.ToDomain(),
 		Estimate:             m.Estimate,
 		StartedExecutionDate: m.StartedExecutionDate,

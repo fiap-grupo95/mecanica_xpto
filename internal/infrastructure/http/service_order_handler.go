@@ -36,13 +36,13 @@ func (h *ServiceOrderHandler) CreateServiceOrder(g *gin.Context) {
 		return
 	}
 
-	err := h.serviceOrderUseCase.CreateServiceOrder(g.Request.Context(), serviceOrder)
+	result, err := h.serviceOrderUseCase.CreateServiceOrder(g.Request.Context(), serviceOrder)
 	if err != nil {
 		g.JSON(500, gin.H{"error": "Failed to create service order"})
 		return
 	}
 
-	g.JSON(201, gin.H{"message": "Service order created successfully"})
+	g.JSON(201, result)
 }
 
 // UpdateServiceOrderDiagnosis PATCH /os/:id/diagnosis
@@ -62,13 +62,13 @@ func (h *ServiceOrderHandler) UpdateServiceOrderDiagnosis(g *gin.Context) {
 		return
 	}
 
-	err = h.serviceOrderUseCase.UpdateServiceOrder(g.Request.Context(), serviceOrder, DIAGNOSIS)
+	result, err := h.serviceOrderUseCase.UpdateServiceOrder(g.Request.Context(), serviceOrder, DIAGNOSIS)
 	if err != nil {
 		g.JSON(500, gin.H{"error": "Failed to update service order"})
 		return
 	}
 
-	g.JSON(200, gin.H{"message": "Service order updated successfully"})
+	g.JSON(200, result)
 }
 
 // UpdateServiceOrderEstimate PATCH /os/:id/estimate
@@ -88,13 +88,13 @@ func (h *ServiceOrderHandler) UpdateServiceOrderEstimate(g *gin.Context) {
 		return
 	}
 
-	err = h.serviceOrderUseCase.UpdateServiceOrder(g.Request.Context(), serviceOrder, ESTIMATE)
+	result, err := h.serviceOrderUseCase.UpdateServiceOrder(g.Request.Context(), serviceOrder, ESTIMATE)
 	if err != nil {
 		g.JSON(500, gin.H{"error": "Failed to update service order"})
 		return
 	}
 
-	g.JSON(200, gin.H{"message": "Service order updated successfully"})
+	g.JSON(200, result)
 }
 
 // UpdateServiceOrderExecution PATCH /os/:id/execution
@@ -114,13 +114,13 @@ func (h *ServiceOrderHandler) UpdateServiceOrderExecution(g *gin.Context) {
 		return
 	}
 
-	err = h.serviceOrderUseCase.UpdateServiceOrder(g.Request.Context(), serviceOrder, EXECUTION)
+	result, err := h.serviceOrderUseCase.UpdateServiceOrder(g.Request.Context(), serviceOrder, EXECUTION)
 	if err != nil {
 		g.JSON(500, gin.H{"error": "Failed to update service order"})
 		return
 	}
 
-	g.JSON(200, gin.H{"message": "Service order updated successfully"})
+	g.JSON(200, result)
 }
 
 // UpdateServiceOrderDelivery PATCH /os/:id/delivery
@@ -140,13 +140,13 @@ func (h *ServiceOrderHandler) UpdateServiceOrderDelivery(g *gin.Context) {
 		return
 	}
 
-	err = h.serviceOrderUseCase.UpdateServiceOrder(g.Request.Context(), serviceOrder, DELIVERY)
+	result, err := h.serviceOrderUseCase.UpdateServiceOrder(g.Request.Context(), serviceOrder, DELIVERY)
 	if err != nil {
 		g.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update service order"})
 		return
 	}
 
-	g.JSON(http.StatusOK, gin.H{"message": "Service order updated successfully"})
+	g.JSON(http.StatusOK, result)
 }
 
 func (h *ServiceOrderHandler) GetServiceOrder(g *gin.Context) {

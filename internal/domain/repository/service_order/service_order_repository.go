@@ -11,7 +11,7 @@ import (
 )
 
 type IServiceOrderRepository interface {
-	Create(serviceOrder *entities.ServiceOrder) error
+	Create(serviceOrder *entities.ServiceOrder) (*entities.ServiceOrder, error)
 	GetByID(id uint) (*dto.ServiceOrderDTO, error)
 	Update(serviceOrder *entities.ServiceOrder) error
 	List() ([]dto.ServiceOrderDTO, error)
@@ -27,18 +27,18 @@ func NewServiceOrderRepository(db *gorm.DB) *ServiceOrderRepository {
 	return &ServiceOrderRepository{db: db}
 }
 
-func (r *ServiceOrderRepository) Create(serviceOrder *entities.ServiceOrder) error {
+func (r *ServiceOrderRepository) Create(serviceOrder *entities.ServiceOrder) (*entities.ServiceOrder, error) {
 	if serviceOrder == nil {
-		return gorm.ErrInvalidData
+		return nil, gorm.ErrInvalidData
 	}
 
 	dtoStatus, err := r.GetStatus(serviceOrder.ServiceOrderStatus)
 	if err != nil {
-		return gorm.ErrInvalidData
+		return nil, gorm.ErrInvalidData
 	}
 
 	if dtoStatus == nil {
-		return gorm.ErrInvalidData
+		return nil, gorm.ErrInvalidData
 	}
 
 	// Begin transaction
@@ -56,36 +56,18 @@ func (r *ServiceOrderRepository) Create(serviceOrder *entities.ServiceOrder) err
 		UpdatedAt:            serviceOrder.UpdatedAt,
 	}
 
-	if err := tx.Save(&serviceOrderDto).Error; err != nil {
+	if err := tx.Create(&serviceOrderDto).Error; err != nil {
 		tx.Rollback()
-		return err
+		return nil, err
 	}
 
-	// Handle PartsSupplies N:N relationship
-	for _, partsSupply := range serviceOrder.PartsSupplies {
-		relation := dto.PartsSupplyServiceOrderDTO{
-			PartsSupplyID:  partsSupply.ID,
-			ServiceOrderID: serviceOrderDto.ID,
-		}
-		if err := tx.Create(&relation).Error; err != nil {
-			tx.Rollback()
-			return err
-		}
+	if err := tx.Commit().Error; err != nil {
+		return nil, err
 	}
 
-	// Handle Services N:N relationship
-	for _, service := range serviceOrder.Services {
-		relation := dto.ServiceServiceOrderDTO{
-			ServiceID:      service.ID,
-			ServiceOrderID: serviceOrderDto.ID,
-		}
-		if err := tx.Create(&relation).Error; err != nil {
-			tx.Rollback()
-			return err
-		}
-	}
+	serviceOrderDto.ServiceOrderStatus = *dtoStatus
 
-	return tx.Commit().Error
+	return serviceOrderDto.ToDomain(), nil
 }
 
 func (r *ServiceOrderRepository) GetByID(id uint) (*dto.ServiceOrderDTO, error) {

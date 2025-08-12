@@ -15,7 +15,7 @@ type PaymentDTO struct {
 func (pm *PaymentDTO) ToDomain() entities.Payment {
 	return entities.Payment{
 		ID:           pm.ID,
-		ServiceOrder: *pm.ServiceOrder.ToDomain(),
+		ServiceOrder: pm.ServiceOrder.ToDomain(),
 		PaymentDate:  pm.PaymentDate,
 	}
 }
