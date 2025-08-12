@@ -279,18 +279,18 @@ func ValidateEstimate(ctx context.Context, request *entities.ServiceOrder, servi
 	if oldStatus.IsAguardandoAprovacao() && request.ServiceOrderStatus.IsAprovada() {
 		update.ServiceOrderStatus = valueobject.StatusAprovada
 		// If the status is "Aprovada", we can subtract the total available quantity of PartsSupplies from the quantity reserve
-		//partsSupplies, err := getPartsSuppliesByServiceOrderID(ctx, serviceOrderDto.ID, partsSupplyRepo)
-		for _, ps := range request.PartsSupplies {
-			//if err != nil {
-			//	log.Error().Msgf("Error getting parts supplies by service order ID: %v", err)
-			//	return nil, err
-			//}
-			//entity := entities.PartsSupply{
-			//	ID:              ps.ID,
-			//	QuantityReserve: ps.QuantityReserve,
-			//	QuantityTotal:   ps.QuantityTotal,
-			//}
-			err := releaseReservedPartsSupply(ctx, ps, partsSupplyRepo)
+		partsSupplies, err := getPartsSuppliesByServiceOrderID(ctx, serviceOrderDto.ID, partsSupplyRepo)
+		for _, ps := range partsSupplies {
+			if err != nil {
+				log.Error().Msgf("Error getting parts supplies by service order ID: %v", err)
+				return nil, err
+			}
+			entity := entities.PartsSupply{
+				ID:              ps.ID,
+				QuantityReserve: ps.QuantityReserve,
+				QuantityTotal:   ps.QuantityTotal,
+			}
+			err := releaseReservedPartsSupply(ctx, entity, partsSupplyRepo)
 			if err != nil {
 				log.Error().Msgf("Error releasing reserved parts supply: %v", err)
 				return nil, err
@@ -301,13 +301,13 @@ func ValidateEstimate(ctx context.Context, request *entities.ServiceOrder, servi
 	if oldStatus.IsAguardandoAprovacao() && request.ServiceOrderStatus.IsRejeitada() {
 		update.ServiceOrderStatus = valueobject.StatusRejeitada
 		// If the status is "Rejeitada", we can reset the PartsSupplies reserve
-		//partsSupplies, err := getPartsSuppliesByServiceOrderID(ctx, serviceOrderDto.ID, partsSupplyRepo)
-		//if err != nil {
-		//	log.Error().Msgf("Error getting parts supplies by service order ID: %v", err)
-		//	return nil, err
-		//
-		//}
-		for _, ps := range request.PartsSupplies {
+		partsSupplies, err := getPartsSuppliesByServiceOrderID(ctx, serviceOrderDto.ID, partsSupplyRepo)
+		if err != nil {
+			log.Error().Msgf("Error getting parts supplies by service order ID: %v", err)
+			return nil, err
+
+		}
+		for _, ps := range partsSupplies {
 			err := unreservePartsSupply(ctx, ps, partsSupplyRepo)
 			if err != nil {
 				log.Error().Msgf("Error unreserving parts supply: %v", err)
@@ -599,16 +599,16 @@ func getPartsSupplyByIDs(ctx context.Context, partsSupplies []entities.PartsSupp
 	return psDb, nil
 }
 
-//func getPartsSuppliesByServiceOrderID(ctx context.Context, serviceOrderID uint, partsSupplyRepo parts_supply.IPartsSupplyRepo) ([]entities.PartsSupply, error) {
-//	if serviceOrderID == 0 {
-//		return nil, ErrInvalidID
-//	}
-//
-//	partsSupplies, err := partsSupplyRepo.GetByServiceOrderID(ctx, serviceOrderID)
-//	if err != nil {
-//		log.Error().Msgf("error getting parts supplies for service order %d: %v", serviceOrderID, err)
-//		return nil, err
-//	}
-//
-//	return partsSupplies, nil
-//}
+func getPartsSuppliesByServiceOrderID(ctx context.Context, serviceOrderID uint, partsSupplyRepo parts_supply.IPartsSupplyRepo) ([]entities.PartsSupply, error) {
+	if serviceOrderID == 0 {
+		return nil, ErrInvalidID
+	}
+
+	partsSupplies, err := partsSupplyRepo.GetByServiceOrderID(ctx, serviceOrderID)
+	if err != nil {
+		log.Error().Msgf("error getting parts supplies for service order %d: %v", serviceOrderID, err)
+		return nil, err
+	}
+
+	return partsSupplies, nil
+}
