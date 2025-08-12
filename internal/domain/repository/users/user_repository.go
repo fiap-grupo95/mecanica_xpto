@@ -1,13 +1,15 @@
 package users
 
 import (
-	"gorm.io/gorm"
 	"mecanica_xpto/internal/domain/model/dto"
+
+	"gorm.io/gorm"
 )
 
 // IUserRepository defines the interface for Users data access
 type IUserRepository interface {
 	GetByID(id uint) (*dto.UserDTO, error)
+	GetByEmail(email string) (*dto.UserDTO, error)
 	Create(User *dto.UserDTO) error
 	Update(User *dto.UserDTO) error
 	Delete(id uint) error
@@ -34,6 +36,15 @@ func (r *UserRepository) GetByID(id uint) (*dto.UserDTO, error) {
 		return nil, err
 	}
 	return &User, nil
+}
+
+func (r *UserRepository) GetByEmail(email string) (*dto.UserDTO, error) {
+	var user dto.UserDTO
+	err := r.db.Where("email = ?", email).First(&user).Error
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
 }
 
 func (r *UserRepository) Update(User *dto.UserDTO) error {

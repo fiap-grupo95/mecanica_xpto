@@ -14,8 +14,10 @@ func HashPassword(password string) (string, error) {
 		return "", fmt.Errorf("failed to generate salt: %w", err)
 	}
 	hash := argon2.IDKey([]byte(password), salt, 1, 64*1024, 4, 32)
-	saltBase64 := base64.RawStdEncoding.EncodeToString(salt)
-	hashBase64 := base64.RawStdEncoding.EncodeToString(hash)
+
+	saltBase64 := base64.StdEncoding.EncodeToString(salt) // <-- StdEncoding com padding
+	hashBase64 := base64.StdEncoding.EncodeToString(hash) // <-- StdEncoding com padding
+
 	return fmt.Sprintf("%s.%s", saltBase64, hashBase64), nil
 }
 

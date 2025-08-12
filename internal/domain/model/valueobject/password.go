@@ -3,6 +3,7 @@ package valueobject
 import (
 	"encoding/base64"
 	"errors"
+	"fmt"
 	"mecanica_xpto/pkg"
 	"strings"
 
@@ -11,7 +12,6 @@ import (
 
 type Password string // representa sempre uma senha *hashada*
 
-// NewPassword recebe uma senha pura, valida e retorna um Password hashado
 func NewPassword(p string) (Password, error) {
 	if err := isValid(p); err != nil {
 		return "", err
@@ -25,34 +25,31 @@ func NewPassword(p string) (Password, error) {
 	return Password(hashed), nil
 }
 
-// String retorna o hash como string
 func (p Password) String() string {
 	return string(p)
 }
 
-// Verify compara uma senha pura com o hash armazenado
 func (p Password) Verify(plain string) bool {
-	parts := strings.Split(p.String(), ".")
+	parts := strings.Split(string(p), ".")
 	if len(parts) != 2 {
 		return false
 	}
 
-	salt, err := base64.RawStdEncoding.DecodeString(parts[0])
+	salt, err := base64.StdEncoding.DecodeString(parts[0])
 	if err != nil {
+		fmt.Println("Erro salt:", err)
+		return false
+	}
+	expectedHash, err := base64.StdEncoding.DecodeString(parts[1])
+	if err != nil {
+		fmt.Println("Erro hash:", err)
 		return false
 	}
 
-	expectedHash, err := base64.RawStdEncoding.DecodeString(parts[1])
-	if err != nil {
-		return false
-	}
-
-	hashToCompare := argon2.IDKey([]byte(plain), salt, 1, 64*1024, 4, 32)
-
-	return subtleCompare(expectedHash, hashToCompare)
+	hash := argon2.IDKey([]byte(plain), salt, 1, 64*1024, 4, 32)
+	return subtleCompare(expectedHash, hash)
 }
 
-// subtleCompare realiza comparação segura
 func subtleCompare(a, b []byte) bool {
 	if len(a) != len(b) {
 		return false
@@ -64,7 +61,6 @@ func subtleCompare(a, b []byte) bool {
 	return result == 0
 }
 
-// isValid valida a força mínima da senha pura
 func isValid(s string) error {
 	if len(s) < 8 {
 		return errors.New("password must be at least 8 characters long")
