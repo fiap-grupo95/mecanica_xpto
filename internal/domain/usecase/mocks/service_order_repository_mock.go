@@ -54,3 +54,8 @@ func (m *MockServiceOrderRepository) GetPartsSupplyServiceOrder(serviceOrderID u
 	}
 	return args.Get(0).(*dto.PartsSupplyServiceOrderDTO), args.Error(1)
 }
+
+func (m *MockServiceOrderRepository) UpdateEstimate(id uint, estimate float64) error {
+	args := m.Called(id, estimate)
+	return args.Error(0)
+}
