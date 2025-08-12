@@ -19,6 +19,11 @@ const (
 	DELIVERY  = "delivery"
 )
 
+// ServiceOrderHandler handles HTTP requests related to service orders.
+// It provides methods to create, update, retrieve, and list service orders.
+// @title Service Order API
+// @version 1.0
+// @description API for managing service orders in the workshop management system
 type ServiceOrderHandler struct {
 	serviceOrderUseCase usecase.IServiceOrderUseCase
 }
@@ -29,7 +34,18 @@ func NewServiceOrderHandler(useCase usecase.IServiceOrderUseCase) *ServiceOrderH
 	}
 }
 
-// CreateServiceOrder POST /os
+// CreateServiceOrder godoc
+// @Summary Create a new service order
+// @Description Create a new service order record
+// @Tags Service Orders
+// @Accept json
+// @Produce json
+// @Param order body entities.ServiceOrder true "Service Order Information"
+// @Success 201 {object} entities.ServiceOrder
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /service-orders [post]
 func (h *ServiceOrderHandler) CreateServiceOrder(g *gin.Context) {
 	var serviceOrder entities.ServiceOrder
 	if err := g.ShouldBindJSON(&serviceOrder); err != nil {
@@ -54,7 +70,19 @@ func (h *ServiceOrderHandler) CreateServiceOrder(g *gin.Context) {
 	g.JSON(201, result)
 }
 
-// UpdateServiceOrderDiagnosis PATCH /os/:id/diagnosis
+// UpdateServiceOrderDiagnosis godoc
+// @Summary Update service order diagnosis
+// @Description Update the diagnosis information of a service order
+// @Tags Service Orders
+// @Accept json
+// @Produce json
+// @Param id path int true "Service Order ID"
+// @Param order body entities.ServiceOrder true "Service Order Diagnosis Information"
+// @Success 200 {object} entities.ServiceOrder
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /service-orders/{id}/diagnosis [patch]
 func (h *ServiceOrderHandler) UpdateServiceOrderDiagnosis(g *gin.Context) {
 	var serviceOrder entities.ServiceOrder
 
@@ -93,7 +121,19 @@ func (h *ServiceOrderHandler) UpdateServiceOrderDiagnosis(g *gin.Context) {
 	g.JSON(200, result)
 }
 
-// UpdateServiceOrderEstimate PATCH /os/:id/estimate
+// UpdateServiceOrderEstimate godoc
+// @Summary Update service order estimate
+// @Description Update the estimate information of a service order
+// @Tags Service Orders
+// @Accept json
+// @Produce json
+// @Param id path int true "Service Order ID"
+// @Param order body entities.ServiceOrder true "Service Order Estimate Information"
+// @Success 200 {object} entities.ServiceOrder
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /service-orders/{id}/estimate [patch]
 func (h *ServiceOrderHandler) UpdateServiceOrderEstimate(g *gin.Context) {
 	var serviceOrder entities.ServiceOrder
 
@@ -131,7 +171,19 @@ func (h *ServiceOrderHandler) UpdateServiceOrderEstimate(g *gin.Context) {
 	g.JSON(200, result)
 }
 
-// UpdateServiceOrderExecution PATCH /os/:id/execution
+// UpdateServiceOrderExecution godoc
+// @Summary Update service order execution
+// @Description Update the execution information of a service order
+// @Tags Service Orders
+// @Accept json
+// @Produce json
+// @Param id path int true "Service Order ID"
+// @Param order body entities.ServiceOrder true "Service Order Execution Information"
+// @Success 200 {object} entities.ServiceOrder
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /service-orders/{id}/execution [patch]
 func (h *ServiceOrderHandler) UpdateServiceOrderExecution(g *gin.Context) {
 	var serviceOrder entities.ServiceOrder
 
@@ -169,7 +221,19 @@ func (h *ServiceOrderHandler) UpdateServiceOrderExecution(g *gin.Context) {
 	g.JSON(200, result)
 }
 
-// UpdateServiceOrderDelivery PATCH /os/:id/delivery
+// UpdateServiceOrderDelivery godoc
+// @Summary Update service order delivery
+// @Description Update the delivery information of a service order
+// @Tags Service Orders
+// @Accept json
+// @Produce json
+// @Param id path int true "Service Order ID"
+// @Param order body entities.ServiceOrder true "Service Order Delivery Information"
+// @Success 200 {object} entities.ServiceOrder
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /service-orders/{id}/delivery [patch]
 func (h *ServiceOrderHandler) UpdateServiceOrderDelivery(g *gin.Context) {
 	var serviceOrder entities.ServiceOrder
 
@@ -206,6 +270,17 @@ func (h *ServiceOrderHandler) UpdateServiceOrderDelivery(g *gin.Context) {
 	g.JSON(http.StatusOK, result)
 }
 
+// GetServiceOrder godoc
+// @Summary Get service order by ID
+// @Description Retrieve a service order by its ID
+// @Tags Service Orders
+// @Accept json
+// @Produce json
+// @Param id path int true "Service Order ID"
+// @Success 200 {object} entities.ServiceOrder
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /service-orders/{id} [get]
 func (h *ServiceOrderHandler) GetServiceOrder(g *gin.Context) {
 	var serviceOrder entities.ServiceOrder
 
@@ -225,6 +300,15 @@ func (h *ServiceOrderHandler) GetServiceOrder(g *gin.Context) {
 	g.JSON(http.StatusOK, ServiceOrderResponse)
 }
 
+// ListServiceOrders godoc
+// @Summary List all service orders
+// @Description Get a list of all service orders
+// @Tags Service Orders
+// @Accept json
+// @Produce json
+// @Success 200 {array} entities.ServiceOrder
+// @Failure 500 {object} map[string]string
+// @Router /service-orders [get]
 func (h *ServiceOrderHandler) ListServiceOrders(g *gin.Context) {
 	serviceOrders, err := h.serviceOrderUseCase.ListServiceOrders(g.Request.Context())
 	if err != nil {

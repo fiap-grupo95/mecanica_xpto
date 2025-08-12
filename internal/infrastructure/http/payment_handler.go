@@ -16,6 +16,10 @@ var (
 	errInvalidPaymentInput = pkg.NewDomainErrorSimple("INVALID_PAYMENT_INPUT", "Invalid payment input", http.StatusBadRequest)
 )
 
+// PaymentHandler handles HTTP requests for payment operations
+// @title Payment API
+// @version 1.0
+// @description API for managing payments in the workshop management system
 type PaymentHandler struct {
 	usecase usecase.IPaymentUseCase
 }
@@ -39,6 +43,18 @@ func mapPaymentError(err error) *pkg.AppError {
 	}
 }
 
+// GetPaymentByID godoc
+// @Summary Get payment by ID
+// @Description Retrieve a payment by its ID
+// @Tags Payments
+// @Accept json
+// @Produce json
+// @Param id path int true "Payment ID"
+// @Success 200 {object} entities.Payment
+// @Failure 400 {object} pkg.AppError
+// @Failure 404 {object} pkg.AppError
+// @Failure 500 {object} pkg.AppError
+// @Router /payments/{id} [get]
 func (h *PaymentHandler) GetPaymentByID(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.ParseUint(idStr, 10, 64)
@@ -57,6 +73,15 @@ func (h *PaymentHandler) GetPaymentByID(c *gin.Context) {
 	c.JSON(http.StatusOK, payment)
 }
 
+// ListPayments godoc
+// @Summary List all payments
+// @Description Get a list of all payments
+// @Tags Payments
+// @Accept json
+// @Produce json
+// @Success 200 {array} entities.Payment
+// @Failure 500 {object} pkg.AppError
+// @Router /payments [get]
 func (h *PaymentHandler) ListPayments(c *gin.Context) {
 	payments, err := h.usecase.ListPayments(c.Request.Context())
 	if err != nil {
@@ -68,6 +93,17 @@ func (h *PaymentHandler) ListPayments(c *gin.Context) {
 	c.JSON(http.StatusOK, payments)
 }
 
+// CreatePayment godoc
+// @Summary Create a new payment
+// @Description Create a new payment record
+// @Tags Payments
+// @Accept json
+// @Produce json
+// @Param payment body entities.Payment true "Payment Information"
+// @Success 201 {object} entities.Payment
+// @Failure 400 {object} pkg.AppError
+// @Failure 500 {object} pkg.AppError
+// @Router /payments [post]
 func (h *PaymentHandler) CreatePayment(c *gin.Context) {
 	var input entities.Payment
 	if err := c.ShouldBindJSON(&input); err != nil {
