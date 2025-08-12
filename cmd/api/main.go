@@ -2,7 +2,9 @@ package main
 
 import (
 	_ "mecanica_xpto/docs"
+	"mecanica_xpto/internal/infrastructure/database"
 	"mecanica_xpto/internal/infrastructure/http/routes"
+	"os"
 )
 
 // @title           Mecanica XPTO API
@@ -23,5 +25,15 @@ import (
 // @securityDefinitions.basic  BasicAuth
 
 func main() {
+	if len(os.Args) > 1 {
+		switch os.Args[1] {
+		case "seed":
+			database.Seed()
+			return
+		case "migrate":
+			database.Migrate()
+			return
+		}
+	}
 	routes.Run()
 }

@@ -13,6 +13,70 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
+const (
+	StatusRecebida            = "RECEBIDA"
+	StatusEmDiagnostico       = "EM DIAGNÓSTICO"
+	StatusAguardandoAprovacao = "AGUARDANDO APROVAÇÃO"
+	StatusAprovada            = "APROVADA"
+	StatusRejeitada           = "REJEITADA"
+	StatusEmExecucao          = "EM EXECUÇÃO"
+	StatusFinalizada          = "FINALIZADA"
+	StatusEntregue            = "ENTREGUE"
+	StatusCancelada           = "CANCELADA"
+)
+
+// Mock Service Repository
+type MockServiceRepository struct {
+	mock.Mock
+}
+
+func (m *MockServiceRepository) Update(ctx context.Context, so *entities.Service) error {
+	args := m.Called(ctx, so)
+	if args.Get(0) == nil {
+		return args.Error(1)
+	}
+	return args.Error(0)
+}
+
+func (m *MockServiceRepository) Delete(ctx context.Context, id uint) error {
+	args := m.Called(ctx, id)
+	if args.Get(0) == nil {
+		return args.Error(1)
+	}
+	return args.Error(0)
+}
+
+func (m *MockServiceRepository) List(ctx context.Context) ([]entities.Service, error) {
+	args := m.Called(ctx)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).([]entities.Service), args.Error(1)
+}
+
+func (m *MockServiceRepository) Create(ctx context.Context, so *entities.Service) (entities.Service, error) {
+	args := m.Called(ctx, so)
+	if args.Get(0) == nil {
+		return entities.Service{}, args.Error(1)
+	}
+	return args.Get(0).(entities.Service), args.Error(1)
+}
+func (m *MockServiceRepository) GetByID(ctx context.Context, id uint) (entities.Service, error) {
+	args := m.Called(ctx, id)
+	if args.Get(0) == nil {
+		return entities.Service{}, args.Error(1)
+	}
+	return args.Get(0).(entities.Service), args.Error(1)
+}
+
+func (m *MockServiceRepository) GetByName(ctx context.Context, name string) (entities.Service, error) {
+	args := m.Called(ctx, name)
+	if args.Get(0) == nil {
+		return entities.Service{}, args.Error(1)
+	}
+	return args.Get(0).(entities.Service), args.Error(1)
+}
+
 // Mock Vehicle Repository - "github.com/stretchr/testify/mock"
 type MockVehicleRepository struct {
 	mock.Mock
@@ -128,6 +192,21 @@ type MockServiceOrderRepository struct {
 	mock.Mock
 }
 
+func (m *MockServiceOrderRepository) GetByName(ctx context.Context, name string) (entities.Service, error) {
+	args := m.Called(ctx, name)
+	if args.Get(0) == nil {
+		return entities.Service{}, args.Error(1)
+	}
+	return args.Get(0).(entities.Service), args.Error(1)
+}
+func (m *MockServiceOrderRepository) Delete(ctx context.Context, id uint) error {
+	args := m.Called(ctx, id)
+	if args.Get(0) == nil {
+		return args.Error(1)
+	}
+	return args.Error(0)
+}
+
 func (m *MockServiceOrderRepository) Create(serviceOrder *entities.ServiceOrder) (*entities.ServiceOrder, error) {
 	args := m.Called(serviceOrder)
 	if args.Get(0) == nil {
@@ -136,11 +215,21 @@ func (m *MockServiceOrderRepository) Create(serviceOrder *entities.ServiceOrder)
 	return args.Get(0).(*entities.ServiceOrder), args.Error(1)
 }
 
-func (m *MockServiceOrderRepository) List() ([]dto.ServiceOrderDTO, error) {
-	args := m.Called()
+func (m *MockServiceOrderRepository) GetByID(id uint) (*dto.ServiceOrderDTO, error) {
+	args := m.Called(id)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
+	return args.Get(0).(*dto.ServiceOrderDTO), args.Error(1)
+}
+
+func (m *MockServiceOrderRepository) Update(serviceOrder *entities.ServiceOrder) error {
+	args := m.Called(serviceOrder)
+	return args.Error(0)
+}
+
+func (m *MockServiceOrderRepository) List() ([]dto.ServiceOrderDTO, error) {
+	args := m.Called()
 	return args.Get(0).([]dto.ServiceOrderDTO), args.Error(1)
 }
 
@@ -152,17 +241,12 @@ func (m *MockServiceOrderRepository) GetStatus(status valueobject.ServiceOrderSt
 	return args.Get(0).(*dto.ServiceOrderStatusDTO), args.Error(1)
 }
 
-func (m *MockServiceOrderRepository) Update(serviceOrder *entities.ServiceOrder) error {
-	args := m.Called(serviceOrder)
-	return args.Error(0)
-}
-
-func (m *MockServiceOrderRepository) GetByID(id uint) (*dto.ServiceOrderDTO, error) {
-	args := m.Called(id)
+func (m *MockServiceOrderRepository) GetPartsSupplyServiceOrder(partsSupplyID uint, serviceOrderID uint) (*dto.PartsSupplyServiceOrderDTO, error) {
+	args := m.Called(partsSupplyID, serviceOrderID)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	return args.Get(0).(*dto.ServiceOrderDTO), args.Error(1)
+	return args.Get(0).(*dto.PartsSupplyServiceOrderDTO), args.Error(1)
 }
 
 // Mock Parts Supply Repository
@@ -170,12 +254,12 @@ type MockPartsSupplyRepository struct {
 	mock.Mock
 }
 
-func (m *MockPartsSupplyRepository) GetByServiceOrderID(ctx context.Context, serviceOrderID uint) ([]entities.PartsSupply, error) {
-	args := m.Called(ctx, serviceOrderID)
+func (m *MockPartsSupplyRepository) GetByName(ctx context.Context, name string) (entities.PartsSupply, error) {
+	args := m.Called(ctx, name)
 	if args.Get(0) == nil {
-		return nil, args.Error(1)
+		return entities.PartsSupply{}, args.Error(1)
 	}
-	return args.Get(0).([]entities.PartsSupply), args.Error(1)
+	return args.Get(0).(entities.PartsSupply), args.Error(1)
 }
 
 func (m *MockPartsSupplyRepository) Create(ctx context.Context, ps *entities.PartsSupply) (entities.PartsSupply, error) {
@@ -185,18 +269,22 @@ func (m *MockPartsSupplyRepository) Create(ctx context.Context, ps *entities.Par
 	}
 	return args.Get(0).(entities.PartsSupply), args.Error(1)
 }
-func (m *MockPartsSupplyRepository) GetByName(ctx context.Context, name string) (entities.PartsSupply, error) {
-	args := m.Called(ctx, name)
+
+func (m *MockPartsSupplyRepository) GetByID(ctx context.Context, id uint) (entities.PartsSupply, error) {
+	args := m.Called(ctx, id)
 	if args.Get(0) == nil {
 		return entities.PartsSupply{}, args.Error(1)
 	}
 	return args.Get(0).(entities.PartsSupply), args.Error(1)
 }
+
+func (m *MockPartsSupplyRepository) Update(ctx context.Context, partsSupply *entities.PartsSupply) error {
+	args := m.Called(ctx, partsSupply)
+	return args.Error(0)
+}
+
 func (m *MockPartsSupplyRepository) Delete(ctx context.Context, id uint) error {
 	args := m.Called(ctx, id)
-	if args.Get(0) == nil {
-		return args.Error(1)
-	}
 	return args.Error(0)
 }
 
@@ -208,68 +296,19 @@ func (m *MockPartsSupplyRepository) List(ctx context.Context) ([]entities.PartsS
 	return args.Get(0).([]entities.PartsSupply), args.Error(1)
 }
 
-func (m *MockPartsSupplyRepository) GetByID(ctx context.Context, id uint) (entities.PartsSupply, error) {
-	args := m.Called(ctx, id)
+func (m *MockPartsSupplyRepository) GetByServiceOrderID(ctx context.Context, serviceOrderID uint) ([]entities.PartsSupply, error) {
+	args := m.Called(ctx, serviceOrderID)
 	if args.Get(0) == nil {
-		return entities.PartsSupply{}, args.Error(1)
+		return nil, args.Error(1)
 	}
-	return args.Get(0).(entities.PartsSupply), args.Error(1)
-}
-
-func (m *MockPartsSupplyRepository) Update(ctx context.Context, ps *entities.PartsSupply) error {
-	args := m.Called(ctx, ps)
-	return args.Error(0)
-}
-
-// Mock Service Repository
-type ServiceRepoMock struct {
-	mock.Mock
-}
-
-func (m *ServiceRepoMock) GetByName(ctx context.Context, name string) (entities.Service, error) {
-	args := m.Called(ctx, name)
-	if args.Get(0) == nil {
-		return entities.Service{}, args.Error(1)
-	}
-	return args.Get(0).(entities.Service), args.Error(1)
-}
-
-func (m *ServiceRepoMock) GetByID(ctx context.Context, id uint) (entities.Service, error) {
-	args := m.Called(ctx, id)
-	if args.Get(0) == nil {
-		return entities.Service{}, args.Error(1)
-	}
-	return args.Get(0).(entities.Service), args.Error(1)
-}
-
-func (m *ServiceRepoMock) Create(ctx context.Context, so *entities.Service) (entities.Service, error) {
-	args := m.Called(ctx, so)
-	if args.Get(0) == nil {
-		return entities.Service{}, args.Error(1)
-	}
-	return args.Get(0).(entities.Service), args.Error(1)
-}
-
-func (m *ServiceRepoMock) Update(ctx context.Context, service *entities.Service) error {
-	args := m.Called(ctx, service)
-	return args.Error(0)
-}
-
-func (m *ServiceRepoMock) Delete(ctx context.Context, id uint) error {
-	args := m.Called(ctx, id)
-	return args.Error(0)
-}
-
-func (m *ServiceRepoMock) List(ctx context.Context) ([]entities.Service, error) {
-	args := m.Called(ctx)
-	return args.Get(0).([]entities.Service), args.Error(1)
+	return args.Get(0).([]entities.PartsSupply), args.Error(1)
 }
 
 func TestCreateServiceOrder(t *testing.T) {
 	vehicleRepo := new(MockVehicleRepository)
 	customerRepo := new(MockCustomerRepository)
 	serviceOrderRepo := new(MockServiceOrderRepository)
-	serviceRepo := new(ServiceRepoMock)
+	serviceRepo := new(MockServiceRepository)
 	partsSupplyRepo := new(MockPartsSupplyRepository)
 
 	useCase := NewServiceOrderUseCase(serviceOrderRepo, vehicleRepo, customerRepo, serviceRepo, partsSupplyRepo)
@@ -290,10 +329,9 @@ func TestCreateServiceOrder(t *testing.T) {
 				vehicleRepo.On("FindByID", uint(1)).Return(&dto.VehicleDTO{ID: 1}, nil)
 				customerRepo.On("GetByID", uint(1)).Return(&dto.CustomerDTO{ID: 1}, nil)
 				serviceOrderRepo.On("Create", mock.AnythingOfType("*entities.ServiceOrder")).Return(&entities.ServiceOrder{
-					ID:                 1,
-					CustomerID:         1,
-					VehicleID:          1,
-					ServiceOrderStatus: valueobject.StatusRecebida,
+					ID:         1,
+					CustomerID: 1,
+					VehicleID:  1,
 				}, nil)
 			},
 			expectedError: nil,
@@ -326,12 +364,12 @@ func TestCreateServiceOrder(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.setupMocks()
-			result, err := useCase.CreateServiceOrder(context.Background(), tt.serviceOrder)
+			r, err := useCase.CreateServiceOrder(context.Background(), tt.serviceOrder)
 			if tt.expectedError != nil && err != nil {
 				assert.Error(t, err)
 				assert.Equal(t, tt.expectedError.Error(), err.Error())
 			} else {
-				assert.NotNil(t, result)
+				assert.NotNil(t, r)
 				assert.NoError(t, err)
 			}
 		})
@@ -342,7 +380,7 @@ func TestUpdateServiceOrder(t *testing.T) {
 	vehicleRepo := new(MockVehicleRepository)
 	customerRepo := new(MockCustomerRepository)
 	serviceOrderRepo := new(MockServiceOrderRepository)
-	serviceRepo := new(ServiceRepoMock)
+	serviceRepo := new(MockServiceRepository)
 	partsSupplyRepo := new(MockPartsSupplyRepository)
 
 	useCase := NewServiceOrderUseCase(serviceOrderRepo, vehicleRepo, customerRepo, serviceRepo, partsSupplyRepo)
@@ -430,73 +468,80 @@ func TestValidateEstimate(t *testing.T) {
 		name            string
 		request         *entities.ServiceOrder
 		serviceOrderDTO *dto.ServiceOrderDTO
-		partsSupplies   []entities.PartsSupply
-		setupMocks      func(*MockPartsSupplyRepository)
+		setupMocks      func(*MockPartsSupplyRepository, *MockServiceOrderRepository)
 		expectedError   error
 	}{
 		{
-			name: "Success - Approve Estimate",
+			name: "Should approve estimate and release parts supply",
 			request: &entities.ServiceOrder{
 				ID:                 1,
 				ServiceOrderStatus: valueobject.StatusAprovada,
-				PartsSupplies: []entities.PartsSupply{
-					{ID: 1, QuantityReserve: 2},
-				},
 			},
 			serviceOrderDTO: &dto.ServiceOrderDTO{
 				ID: 1,
 				ServiceOrderStatus: dto.ServiceOrderStatusDTO{
-					ID:          1,
-					Description: string(valueobject.StatusAguardandoAprovacao),
+					Description: StatusAguardandoAprovacao,
 				},
 			},
-			setupMocks: func(repo *MockPartsSupplyRepository) {
-				repo.On("GetByID", mock.Anything, uint(1)).Return(entities.PartsSupply{
+			setupMocks: func(psRepo *MockPartsSupplyRepository, soRepo *MockServiceOrderRepository) {
+				// Mock get parts supplies by service order ID
+				psRepo.On("GetByServiceOrderID", context.Background(), uint(1)).Return([]entities.PartsSupply{
+					{ID: 1, QuantityTotal: 10, QuantityReserve: 2},
+				}, nil)
+
+				// Mock get parts supply service order relation
+				soRepo.On("GetPartsSupplyServiceOrder", uint(1), uint(1)).Return(&dto.PartsSupplyServiceOrderDTO{
+					PartsSupplyID:  1,
+					ServiceOrderID: 1,
+					Quantity:       2,
+				}, nil)
+
+				// Mock get parts supply by ID
+				psRepo.On("GetByID", context.Background(), uint(1)).Return(entities.PartsSupply{
 					ID:              1,
-					QuantityTotal:   5,
+					QuantityTotal:   10,
 					QuantityReserve: 2,
 				}, nil)
-				repo.On("Update", mock.Anything, mock.AnythingOfType("*entities.PartsSupply")).Return(nil)
+
+				// Mock update parts supply
+				psRepo.On("Update", context.Background(), mock.AnythingOfType("*entities.PartsSupply")).Return(nil)
 			},
 			expectedError: nil,
 		},
 		{
-			name: "Success - Reject Estimate",
+			name: "Should fail when getting parts supply relation fails",
 			request: &entities.ServiceOrder{
 				ID:                 1,
-				ServiceOrderStatus: valueobject.StatusRejeitada,
-				PartsSupplies: []entities.PartsSupply{
-					{ID: 1, QuantityReserve: 2},
-				},
+				ServiceOrderStatus: valueobject.StatusAprovada,
 			},
 			serviceOrderDTO: &dto.ServiceOrderDTO{
 				ID: 1,
 				ServiceOrderStatus: dto.ServiceOrderStatusDTO{
-					ID:          1,
-					Description: string(valueobject.StatusAguardandoAprovacao),
+					Description: StatusAguardandoAprovacao,
 				},
 			},
-			setupMocks: func(repo *MockPartsSupplyRepository) {
-				repo.On("GetByID", mock.Anything, uint(1)).Return(entities.PartsSupply{
-					ID:              1,
-					QuantityTotal:   5,
-					QuantityReserve: 2,
+			setupMocks: func(psRepo *MockPartsSupplyRepository, soRepo *MockServiceOrderRepository) {
+				psRepo.On("GetByServiceOrderID", context.Background(), uint(1)).Return([]entities.PartsSupply{
+					{ID: 1},
 				}, nil)
-				repo.On("Update", mock.Anything, mock.AnythingOfType("*entities.PartsSupply")).Return(nil)
+
+				soRepo.On("GetPartsSupplyServiceOrder", uint(1), uint(1)).Return(nil, errors.New("error getting relation"))
 			},
-			expectedError: nil,
+			expectedError: errors.New("error getting relation"),
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			partsSupplyRepo := new(MockPartsSupplyRepository)
+			serviceOrderRepo := new(MockServiceOrderRepository)
+
 			if tt.setupMocks != nil {
-				tt.setupMocks(partsSupplyRepo)
+				tt.setupMocks(partsSupplyRepo, serviceOrderRepo)
 			}
 
 			update := &entities.ServiceOrder{}
-			result, err := ValidateEstimate(context.Background(), tt.request, tt.serviceOrderDTO, update, partsSupplyRepo)
+			result, err := ValidateEstimate(context.Background(), tt.request, tt.serviceOrderDTO, update, partsSupplyRepo, serviceOrderRepo)
 
 			if tt.expectedError != nil {
 				assert.Error(t, err)
@@ -504,6 +549,7 @@ func TestValidateEstimate(t *testing.T) {
 			} else {
 				assert.NoError(t, err)
 				assert.NotNil(t, result)
+				assert.Equal(t, valueobject.StatusAprovada, result.ServiceOrderStatus)
 			}
 		})
 	}
@@ -514,7 +560,7 @@ func TestCalculateEstimate(t *testing.T) {
 		name           string
 		services       []entities.Service
 		partsSupplies  []entities.PartsSupply
-		serviceRepo    *ServiceRepoMock
+		serviceRepo    *MockServiceRepository
 		partsSuplyRepo *MockPartsSupplyRepository
 		expected       float64
 	}{
@@ -528,7 +574,7 @@ func TestCalculateEstimate(t *testing.T) {
 				{ID: 1, QuantityReserve: 2},
 				{ID: 2, QuantityReserve: 3},
 			},
-			serviceRepo:    &ServiceRepoMock{},
+			serviceRepo:    &MockServiceRepository{},
 			partsSuplyRepo: &MockPartsSupplyRepository{},
 			expected:       350.0, // Updated to match actual calculation: (100 + 75) + (50*2 + 25*3) = 175 + 175 = 350
 		},
@@ -713,7 +759,7 @@ func TestInvalidServiceOrder(t *testing.T) {
 	vehicleRepo := new(MockVehicleRepository)
 	customerRepo := new(MockCustomerRepository)
 	serviceOrderRepo := new(MockServiceOrderRepository)
-	serviceRepo := new(ServiceRepoMock)
+	serviceRepo := new(MockServiceRepository)
 	partsSupplyRepo := new(MockPartsSupplyRepository)
 
 	useCase := NewServiceOrderUseCase(serviceOrderRepo, vehicleRepo, customerRepo, serviceRepo, partsSupplyRepo)
@@ -775,7 +821,7 @@ func TestGetServiceOrder(t *testing.T) {
 	serviceOrderRepo := new(MockServiceOrderRepository)
 	vehicleRepo := new(MockVehicleRepository)
 	customerRepo := new(MockCustomerRepository)
-	serviceRepo := new(ServiceRepoMock)
+	serviceRepo := new(MockServiceRepository)
 	partsSupplyRepo := new(MockPartsSupplyRepository)
 	useCase := NewServiceOrderUseCase(serviceOrderRepo, vehicleRepo, customerRepo, serviceRepo, partsSupplyRepo)
 
@@ -807,7 +853,7 @@ func TestListServiceOrders(t *testing.T) {
 	serviceOrderRepo := new(MockServiceOrderRepository)
 	vehicleRepo := new(MockVehicleRepository)
 	customerRepo := new(MockCustomerRepository)
-	serviceRepo := new(ServiceRepoMock)
+	serviceRepo := new(MockServiceRepository)
 	partsSupplyRepo := new(MockPartsSupplyRepository)
 	useCase := NewServiceOrderUseCase(serviceOrderRepo, vehicleRepo, customerRepo, serviceRepo, partsSupplyRepo)
 

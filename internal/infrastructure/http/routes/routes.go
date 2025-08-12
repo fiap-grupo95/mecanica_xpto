@@ -47,10 +47,11 @@ func getRoutes() {
 	jwtService := utils.NewJWTService(jwtCfg)
 
 	db := database.ConnectDatabase()
+	userRepository := users.NewUserRepository(db)
 
 	// Handler de autenticação
 	authHandler := handlers.NewAuthHandler(
-		usecase.NewAuthUseCase(jwtService),
+		usecase.NewAuthUseCase(jwtService, userRepository),
 	)
 
 	// Rotas públicas
@@ -68,8 +69,6 @@ func getRoutes() {
 	vehiclesRepository := vehicles.NewVehicleRepository(db)
 	vehiclesUseCase := usecase.NewVehicleService(vehiclesRepository)
 	vehicleHandler := http.NewVehicleHandler(vehiclesUseCase)
-
-	userRepository := users.NewUserRepository(db)
 	customerRepository := customers.NewCustomerRepository(db)
 	customerUseCase := usecase.NewCustomerUseCase(customerRepository, userRepository)
 	customerHandler := http.NewCustomerHandler(customerUseCase)
