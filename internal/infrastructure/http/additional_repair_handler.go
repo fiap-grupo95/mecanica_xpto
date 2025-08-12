@@ -28,6 +28,7 @@ func NewAdditionalRepairHandler(useCase usecase.IAdditionalRepairUseCase) *Addit
 // @Summary Get additional repair by ID
 // @Description Retrieve an additional repair by its ID
 // @Tags Additional Repairs
+// @Security Bearer
 // @Accept json
 // @Produce json
 // @Param id path int true "Additional Repair ID"
@@ -57,6 +58,7 @@ func (h *AdditionalRepairHandler) GetAdditionalRepair(g *gin.Context) {
 // @Summary Create a new additional repair
 // @Description Create a new additional repair record
 // @Tags Additional Repairs
+// @Security Bearer
 // @Accept json
 // @Produce json
 // @Param repair body entities.AdditionalRepair true "Additional Repair Information"
@@ -84,6 +86,7 @@ func (h *AdditionalRepairHandler) CreateAdditionalRepair(g *gin.Context) {
 // @Summary Add parts supply and service to additional repair
 // @Description Add parts supply and service to an existing additional repair
 // @Tags Additional Repairs
+// @Security Bearer
 // @Accept json
 // @Produce json
 // @Param id path int true "Additional Repair ID"
@@ -118,6 +121,7 @@ func (h *AdditionalRepairHandler) AddPartSupplyAndService(g *gin.Context) {
 // @Summary Remove parts supply and service from additional repair
 // @Description Remove parts supply and service from an existing additional repair
 // @Tags Additional Repairs
+// @Security Bearer
 // @Accept json
 // @Produce json
 // @Param id path int true "Additional Repair ID"
@@ -152,6 +156,7 @@ func (h *AdditionalRepairHandler) RemovePartSupplyAndService(g *gin.Context) {
 // @Summary Update customer approval status for additional repair
 // @Description Update the customer approval status of an additional repair
 // @Tags Additional Repairs
+// @Security Bearer
 // @Accept json
 // @Produce json
 // @Param id path int true "Additional Repair ID"

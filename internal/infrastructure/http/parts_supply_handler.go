@@ -46,6 +46,7 @@ func mapPartsSupplyError(err error) *pkg.AppError {
 // @Summary Get parts supply by ID
 // @Description Retrieve a parts supply by its ID
 // @Tags Parts Supply
+// @Security Bearer
 // @Accept json
 // @Produce json
 // @Param id path int true "Parts Supply ID"
@@ -76,6 +77,7 @@ func (h *PartsSupplyHandler) GetPartsSupplyByID(c *gin.Context) {
 // @Summary Create a new parts supply
 // @Description Create a new parts supply record
 // @Tags Parts Supply
+// @Security Bearer
 // @Accept json
 // @Produce json
 // @Param supply body entities.PartsSupply true "Parts Supply Information"
@@ -104,6 +106,7 @@ func (h *PartsSupplyHandler) CreatePartsSupply(c *gin.Context) {
 // @Summary Update a parts supply
 // @Description Update an existing parts supply record
 // @Tags Parts Supply
+// @Security Bearer
 // @Accept json
 // @Produce json
 // @Param id path int true "Parts Supply ID"
@@ -141,6 +144,7 @@ func (h *PartsSupplyHandler) UpdatePartsSupply(c *gin.Context) {
 // @Summary Delete a parts supply
 // @Description Delete an existing parts supply record
 // @Tags Parts Supply
+// @Security Bearer
 // @Accept json
 // @Produce json
 // @Param id path int true "Parts Supply ID"
@@ -170,6 +174,7 @@ func (h *PartsSupplyHandler) DeletePartsSupply(c *gin.Context) {
 // @Summary List all parts supplies
 // @Description Get a list of all parts supplies
 // @Tags Parts Supply
+// @Security Bearer
 // @Accept json
 // @Produce json
 // @Success 200 {array} entities.PartsSupply

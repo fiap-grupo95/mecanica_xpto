@@ -29,7 +29,7 @@ func NewAuthHandler(usecase usecase.AuthInterface) *AuthHandler {
 //
 // @Summary      Autenticação do usuário
 // @Description  Autentica um usuário com email e senha e retorna token JWT.
-// @Tags         auth
+// @Tags         Auth
 // @Accept       json
 // @Produce      json
 // @Param        loginRequest  body  dto.AuthDTO  true  "Credenciais do usuário"

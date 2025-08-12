@@ -38,6 +38,7 @@ func NewServiceOrderHandler(useCase usecase.IServiceOrderUseCase) *ServiceOrderH
 // @Summary Create a new service order
 // @Description Create a new service order record
 // @Tags Service Orders
+// @Security Bearer
 // @Accept json
 // @Produce json
 // @Param order body entities.ServiceOrder true "Service Order Information"
@@ -74,6 +75,7 @@ func (h *ServiceOrderHandler) CreateServiceOrder(g *gin.Context) {
 // @Summary Update service order diagnosis
 // @Description Update the diagnosis information of a service order
 // @Tags Service Orders
+// @Security Bearer
 // @Accept json
 // @Produce json
 // @Param id path int true "Service Order ID"
@@ -125,6 +127,7 @@ func (h *ServiceOrderHandler) UpdateServiceOrderDiagnosis(g *gin.Context) {
 // @Summary Update service order estimate
 // @Description Update the estimate information of a service order
 // @Tags Service Orders
+// @Security Bearer
 // @Accept json
 // @Produce json
 // @Param id path int true "Service Order ID"
@@ -175,6 +178,7 @@ func (h *ServiceOrderHandler) UpdateServiceOrderEstimate(g *gin.Context) {
 // @Summary Update service order execution
 // @Description Update the execution information of a service order
 // @Tags Service Orders
+// @Security Bearer
 // @Accept json
 // @Produce json
 // @Param id path int true "Service Order ID"
@@ -225,6 +229,7 @@ func (h *ServiceOrderHandler) UpdateServiceOrderExecution(g *gin.Context) {
 // @Summary Update service order delivery
 // @Description Update the delivery information of a service order
 // @Tags Service Orders
+// @Security Bearer
 // @Accept json
 // @Produce json
 // @Param id path int true "Service Order ID"
@@ -274,6 +279,7 @@ func (h *ServiceOrderHandler) UpdateServiceOrderDelivery(g *gin.Context) {
 // @Summary Get service order by ID
 // @Description Retrieve a service order by its ID
 // @Tags Service Orders
+// @Security Bearer
 // @Accept json
 // @Produce json
 // @Param id path int true "Service Order ID"
@@ -304,6 +310,7 @@ func (h *ServiceOrderHandler) GetServiceOrder(g *gin.Context) {
 // @Summary List all service orders
 // @Description Get a list of all service orders
 // @Tags Service Orders
+// @Security Bearer
 // @Accept json
 // @Produce json
 // @Success 200 {array} entities.ServiceOrder

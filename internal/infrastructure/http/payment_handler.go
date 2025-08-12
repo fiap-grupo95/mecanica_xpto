@@ -47,6 +47,7 @@ func mapPaymentError(err error) *pkg.AppError {
 // @Summary Get payment by ID
 // @Description Retrieve a payment by its ID
 // @Tags Payments
+// @Security Bearer
 // @Accept json
 // @Produce json
 // @Param id path int true "Payment ID"
@@ -77,6 +78,7 @@ func (h *PaymentHandler) GetPaymentByID(c *gin.Context) {
 // @Summary List all payments
 // @Description Get a list of all payments
 // @Tags Payments
+// @Security Bearer
 // @Accept json
 // @Produce json
 // @Success 200 {array} entities.Payment
@@ -97,6 +99,7 @@ func (h *PaymentHandler) ListPayments(c *gin.Context) {
 // @Summary Create a new payment
 // @Description Create a new payment record
 // @Tags Payments
+// @Security Bearer
 // @Accept json
 // @Produce json
 // @Param payment body entities.Payment true "Payment Information"

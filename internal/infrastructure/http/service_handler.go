@@ -46,6 +46,7 @@ func mapServiceError(err error) *pkg.AppError {
 // @Summary Get service by ID
 // @Description Retrieve a service by its ID
 // @Tags Services
+// @Security Bearer
 // @Accept json
 // @Produce json
 // @Param id path int true "Service ID"
@@ -73,6 +74,7 @@ func (h *ServiceHandler) GetServiceByID(c *gin.Context) {
 // @Summary Create a new service
 // @Description Create a new service record
 // @Tags Services
+// @Security Bearer
 // @Accept json
 // @Produce json
 // @Param service body entities.Service true "Service Information"
@@ -99,6 +101,7 @@ func (h *ServiceHandler) CreateService(c *gin.Context) {
 // @Summary Update a service
 // @Description Update an existing service record
 // @Tags Services
+// @Security Bearer
 // @Accept json
 // @Produce json
 // @Param id path int true "Service ID"
@@ -133,6 +136,7 @@ func (h *ServiceHandler) UpdateService(c *gin.Context) {
 // @Summary Delete a service
 // @Description Delete an existing service record
 // @Tags Services
+// @Security Bearer
 // @Accept json
 // @Produce json
 // @Param id path int true "Service ID"
@@ -160,6 +164,7 @@ func (h *ServiceHandler) DeleteService(c *gin.Context) {
 // @Summary List all services
 // @Description Get a list of all services
 // @Tags Services
+// @Security Bearer
 // @Accept json
 // @Produce json
 // @Success 200 {array} entities.Service
