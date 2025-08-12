@@ -41,6 +41,14 @@ func (m *MockIPartsSupplyRepo) EXPECT() *MockIPartsSupplyRepoMockRecorder {
 	return m.recorder
 }
 
+func (m *MockIPartsSupplyRepo) GetByServiceOrderID(ctx context.Context, serviceOrderID uint) ([]entities.PartsSupply, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetByServiceOrderID", ctx, serviceOrderID)
+	ret0, _ := ret[0].([]entities.PartsSupply)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
 // Create mocks base method.
 func (m *MockIPartsSupplyRepo) Create(ctx context.Context, ps *entities.PartsSupply) (entities.PartsSupply, error) {
 	m.ctrl.T.Helper()

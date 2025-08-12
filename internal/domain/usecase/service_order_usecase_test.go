@@ -167,6 +167,14 @@ type MockPartsSupplyRepository struct {
 	mock.Mock
 }
 
+func (m *MockPartsSupplyRepository) GetByServiceOrderID(ctx context.Context, serviceOrderID uint) ([]entities.PartsSupply, error) {
+	args := m.Called(ctx, serviceOrderID)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).([]entities.PartsSupply), args.Error(1)
+}
+
 func (m *MockPartsSupplyRepository) Create(ctx context.Context, ps *entities.PartsSupply) (entities.PartsSupply, error) {
 	args := m.Called(ctx, ps)
 	if args.Get(0) == nil {
