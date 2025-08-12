@@ -36,7 +36,7 @@ func NewAuthHandler(usecase usecase.AuthInterface) *AuthHandler {
 // @Success      200  {object}  map[string]string  "Token JWT"
 // @Failure      400  {object}  pkg.ErrorResponse  "Requisição inválida"
 // @Failure      401  {object}  pkg.ErrorResponse  "Não autorizado"
-// @Router       /v1/login [post]
+// @Router       /login [post]
 func (h *AuthHandler) Login(c *gin.Context) {
 	var req dto.AuthDTO
 	if err := c.ShouldBindJSON(&req); err != nil {

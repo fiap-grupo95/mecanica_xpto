@@ -8,6 +8,7 @@ import (
 // @Summary Health check endpoint
 // @Description Returns a pong message to verify the API is running
 // @Tags Health Check
+// @Security Bearer
 // @Produce json
 // @Success 200 {object} map[string]interface{} "Returns pong message"
 // @Router /ping [get]
