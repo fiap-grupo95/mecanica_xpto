@@ -16,6 +16,7 @@ type IServiceOrderRepository interface {
 	Update(serviceOrder *entities.ServiceOrder) error
 	List() ([]dto.ServiceOrderDTO, error)
 	GetStatus(status valueobject.ServiceOrderStatus) (*dto.ServiceOrderStatusDTO, error)
+	GetPartsSupplyServiceOrder(partsSupplyID uint, serviceOrderID uint) (*dto.PartsSupplyServiceOrderDTO, error)
 }
 
 // ServiceOrderRepository implements IServiceOrderRepository interface
@@ -148,6 +149,7 @@ func (r *ServiceOrderRepository) Update(serviceOrder *entities.ServiceOrder) err
 		relation := dto.PartsSupplyServiceOrderDTO{
 			PartsSupplyID:  partsSupply.ID,
 			ServiceOrderID: serviceOrder.ID,
+			Quantity:       partsSupply.QuantityReserve,
 		}
 		if err := tx.Create(&relation).Error; err != nil {
 			tx.Rollback()
@@ -198,4 +200,13 @@ func (r *ServiceOrderRepository) GetStatus(status valueobject.ServiceOrderStatus
 		return nil, err
 	}
 	return &serviceOrderStatuses, nil
+}
+
+func (r *ServiceOrderRepository) GetPartsSupplyServiceOrder(partsSupplyID uint, serviceOrderID uint) (*dto.PartsSupplyServiceOrderDTO, error) {
+	var relation dto.PartsSupplyServiceOrderDTO
+	err := r.db.Where("parts_supply_id = ? AND service_order_id = ?", partsSupplyID, serviceOrderID).First(&relation).Error
+	if err != nil {
+		return nil, err
+	}
+	return &relation, nil
 }
