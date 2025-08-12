@@ -8,4 +8,5 @@ const (
 	PathPartsSupply   = "/parts-supply"
 	PathService       = "/service"
 	PathServiceOrders = "/service-orders"
+	PathPayments      = "/payments"
 )

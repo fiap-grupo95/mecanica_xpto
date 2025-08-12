@@ -6,10 +6,11 @@ import (
 	"mecanica_xpto/internal/domain/usecase/mocks"
 	"testing"
 
-	"github.com/golang/mock/gomock"
-	"github.com/stretchr/testify/assert"
 	"mecanica_xpto/internal/domain/model/dto"
 	"mecanica_xpto/internal/domain/model/entities"
+
+	"github.com/golang/mock/gomock"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestUpdateCustomer_Success(t *testing.T) {

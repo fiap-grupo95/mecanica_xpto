@@ -169,8 +169,9 @@ func (r *ServiceOrderRepository) List() ([]dto.ServiceOrderDTO, error) {
 		Preload("ServiceOrderStatus").
 		Preload("AdditionalRepairs").
 		Preload("Payment").
-		Preload("PartsSupplies").
-		Preload("Services").
+		// Preload("PartsSupplies").
+		// Preload("Services").
+		// Preloading "PartsSupplies" and "Services" is intentionally omitted for now; see TODO above for evaluation.
 		Find(&serviceOrders).Error
 	return serviceOrders, err
 }

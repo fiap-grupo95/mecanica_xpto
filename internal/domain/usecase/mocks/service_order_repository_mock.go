@@ -13,9 +13,12 @@ type MockServiceOrderRepository struct {
 	mock.Mock
 }
 
-func (m *MockServiceOrderRepository) Create(serviceOrder *entities.ServiceOrder) error {
+func (m *MockServiceOrderRepository) Create(serviceOrder *entities.ServiceOrder) (*entities.ServiceOrder, error) {
 	args := m.Called(serviceOrder)
-	return args.Error(0)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*entities.ServiceOrder), args.Error(1)
 }
 
 func (m *MockServiceOrderRepository) Update(serviceOrder *entities.ServiceOrder) error {
@@ -42,4 +45,12 @@ func (m *MockServiceOrderRepository) GetStatus(status valueobject.ServiceOrderSt
 		return nil, args.Error(1)
 	}
 	return args.Get(0).(*dto.ServiceOrderStatusDTO), args.Error(1)
+}
+
+func (m *MockServiceOrderRepository) GetPartsSupplyServiceOrder(serviceOrderID uint, partsSupplyID uint) (*dto.PartsSupplyServiceOrderDTO, error) {
+	args := m.Called(serviceOrderID, partsSupplyID)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*dto.PartsSupplyServiceOrderDTO), args.Error(1)
 }
