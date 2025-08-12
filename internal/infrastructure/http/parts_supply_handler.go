@@ -17,6 +17,10 @@ var (
 	errInvalidPartsSupplyInput = pkg.NewDomainErrorSimple("INVALID_INPUT", "Invalid input data", http.StatusBadRequest)
 )
 
+// PartsSupplyHandler handles HTTP requests for parts supply operations
+// @title Parts Supply API
+// @version 1.0
+// @description API for managing parts supply in the workshop management system
 type PartsSupplyHandler struct {
 	usecase usecase.IPartsSupplyUseCase
 }
@@ -38,6 +42,19 @@ func mapPartsSupplyError(err error) *pkg.AppError {
 	}
 }
 
+// GetPartsSupplyByID godoc
+// @Summary Get parts supply by ID
+// @Description Retrieve a parts supply by its ID
+// @Tags Parts Supply
+// @Security Bearer
+// @Accept json
+// @Produce json
+// @Param id path int true "Parts Supply ID"
+// @Success 200 {object} entities.PartsSupply
+// @Failure 400 {object} pkg.AppError
+// @Failure 404 {object} pkg.AppError
+// @Failure 500 {object} pkg.AppError
+// @Router /parts-supplies/{id} [get]
 func (h *PartsSupplyHandler) GetPartsSupplyByID(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.ParseUint(idStr, 10, 64)
@@ -56,6 +73,18 @@ func (h *PartsSupplyHandler) GetPartsSupplyByID(c *gin.Context) {
 	c.JSON(http.StatusOK, foundPartsSupply)
 }
 
+// CreatePartsSupply godoc
+// @Summary Create a new parts supply
+// @Description Create a new parts supply record
+// @Tags Parts Supply
+// @Security Bearer
+// @Accept json
+// @Produce json
+// @Param supply body entities.PartsSupply true "Parts Supply Information"
+// @Success 201 {object} entities.PartsSupply
+// @Failure 400 {object} pkg.AppError
+// @Failure 500 {object} pkg.AppError
+// @Router /parts-supplies [post]
 func (h *PartsSupplyHandler) CreatePartsSupply(c *gin.Context) {
 	var partsSupply entities.PartsSupply
 	if err := c.ShouldBindJSON(&partsSupply); err != nil {
@@ -73,6 +102,20 @@ func (h *PartsSupplyHandler) CreatePartsSupply(c *gin.Context) {
 	c.JSON(http.StatusCreated, createdPartsSupply)
 }
 
+// UpdatePartsSupply godoc
+// @Summary Update a parts supply
+// @Description Update an existing parts supply record
+// @Tags Parts Supply
+// @Security Bearer
+// @Accept json
+// @Produce json
+// @Param id path int true "Parts Supply ID"
+// @Param supply body entities.PartsSupply true "Parts Supply Information"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} pkg.AppError
+// @Failure 404 {object} pkg.AppError
+// @Failure 500 {object} pkg.AppError
+// @Router /parts-supplies/{id} [put]
 func (h *PartsSupplyHandler) UpdatePartsSupply(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.ParseUint(idStr, 10, 64)
@@ -97,6 +140,19 @@ func (h *PartsSupplyHandler) UpdatePartsSupply(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "parts supply updated successfully"})
 }
 
+// DeletePartsSupply godoc
+// @Summary Delete a parts supply
+// @Description Delete an existing parts supply record
+// @Tags Parts Supply
+// @Security Bearer
+// @Accept json
+// @Produce json
+// @Param id path int true "Parts Supply ID"
+// @Success 204 "No Content"
+// @Failure 400 {object} pkg.AppError
+// @Failure 404 {object} pkg.AppError
+// @Failure 500 {object} pkg.AppError
+// @Router /parts-supplies/{id} [delete]
 func (h *PartsSupplyHandler) DeletePartsSupply(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.ParseUint(idStr, 10, 64)
@@ -114,6 +170,16 @@ func (h *PartsSupplyHandler) DeletePartsSupply(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "parts supply deleted successfully"})
 }
 
+// ListPartsSupplies godoc
+// @Summary List all parts supplies
+// @Description Get a list of all parts supplies
+// @Tags Parts Supply
+// @Security Bearer
+// @Accept json
+// @Produce json
+// @Success 200 {array} entities.PartsSupply
+// @Failure 500 {object} pkg.AppError
+// @Router /parts-supplies [get]
 func (h *PartsSupplyHandler) ListPartsSupplies(c *gin.Context) {
 	partsSupplies, err := h.usecase.ListPartsSupplies(c.Request.Context())
 	if err != nil {

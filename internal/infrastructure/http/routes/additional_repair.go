@@ -9,7 +9,7 @@ import (
 func addAdditionalRepairRoutes(rg *gin.RouterGroup, additionalRepair *http.AdditionalRepairHandler) {
 	serviceOrdersRoutes := rg.Group(PathAdditionalRepair)
 	{
-		serviceOrdersRoutes.POST("", additionalRepair.CreateSOAdditionalRepair)
+		serviceOrdersRoutes.POST("", additionalRepair.CreateAdditionalRepair)
 		serviceOrdersRoutes.GET("/:id", additionalRepair.GetAdditionalRepair)
 		serviceOrdersRoutes.PATCH("/:id/add", additionalRepair.AddPartSupplyAndService)
 		serviceOrdersRoutes.PATCH("/:id/remove", additionalRepair.RemovePartSupplyAndService)

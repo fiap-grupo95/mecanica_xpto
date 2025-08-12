@@ -11,7 +11,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// CustomerHandler handles HTTP requests for customers
+// CustomerHandler handles HTTP requests for customer operations
+// @title Customer API
+// @version 1.0
+// @description API for managing customers in the workshop management system
 type CustomerHandler struct {
 	ucCustomer use_cases.ICustomerUseCase
 }
@@ -38,6 +41,7 @@ func mapCustomerError(err error) *pkg.AppError {
 // @Summary Get customer by ID
 // @Description Retrieve a customer by their ID
 // @Tags Customers
+// @Security Bearer
 // @Accept json
 // @Produce json
 // @Param id path string true "Customer ID"
@@ -62,6 +66,7 @@ func (h *CustomerHandler) GetCustomer(c *gin.Context) {
 // @Summary Get full customer by ID
 // @Description Retrieve a full customer record by their numeric ID
 // @Tags Customers
+// @Security Bearer
 // @Accept json
 // @Produce json
 // @Param id path int true "Customer ID"
@@ -89,7 +94,8 @@ func (h *CustomerHandler) GetFullCustomer(c *gin.Context) {
 // CreateCustomer godoc
 // @Summary Create a new customer
 // @Description Creates a new customer record
-// @Tags customers
+// @Tags Customers
+// @Security Bearer
 // @Accept json
 // @Produce json
 // @Param vehicle body entities.Customer true "Customer information"
@@ -118,6 +124,7 @@ func (h *CustomerHandler) CreateCustomer(c *gin.Context) {
 // @Summary Update a customer
 // @Description Update an existing customer record by ID
 // @Tags Customers
+// @Security Bearer
 // @Accept json
 // @Produce json
 // @Param id path int true "Customer ID"
@@ -153,6 +160,7 @@ func (h *CustomerHandler) UpdateCustomer(c *gin.Context) {
 // @Summary Delete a customer
 // @Description Delete a customer record by ID
 // @Tags Customers
+// @Security Bearer
 // @Accept json
 // @Produce json
 // @Param id path int true "Customer ID"
@@ -181,6 +189,7 @@ func (h *CustomerHandler) DeleteCustomer(c *gin.Context) {
 // @Summary List all customers
 // @Description Retrieve a list of all customers
 // @Tags Customers
+// @Security Bearer
 // @Accept json
 // @Produce json
 // @Success 200 {array} entities.Customer
