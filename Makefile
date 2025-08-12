@@ -5,9 +5,10 @@ DB_CONTAINER_NAME=db
 APP_BINARY_PATH=/app/mecanica-xpto-api
 GO_BIN=$(shell go env GOPATH)/bin
 
-.PHONY: init up down logs swag-install swag-generate swag-run
+.PHONY: init up down logs swag-install swag-generate swag-run test coverage coverage-html
 
 init: swag-install swag-generate
+	cp .env-example .env
 	docker compose up -d --build
 
 	@echo "Aguardando banco ficar pronto..."
@@ -56,3 +57,18 @@ swag-generate:
 swag-run: swag-generate
 	@echo "Rodando a aplicação localmente..."
 	go run cmd/api/main.go
+
+dev-up:
+	docker compose up -d dev
+
+test: dev-up
+	docker compose exec dev go test ./... -v
+
+coverage: dev-up
+	docker compose exec dev go test ./... -coverprofile=coverage.out
+	docker compose exec dev go tool cover -func=coverage.out
+
+coverage-html: dev-up
+	docker compose exec dev go test ./... -coverprofile=coverage.out
+	docker cp $$(docker compose ps -q dev):/app/coverage.out .
+	go tool cover -html=coverage.out
