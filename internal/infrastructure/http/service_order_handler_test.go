@@ -28,7 +28,7 @@ func TestCreateServiceOrder(t *testing.T) {
 	r.POST("/os", h.CreateServiceOrder)
 
 	// Success
-	mockUC.EXPECT().CreateServiceOrder(gomock.Any(), gomock.Any()).Return(nil)
+	mockUC.EXPECT().CreateServiceOrder(gomock.Any(), gomock.Any()).Return(&entities.ServiceOrder{}, nil)
 	jsonBody := `{"customer_id":1,"vehicle_id":1}`
 	req, _ := http.NewRequest("POST", "/os", bytes.NewBufferString(jsonBody))
 	req.Header.Set("Content-Type", "application/json")
@@ -48,7 +48,7 @@ func TestCreateServiceOrder(t *testing.T) {
 	}
 
 	// Failure
-	mockUC.EXPECT().CreateServiceOrder(gomock.Any(), gomock.Any()).Return(errors.New("fail"))
+	mockUC.EXPECT().CreateServiceOrder(gomock.Any(), gomock.Any()).Return(nil, errors.New("fail"))
 	req, _ = http.NewRequest("POST", "/os", bytes.NewBufferString(jsonBody))
 	req.Header.Set("Content-Type", "application/json")
 	w = httptest.NewRecorder()

@@ -1,6 +1,7 @@
 package http
 
 import (
+	"errors"
 	"mecanica_xpto/internal/domain/model/entities"
 	"mecanica_xpto/internal/domain/usecase"
 	"net/http"
@@ -36,13 +37,21 @@ func (h *ServiceOrderHandler) CreateServiceOrder(g *gin.Context) {
 		return
 	}
 
-	err := h.serviceOrderUseCase.CreateServiceOrder(g.Request.Context(), serviceOrder)
+	result, err := h.serviceOrderUseCase.CreateServiceOrder(g.Request.Context(), serviceOrder)
 	if err != nil {
-		g.JSON(500, gin.H{"error": "Failed to create service order"})
+		if errors.Is(err, usecase.ErrServiceOrderNotFound) ||
+			errors.Is(err, usecase.ErrVehicleNotFound) ||
+			errors.Is(err, usecase.ErrCustomerNotFound) {
+			g.JSON(404, gin.H{"error": err.Error()})
+			return
+		}
+
+		g.JSON(500, gin.H{"error": "Failed to create service order", "details": err.Error()})
+		log.Error().Msgf("Error creating service order: %v", err)
 		return
 	}
 
-	g.JSON(201, gin.H{"message": "Service order created successfully"})
+	g.JSON(201, result)
 }
 
 // UpdateServiceOrderDiagnosis PATCH /os/:id/diagnosis
@@ -62,13 +71,26 @@ func (h *ServiceOrderHandler) UpdateServiceOrderDiagnosis(g *gin.Context) {
 		return
 	}
 
-	err = h.serviceOrderUseCase.UpdateServiceOrder(g.Request.Context(), serviceOrder, DIAGNOSIS)
+	result, err := h.serviceOrderUseCase.UpdateServiceOrder(g.Request.Context(), serviceOrder, DIAGNOSIS)
 	if err != nil {
-		g.JSON(500, gin.H{"error": "Failed to update service order"})
+
+		if errors.Is(err, usecase.ErrServiceOrderNotFound) {
+			g.JSON(404, gin.H{"error": "Service order not found"})
+			return
+		}
+
+		if errors.Is(err, usecase.ErrInvalidTransitionStatusToDiagnosis) ||
+			errors.Is(err, usecase.ErrInvalidStatus) ||
+			errors.Is(err, usecase.ErrInvalidFlow) {
+			g.JSON(400, gin.H{"error": err.Error()})
+			return
+		}
+
+		g.JSON(500, gin.H{"error": "Failed to update service order", "details": err.Error()})
 		return
 	}
 
-	g.JSON(200, gin.H{"message": "Service order updated successfully"})
+	g.JSON(200, result)
 }
 
 // UpdateServiceOrderEstimate PATCH /os/:id/estimate
@@ -88,13 +110,25 @@ func (h *ServiceOrderHandler) UpdateServiceOrderEstimate(g *gin.Context) {
 		return
 	}
 
-	err = h.serviceOrderUseCase.UpdateServiceOrder(g.Request.Context(), serviceOrder, ESTIMATE)
+	result, err := h.serviceOrderUseCase.UpdateServiceOrder(g.Request.Context(), serviceOrder, ESTIMATE)
 	if err != nil {
-		g.JSON(500, gin.H{"error": "Failed to update service order"})
+		if errors.Is(err, usecase.ErrServiceOrderNotFound) {
+			g.JSON(404, gin.H{"error": "Service order not found"})
+			return
+		}
+
+		if errors.Is(err, usecase.ErrInvalidTransitionStatusToEstimate) ||
+			errors.Is(err, usecase.ErrInvalidStatus) ||
+			errors.Is(err, usecase.ErrInvalidFlow) {
+			g.JSON(400, gin.H{"error": err.Error()})
+			return
+		}
+
+		g.JSON(500, gin.H{"error": "Failed to update service order", "details": err.Error()})
 		return
 	}
 
-	g.JSON(200, gin.H{"message": "Service order updated successfully"})
+	g.JSON(200, result)
 }
 
 // UpdateServiceOrderExecution PATCH /os/:id/execution
@@ -114,13 +148,25 @@ func (h *ServiceOrderHandler) UpdateServiceOrderExecution(g *gin.Context) {
 		return
 	}
 
-	err = h.serviceOrderUseCase.UpdateServiceOrder(g.Request.Context(), serviceOrder, EXECUTION)
+	result, err := h.serviceOrderUseCase.UpdateServiceOrder(g.Request.Context(), serviceOrder, EXECUTION)
 	if err != nil {
-		g.JSON(500, gin.H{"error": "Failed to update service order"})
+		if errors.Is(err, usecase.ErrServiceOrderNotFound) {
+			g.JSON(404, gin.H{"error": "Service order not found"})
+			return
+		}
+
+		if errors.Is(err, usecase.ErrInvalidTransitionStatusToExecution) ||
+			errors.Is(err, usecase.ErrInvalidStatus) ||
+			errors.Is(err, usecase.ErrInvalidFlow) {
+			g.JSON(400, gin.H{"error": err.Error()})
+			return
+		}
+
+		g.JSON(500, gin.H{"error": "Failed to update service order", "details": err.Error()})
 		return
 	}
 
-	g.JSON(200, gin.H{"message": "Service order updated successfully"})
+	g.JSON(200, result)
 }
 
 // UpdateServiceOrderDelivery PATCH /os/:id/delivery
@@ -140,13 +186,24 @@ func (h *ServiceOrderHandler) UpdateServiceOrderDelivery(g *gin.Context) {
 		return
 	}
 
-	err = h.serviceOrderUseCase.UpdateServiceOrder(g.Request.Context(), serviceOrder, DELIVERY)
+	result, err := h.serviceOrderUseCase.UpdateServiceOrder(g.Request.Context(), serviceOrder, DELIVERY)
 	if err != nil {
-		g.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update service order"})
+		if errors.Is(err, usecase.ErrServiceOrderNotFound) {
+			g.JSON(404, gin.H{"error": "Service order not found"})
+			return
+		}
+
+		if errors.Is(err, usecase.ErrInvalidTransitionStatusToDelivery) ||
+			errors.Is(err, usecase.ErrInvalidStatus) ||
+			errors.Is(err, usecase.ErrInvalidFlow) {
+			g.JSON(400, gin.H{"error": err.Error()})
+			return
+		}
+		g.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update service order", "details": err.Error()})
 		return
 	}
 
-	g.JSON(http.StatusOK, gin.H{"message": "Service order updated successfully"})
+	g.JSON(http.StatusOK, result)
 }
 
 func (h *ServiceOrderHandler) GetServiceOrder(g *gin.Context) {
@@ -161,7 +218,7 @@ func (h *ServiceOrderHandler) GetServiceOrder(g *gin.Context) {
 
 	ServiceOrderResponse, err := h.serviceOrderUseCase.GetServiceOrder(g.Request.Context(), serviceOrder)
 	if err != nil {
-		g.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve service order"})
+		g.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve service order", "details": err.Error()})
 		return
 	}
 
@@ -171,7 +228,7 @@ func (h *ServiceOrderHandler) GetServiceOrder(g *gin.Context) {
 func (h *ServiceOrderHandler) ListServiceOrders(g *gin.Context) {
 	serviceOrders, err := h.serviceOrderUseCase.ListServiceOrders(g.Request.Context())
 	if err != nil {
-		g.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve service orders"})
+		g.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve service orders", "details": err.Error()})
 		return
 	}
 
