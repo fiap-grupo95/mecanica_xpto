@@ -78,33 +78,26 @@ Event Storming: <https://miro.com/app/board/uXjVIgU2y2I=/>
 
 ## Testes
 
-Para executar os testes automatizados, utilize o seguinte comando:
+- Para rodar os testes automatizados dentro do docker:
 
 ```bash
-go test ./... -v
+make test
+```
+
+- Para rodar os testes e gerar relatório de cobertura (resumo no terminal):
+
+```bash
+make coverage
+
+```
+
+Para gerar e abrir o relatório de cobertura em HTML (abre no navegador):
+
+```bash
+make coverage-html
 ```
 
 ## Documentação da API
 
-### Swagger
-
-Primeiro, instale o Swagger CLI:
-
-```bash
-go install github.com/swaggo/swag/cmd/swag@latest
-```
-
-Depois, baixe as dependências do projeto:
-
-```bash
-go mod tidy
-```
-
-Finalmente, gere a documentação Swagger:
-
-```bash
-swag init -g cmd/api/main.go
-```
-
-Após rodar esses comandos, você poderá acessar a documentação da API em:  
+A documentação Swagger estará disponível em:  
 `http://localhost:8080/swagger/index.html` enquanto a aplicação estiver rodando.
