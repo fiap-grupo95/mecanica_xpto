@@ -59,6 +59,7 @@ swag-run: swag-generate
 	go run cmd/api/main.go
 
 dev-up:
+	cp .env-example .env
 	docker compose up -d dev
 
 test: dev-up
