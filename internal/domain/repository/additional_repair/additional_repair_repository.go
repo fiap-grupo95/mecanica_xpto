@@ -14,6 +14,7 @@ type IAdditionalRepairRepository interface {
 	GetByServiceOrder(serviceOrderId uint) ([]dto.AdditionalRepairDTO, error)
 	GetStatus(status string) (*dto.AdditionalRepairStatusDTO, error)
 	CustomerApprovalStatus(id uint, status entities.AdditionalRepairStatusDTO) error
+	GetPartsSupplyAdditionalRepair(partsSupplyID uint, additionalRepairID uint) (*dto.PartsSupplyAdditionalRepairDTO, error)
 }
 
 // AdditionalRepairRepository implements IAdditionalRepairRepository interface
@@ -35,6 +36,14 @@ func (r *AdditionalRepairRepository) Create(additionalRepair *dto.AdditionalRepa
 	if err := tx.Create(&additionalRepair).Error; err != nil {
 		tx.Rollback()
 		return err
+	}
+	for _, partsSupply := range additionalRepair.PartsSupplies {
+		if err := tx.Model(&dto.PartsSupplyAdditionalRepairDTO{}).
+			Where("parts_supply_dto_id = ? and additional_repair_dto_id = ?", partsSupply.ID, additionalRepair.ID).
+			Update("quantity", partsSupply.QuantityReserve).Error; err != nil {
+			tx.Rollback()
+			return err
+		}
 	}
 
 	return tx.Commit().Error
@@ -151,6 +160,15 @@ func (r *AdditionalRepairRepository) GetStatus(status string) (*dto.AdditionalRe
 		return nil, err
 	}
 	return &additionalRepairStatus, nil
+}
+
+func (r *AdditionalRepairRepository) GetPartsSupplyAdditionalRepair(partsSupplyID uint, additionalRepairID uint) (*dto.PartsSupplyAdditionalRepairDTO, error) {
+	var relation dto.PartsSupplyAdditionalRepairDTO
+	err := r.db.Where("parts_supply_dto_id = ? AND additional_repair_dto_id = ?", partsSupplyID, additionalRepairID).First(&relation).Error
+	if err != nil {
+		return nil, err
+	}
+	return &relation, nil
 }
 
 func calculateEstimate(services []dto.ServiceDTO, partsSupplies []dto.PartsSupplyDTO) float64 {

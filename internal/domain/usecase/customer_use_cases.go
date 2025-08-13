@@ -7,6 +7,7 @@ import (
 	"mecanica_xpto/internal/domain/model/valueobject"
 	customerRepo "mecanica_xpto/internal/domain/repository/customers"
 	"mecanica_xpto/internal/domain/repository/users"
+	"mecanica_xpto/pkg"
 )
 
 var (
@@ -65,9 +66,12 @@ func (uc *CustomerUseCase) CreateCustomer(customer *entities.Customer) error {
 	if e := customer.CpfCnpj.IsValid(); e != nil {
 		return ErrInvalidDocumentFormat
 	}
+	password, _ := pkg.HashPassword(customer.CpfCnpj.String())
+
 	userDTO := dto.UserDTO{
 		Email:    customer.Email,
-		UserType: valueobject.ParseUserType("admin"),
+		UserType: valueobject.ParseUserType("customer"),
+		Password: password,
 	}
 	customerDTO := dto.CustomerDTO{
 		User:        &userDTO,

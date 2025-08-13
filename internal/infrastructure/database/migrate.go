@@ -18,6 +18,7 @@ func Migrate() {
 		&dto.ServiceOrderStatusDTO{},
 		&dto.AdditionalRepairDTO{},
 		&dto.PartsSupplyServiceOrderDTO{},
+		&dto.PartsSupplyAdditionalRepairDTO{},
 		&dto.AdditionalRepairStatusDTO{},
 		&dto.UserTypeDTO{},
 		&dto.ServiceServiceOrderDTO{},

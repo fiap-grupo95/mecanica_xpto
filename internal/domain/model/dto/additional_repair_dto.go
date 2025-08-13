@@ -8,8 +8,9 @@ import (
 
 // N:N relationship between PartsSupply and AdditionalRepair
 type PartsSupplyAdditionalRepairDTO struct {
-	PartsSupplyID      uint `gorm:"primaryKey"`
-	AdditionalRepairID uint `gorm:"primaryKey"`
+	PartsSupplyID      uint `gorm:"column:parts_supply_dto_id;primaryKey"`
+	AdditionalRepairID uint `gorm:"column:additional_repair_dto_id;primaryKey"`
+	Quantity           int  `gorm:"column:quantity"`
 }
 
 // N:N relationship between Service and AdditionalRepair
@@ -39,7 +40,7 @@ type AdditionalRepairDTO struct {
 	Estimate       float64                   `gorm:"type:decimal(10,2)"`
 	CreatedAt      time.Time                 `gorm:"autoCreateTime"`
 	UpdatedAt      time.Time                 `gorm:"autoUpdateTime"`
-	PartsSupplies  []PartsSupplyDTO          `gorm:"many2many:parts_supply_additional_repair"`
+	PartsSupplies  []PartsSupplyDTO          `gorm:"many2many:parts_supply_additional_repair_dtos"`
 	Services       []ServiceDTO              `gorm:"many2many:service_additional_repair"`
 }
 

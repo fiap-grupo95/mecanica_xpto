@@ -19,7 +19,7 @@ type PartsSupplyDTO struct {
 	CreatedAt         time.Time             `gorm:"autoCreateTime"`
 	UpdatedAt         time.Time             `gorm:"autoUpdateTime"`
 	DeletedAt         gorm.DeletedAt        `gorm:"index"`
-	AdditionalRepairs []AdditionalRepairDTO `gorm:"many2many:parts_supply_additional_repair"`
+	AdditionalRepairs []AdditionalRepairDTO `gorm:"many2many:parts_supply_additional_repair_dtos;joinForeignKey:parts_supply_id;joinReferences:additional_repair_id"`
 	ServiceOrders     []ServiceOrderDTO     `gorm:"many2many:parts_supply_service_order_dtos;joinForeignKey:parts_supply_id;joinReferences:service_order_id"`
 }
 
