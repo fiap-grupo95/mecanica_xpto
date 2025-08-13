@@ -29,22 +29,23 @@ func (m *ServiceOrderStatusDTO) ToDomain() valueobject.ServiceOrderStatus {
 }
 
 type ServiceOrderDTO struct {
-	ID                   uint                  `gorm:"primaryKey"`
-	CustomerID           uint                  `gorm:"not null"`
-	Customer             CustomerDTO           `gorm:"foreignKey:CustomerID"`
-	VehicleID            uint                  `gorm:"not null"`
-	Vehicle              VehicleDTO            `gorm:"foreignKey:VehicleID"`
-	OSStatusID           uint                  `gorm:"not null"`
-	ServiceOrderStatus   ServiceOrderStatusDTO `gorm:"foreignKey:OSStatusID"`
-	Estimate             float64               `gorm:"type:decimal(10,2)"`
-	StartedExecutionDate *time.Time
-	FinalExecutionDate   *time.Time
-	CreatedAt            *time.Time            `gorm:"autoCreateTime"`
-	UpdatedAt            *time.Time            `gorm:"autoUpdateTime"`
-	AdditionalRepairs    []AdditionalRepairDTO `gorm:"foreignKey:ServiceOrderID"`
-	Payment              *PaymentDTO           `gorm:"foreignKey:ServiceOrderID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
-	PartsSupplies        []PartsSupplyDTO      `gorm:"many2many:parts_supply_service_order_dtos;"`
-	Services             []ServiceDTO          `gorm:"many2many:service_service_order_dtos;"`
+	ID                       uint                  `gorm:"primaryKey"`
+	CustomerID               uint                  `gorm:"not null"`
+	Customer                 CustomerDTO           `gorm:"foreignKey:CustomerID"`
+	VehicleID                uint                  `gorm:"not null"`
+	Vehicle                  VehicleDTO            `gorm:"foreignKey:VehicleID"`
+	OSStatusID               uint                  `gorm:"not null"`
+	ServiceOrderStatus       ServiceOrderStatusDTO `gorm:"foreignKey:OSStatusID"`
+	Estimate                 float64               `gorm:"type:decimal(10,2)"`
+	StartedExecutionDate     *time.Time
+	FinalExecutionDate       *time.Time
+	ExecutionDurationInHours float64
+	CreatedAt                *time.Time            `gorm:"autoCreateTime"`
+	UpdatedAt                *time.Time            `gorm:"autoUpdateTime"`
+	AdditionalRepairs        []AdditionalRepairDTO `gorm:"foreignKey:ServiceOrderID"`
+	Payment                  *PaymentDTO           `gorm:"foreignKey:ServiceOrderID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	PartsSupplies            []PartsSupplyDTO      `gorm:"many2many:parts_supply_service_order_dtos;"`
+	Services                 []ServiceDTO          `gorm:"many2many:service_service_order_dtos;"`
 }
 
 func (m *ServiceOrderDTO) ToDomain() *entities.ServiceOrder {

@@ -11,7 +11,6 @@ import (
 	mocks "mecanica_xpto/internal/domain/mocks"
 	"mecanica_xpto/internal/domain/model/dto"
 	"mecanica_xpto/internal/domain/model/entities"
-	serviceordermocks "mecanica_xpto/internal/domain/usecase/mocks"
 )
 
 func TestPaymentUseCase_CreatePayment(t *testing.T) {
@@ -20,7 +19,7 @@ func TestPaymentUseCase_CreatePayment(t *testing.T) {
 	ctx := context.Background()
 
 	mockPaymentRepo := mocks.NewMockIPaymentRepo(ctrl)
-	mockServiceOrderRepo := &serviceordermocks.MockServiceOrderRepository{}
+	mockServiceOrderRepo := &mocks.MockServiceOrderRepository{}
 	u := NewPaymentUseCase(mockPaymentRepo, mockServiceOrderRepo)
 
 	mockServiceOrderDTO := &dto.ServiceOrderDTO{ID: 1, Estimate: 100.0}
@@ -89,7 +88,7 @@ func TestPaymentUseCase_GetPaymentByID(t *testing.T) {
 	defer ctrl.Finish()
 	ctx := context.Background()
 	mockPaymentRepo := mocks.NewMockIPaymentRepo(ctrl)
-	mockServiceOrderRepo := &serviceordermocks.MockServiceOrderRepository{}
+	mockServiceOrderRepo := &mocks.MockServiceOrderRepository{}
 	u := NewPaymentUseCase(mockPaymentRepo, mockServiceOrderRepo)
 
 	paymentDTO := &dto.PaymentDTO{ID: 1}
@@ -130,7 +129,7 @@ func TestPaymentUseCase_ListPayments(t *testing.T) {
 	defer ctrl.Finish()
 	ctx := context.Background()
 	mockPaymentRepo := mocks.NewMockIPaymentRepo(ctrl)
-	mockServiceOrderRepo := &serviceordermocks.MockServiceOrderRepository{}
+	mockServiceOrderRepo := &mocks.MockServiceOrderRepository{}
 	u := NewPaymentUseCase(mockPaymentRepo, mockServiceOrderRepo)
 
 	dtos := []dto.PaymentDTO{{ID: 1}, {ID: 2}}

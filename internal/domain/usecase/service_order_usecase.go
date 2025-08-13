@@ -3,17 +3,17 @@ package usecase
 import (
 	"context"
 	"errors"
-	"mecanica_xpto/internal/domain/model/dto"
-	"mecanica_xpto/internal/domain/repository/parts_supply"
-
 	"github.com/rs/zerolog/log"
-
+	"mecanica_xpto/internal/domain/model/dto"
 	"mecanica_xpto/internal/domain/model/entities"
 	"mecanica_xpto/internal/domain/model/valueobject"
 	customerRepo "mecanica_xpto/internal/domain/repository/customers"
+	"mecanica_xpto/internal/domain/repository/parts_supply"
 	"mecanica_xpto/internal/domain/repository/service"
 	serviceorder "mecanica_xpto/internal/domain/repository/service_order"
 	"mecanica_xpto/internal/domain/repository/vehicles"
+	"mecanica_xpto/pkg/utils"
+	"time"
 )
 
 // operation flow
@@ -357,16 +357,24 @@ func ValidateEstimate(ctx context.Context, request *entities.ServiceOrder, servi
 
 func ValidateExecution(ctx context.Context, request *entities.ServiceOrder, serviceOrderDto *dto.ServiceOrderDTO, update *entities.ServiceOrder) (*entities.ServiceOrder, error) {
 	oldStatus := serviceOrderDto.ServiceOrderStatus.ToDomain()
+	currentTime := time.Now()
 
 	if !request.ServiceOrderStatus.IsValid() {
 		return nil, ErrInvalidStatus
 	}
 	if oldStatus.IsAprovada() && request.ServiceOrderStatus.IsEmExecucao() {
 		update.ServiceOrderStatus = valueobject.StatusEmExecucao
+		update.StartedExecutionDate = &currentTime
 		return update, nil
 	}
 	if oldStatus.IsEmExecucao() && request.ServiceOrderStatus.IsFinalizada() {
+		executionDuration, err := utils.CalculateExecutionDurationInHours(serviceOrderDto.StartedExecutionDate, &currentTime)
+		if err != nil {
+			return nil, err
+		}
 		update.ServiceOrderStatus = valueobject.StatusFinalizada
+		update.FinalExecutionDate = &currentTime
+		update.ExecutionDurationInHours = executionDuration
 		return update, nil
 	}
 	return nil, ErrInvalidTransitionStatusToExecution

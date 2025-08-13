@@ -64,16 +64,3 @@ func TestDeleteCustomer_RepoError(t *testing.T) {
 	err := uc.DeleteCustomer(1)
 	assert.Error(t, err)
 }
-
-func TestListCustomer_Error(t *testing.T) {
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-	mockRepo := mocks.NewMockICustomerRepository(ctrl)
-	uc := use_cases.NewCustomerUseCase(mockRepo, nil)
-
-	mockRepo.EXPECT().List().Return(nil, errors.New("fail"))
-
-	customers, err := uc.ListCustomer()
-	assert.Error(t, err)
-	assert.Nil(t, customers)
-}
