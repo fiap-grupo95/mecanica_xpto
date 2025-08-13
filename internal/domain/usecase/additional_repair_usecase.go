@@ -183,6 +183,37 @@ func (u *AdditionalRepairUseCase) CustomerApprovalStatus(ctx context.Context, ad
 	if err := u.ValidateAdditionalRepairStatus(additionalRepairDto.ARStatus.Description); err != nil {
 		return err
 	}
+
+	if status.ApprovalStatus == "DENIED" {
+		for _, ps := range additionalRepairDto.PartsSupplies {
+			err := unreservePartsSupply(ctx, ps.ToDomain(), u.partsSupplyRepo)
+			if err != nil {
+				log.Error().Msgf("Error unreserving parts supply: %v", err)
+			}
+		}
+		log.Info().Msgf("Customer rejected additional repair with id %d", additionalRepairId)
+		return nil
+	} else {
+		for _, ps := range additionalRepairDto.PartsSupplies {
+			relation, err := u.repo.GetPartsSupplyAdditionalRepair(ps.ID, additionalRepairDto.ID)
+			if err != nil {
+				log.Error().Msgf("Error getting parts supply additional repair relation: %v", err)
+				return err
+			}
+
+			entity := entities.PartsSupply{
+				ID:              ps.ID,
+				QuantityReserve: relation.Quantity, // Use the quantity from the relationship
+				QuantityTotal:   relation.Quantity,
+			}
+			err = releaseReservedPartsSupply(ctx, entity, u.partsSupplyRepo)
+			if err != nil {
+				log.Error().Msgf("Error releasing reserved parts supply: %v", err)
+				return err
+			}
+		}
+	}
+
 	err = u.repo.CustomerApprovalStatus(additionalRepairId, status)
 	if err != nil {
 		log.Error().Msgf("error updating customer approval with id %d: %v", additionalRepairId, err)
@@ -203,6 +234,11 @@ func (u *AdditionalRepairUseCase) addPartsSupplyToAdditionalRepair(ctx context.C
 	var estimatedPrice float64
 
 	for _, ps := range partsSupplyId {
+		err := reservePartsSupply(ctx, ps, u.partsSupplyRepo)
+		if err != nil {
+			log.Error().Msgf("Error reserving parts supply: %v", err)
+			return nil, 0, err
+		}
 		psDto, err := u.partsSupplyRepo.GetByID(ctx, ps.ID)
 		if err != nil {
 			log.Error().Msgf("error finding parts supply with id %d: %v", ps.ID, err)
@@ -211,8 +247,9 @@ func (u *AdditionalRepairUseCase) addPartsSupplyToAdditionalRepair(ctx context.C
 			log.Error().Msgf("parts supply with id %d not found", ps.ID)
 			return listPartsSupply, estimatedPrice, ErrServiceNotFound
 		}
+		psDto.QuantityReserve = ps.QuantityReserve
 		estimatedPrice += psDto.Price
-		listPartsSupply = append(listPartsSupply, dto.PartsSupplyDTO{ID: ps.ID})
+		listPartsSupply = append(listPartsSupply, dto.PartsSupplyDTO{ID: ps.ID, QuantityReserve: ps.QuantityReserve, QuantityTotal: psDto.QuantityTotal})
 	}
 	return listPartsSupply, estimatedPrice, nil
 }
@@ -240,6 +277,23 @@ func (u *AdditionalRepairUseCase) ValidateAdditionalRepairStatus(status string) 
 	if status != "IN_ANALYSIS" {
 		log.Error().Msgf("invalid additional repair status: %s", status)
 		return ErrStatusNotPermitted
+	}
+	return nil
+}
+
+func (u *AdditionalRepairUseCase) releaseReservedPartsSupply(ctx context.Context, additionalRepairDto *dto.AdditionalRepairDTO) error {
+	for _, ps := range additionalRepairDto.PartsSupplies {
+
+		entity := entities.PartsSupply{
+			ID:              ps.ID,
+			QuantityReserve: ps.QuantityReserve,
+			QuantityTotal:   ps.QuantityTotal,
+		}
+		err := releaseReservedPartsSupply(ctx, entity, u.partsSupplyRepo)
+		if err != nil {
+			log.Error().Msgf("Error releasing reserved parts supply: %v", err)
+			return err
+		}
 	}
 	return nil
 }
