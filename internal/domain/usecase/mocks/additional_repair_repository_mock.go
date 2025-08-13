@@ -107,6 +107,21 @@ func (mr *MockIAdditionalRepairRepositoryMockRecorder) GetByServiceOrder(service
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByServiceOrder", reflect.TypeOf((*MockIAdditionalRepairRepository)(nil).GetByServiceOrder), serviceOrderId)
 }
 
+// GetPartsSupplyAdditionalRepair mocks base method.
+func (m *MockIAdditionalRepairRepository) GetPartsSupplyAdditionalRepair(partsSupplyID, additionalRepairID uint) (*dto.PartsSupplyAdditionalRepairDTO, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetPartsSupplyAdditionalRepair", partsSupplyID, additionalRepairID)
+	ret0, _ := ret[0].(*dto.PartsSupplyAdditionalRepairDTO)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetPartsSupplyAdditionalRepair indicates an expected call of GetPartsSupplyAdditionalRepair.
+func (mr *MockIAdditionalRepairRepositoryMockRecorder) GetPartsSupplyAdditionalRepair(partsSupplyID, additionalRepairID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPartsSupplyAdditionalRepair", reflect.TypeOf((*MockIAdditionalRepairRepository)(nil).GetPartsSupplyAdditionalRepair), partsSupplyID, additionalRepairID)
+}
+
 // GetStatus mocks base method.
 func (m *MockIAdditionalRepairRepository) GetStatus(status string) (*dto.AdditionalRepairStatusDTO, error) {
 	m.ctrl.T.Helper()

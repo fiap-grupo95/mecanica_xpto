@@ -69,7 +69,7 @@ func (s *PartsSupplyRepository) GetByName(ctx context.Context, name string) (ent
 
 func (s *PartsSupplyRepository) Update(ctx context.Context, ps *entities.PartsSupply) error {
 	var dtoDB dto.PartsSupplyDTO
-	if err := s.db.WithContext(ctx).First(&dtoDB, ps.ID).Error; err != nil {
+	if err := s.db.First(&dtoDB, ps.ID).Error; err != nil {
 		return err
 	}
 
