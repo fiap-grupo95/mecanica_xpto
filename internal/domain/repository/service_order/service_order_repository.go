@@ -120,13 +120,14 @@ func (r *ServiceOrderRepository) Update(serviceOrder *entities.ServiceOrder) err
 	tx := r.db.Begin()
 
 	serviceOrderDto := dto.ServiceOrderDTO{
-		ID:                   serviceOrder.ID,
-		CustomerID:           serviceOrder.CustomerID,
-		VehicleID:            serviceOrder.VehicleID,
-		OSStatusID:           dtoStatus.ID,
-		Estimate:             serviceOrder.Estimate,
-		StartedExecutionDate: serviceOrder.StartedExecutionDate,
-		FinalExecutionDate:   serviceOrder.FinalExecutionDate,
+		ID:                       serviceOrder.ID,
+		CustomerID:               serviceOrder.CustomerID,
+		VehicleID:                serviceOrder.VehicleID,
+		OSStatusID:               dtoStatus.ID,
+		Estimate:                 serviceOrder.Estimate,
+		StartedExecutionDate:     serviceOrder.StartedExecutionDate,
+		FinalExecutionDate:       serviceOrder.FinalExecutionDate,
+		ExecutionDurationInHours: serviceOrder.ExecutionDurationInHours,
 	}
 
 	if err := tx.Model(&dto.ServiceOrderDTO{}).Where("id = ?", serviceOrder.ID).Updates(&serviceOrderDto).Error; err != nil {
