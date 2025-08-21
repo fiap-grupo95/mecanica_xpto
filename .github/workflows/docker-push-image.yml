@@ -15,7 +15,7 @@ jobs:
       - name: Get latest version
         id: get_version
         run: |
-          LATEST_VERSION=$(curl -s "https://hub.docker.com/v2/repositories/mandaapag03/mecanica-xpto-api/tags/" | jq -r '.results[0].name' | grep -oP '^v\d+\.\d+\.\d+' || echo "v0.0.0")
+          LATEST_VERSION=$(curl -s "https://hub.docker.com/v2/repositories/mandaapag03/mecanica-xpto-api/tags/?page_size=1" | jq -r '.results[0].name' | grep -oP '^v\d+\.\d+\.\d+' || echo "v0.0.0")
           echo "Current version: $LATEST_VERSION"
           
           # Extract version numbers
