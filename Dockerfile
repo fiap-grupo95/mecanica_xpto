@@ -20,7 +20,7 @@ FROM alpine:3.22
 
 WORKDIR /app
 
-COPY .env .
+COPY .env-example .
 
 COPY --from=builder /mecanica-xpto-api .
 
