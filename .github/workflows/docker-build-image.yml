@@ -14,4 +14,4 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build . --file Dockerfile --env-file .env-example
+          docker build . --file Dockerfile
