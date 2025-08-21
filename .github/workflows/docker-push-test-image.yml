@@ -2,9 +2,9 @@ name: Docker Image CI
 
 on:
   push:
-    branches: [ "main", "develop", "release/*" ]
+    branches: [ "develop", "feature/*", "enhancement/*", "bugfix/*", "hotfix/*", "release/*" ]
   pull_request:
-    branches: [ "main", "develop", "release/*" ]
+    branches: [ "develop", "release/*" ]
 
 jobs:
   build:
@@ -25,7 +25,7 @@ jobs:
           
           # Increment patch version
           NEW_PATCH=$((PATCH + 1))
-          NEW_VERSION="v$MAJOR.$MINOR.$NEW_PATCH"
+          NEW_VERSION="v$MAJOR.$MINOR.$NEW_PATCH-test"
           echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
           echo "New version will be: $NEW_VERSION"
 
