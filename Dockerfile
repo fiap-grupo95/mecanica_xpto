@@ -20,7 +20,8 @@ FROM alpine:3.22
 
 WORKDIR /app
 
-COPY .env .
+# TODO: Refatorar para deixar de usar o .env e usar variáveis de ambiente
+COPY .env-example .
 
 COPY --from=builder /mecanica-xpto-api .
 
