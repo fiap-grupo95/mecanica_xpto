@@ -4,7 +4,7 @@ on:
   push:
     branches: [ "main" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main", "develop" ]
 
 jobs:
   build:
@@ -15,8 +15,15 @@ jobs:
       - name: Get latest version
         id: get_version
         run: |
-          LATEST_VERSION=$(curl -s "https://hub.docker.com/v2/repositories/mandaapag03/mecanica-xpto-api/tags/?page_size=1" | jq -r '.results[0].name' | grep -oP '^v\d+\.\d+\.\d+' || echo "v0.0.0")
-          echo "Current version: $LATEST_VERSION"
+          # Fetch all tags, filter for semantic versions, and sort to get the latest
+          LATEST_VERSION=$(curl -s "https://hub.docker.com/v2/repositories/mandaapag03/mecanica-xpto-api/tags/?page_size=100" \
+            | jq -r '.results[].name' \
+            | grep -oP '^v\d+\.\d+\.\d+' \
+            | sort -V \
+            | tail -n 1)
+          if [ -z "$LATEST_VERSION" ]; then
+            LATEST_VERSION="v0.0.0"
+          fi
           
           # Extract version numbers
           MAJOR=$(echo $LATEST_VERSION | cut -d. -f1 | tr -d 'v')
