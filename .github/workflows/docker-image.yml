@@ -15,7 +15,7 @@ jobs:
       - name: Get latest version
         id: get_version
         run: |
-          LATEST_VERSION=$(curl -s "https://hub.docker.com/v2/repositories/mandaapagdocker/mecanica-xpto-api/tags/" | jq -r '.results[0].name' | grep -oP '^v\d+\.\d+\.\d+' || echo "v0.0.0")
+          LATEST_VERSION=$(curl -s "https://hub.docker.com/v2/repositories/mandaapag03/mecanica-xpto-api/tags/" | jq -r '.results[0].name' | grep -oP '^v\d+\.\d+\.\d+' || echo "v0.0.0")
           echo "Current version: $LATEST_VERSION"
           
           # Extract version numbers
@@ -31,8 +31,8 @@ jobs:
 
       - name: Build and tag Docker image
         run: |
-          docker build . --file Dockerfile --tag mandaapagdocker/mecanica-xpto-api:${{ env.NEW_VERSION }}
-          docker tag mandaapagdocker/mecanica-xpto-api:${{ env.NEW_VERSION }} mandaapagdocker/mecanica-xpto-api:latest
+          docker build . --file Dockerfile --tag mandaapag03/mecanica-xpto-api:${{ env.NEW_VERSION }}
+          docker tag mandaapag03/mecanica-xpto-api:${{ env.NEW_VERSION }} mandaapag03/mecanica-xpto-api:latest
 
       - name: Login to Docker Hub
         uses: docker/login-action@v3
@@ -42,5 +42,5 @@ jobs:
 
       - name: Push Docker image
         run: |
-          docker push mandaapagdocker/mecanica-xpto-api:${{ env.NEW_VERSION }}
-          docker push mandaapagdocker/mecanica-xpto-api:latest
+          docker push mandaapag03/mecanica-xpto-api:${{ env.NEW_VERSION }}
+          docker push mandaapag03/mecanica-xpto-api:latest
