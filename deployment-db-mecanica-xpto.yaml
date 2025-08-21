@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: db-mecanica-xpto-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+        app: db-mecanica-xpto
+  template:
+    metadata:
+        labels:
+            app: db-mecanica-xpto
+    spec:
+        containers:
+            - name: db-mecanica-xpto
+              image: postgres:17.5
+              ports:
+                  - containerPort: 5432
+              volumeMounts:
+                  - name: postgresql-data
+                    mountPath: /var/lib/postgresql/data
+        volumes:
+            - name: postgresql-data
+        hostNetwork: true
