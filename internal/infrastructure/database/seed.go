@@ -43,4 +43,74 @@ func Seed() {
 	} else {
 		fmt.Println("Users already seeded")
 	}
+
+	// Seed status_Service_Order_dtos
+	var countSOStatus int64
+	db.Model(&dto.ServiceOrderStatusDTO{}).Count(&countSOStatus)
+	if countSOStatus == 0 {
+		serviceOrderStatus := []dto.ServiceOrderStatusDTO{
+			{
+				Description: "RECEBIDA",
+			},
+			{
+				Description: "EM DIAGNÓSTICO",
+			},
+			{
+				Description: "AGUARDANDO APROVAÇÃO",
+			},
+			{
+				Description: "APROVADA",
+			},
+			{
+				Description: "REJEITADA",
+			},
+			{
+				Description: "EM EXECUÇÃO",
+			},
+			{
+				Description: "FINALIZADA",
+			},
+			{
+				Description: "ENTREGUE",
+			},
+			{
+				Description: "CANCELADA",
+			},
+		}
+
+		if err := db.Create(&serviceOrderStatus).Error; err != nil {
+			fmt.Println("Erro ao criar OS Status:", err)
+			return
+		}
+		fmt.Println("Seeded Service Order Status successfully")
+	} else {
+		fmt.Println("Service Order Status already seeded")
+	}
+	// Seed status_Aditional_Repair_dtos
+	var countARStatus int64
+	db.Model(&dto.AdditionalRepairStatusDTO{}).Count(&countARStatus)
+	if countARStatus == 0 {
+		additionalRepairStatus := []dto.AdditionalRepairStatusDTO{
+			{
+				Description: "ABERTA",
+			},
+			{
+				Description: "AGUARDANDO APROVAÇÃO",
+			},
+			{
+				Description: "APROVADA",
+			},
+			{
+				Description: "REJEITADA",
+			},
+		}
+
+		if err := db.Create(&additionalRepairStatus).Error; err != nil {
+			fmt.Println("Erro ao criar Additional Repair Status:", err)
+			return
+		}
+		fmt.Println("Seeded Additional Repair Status successfully")
+	} else {
+		fmt.Println("Additional Repair Status already seeded")
+	}
 }
